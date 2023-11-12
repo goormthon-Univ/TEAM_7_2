@@ -17,7 +17,7 @@ public class DayPhoto {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "day_id_seq")
     @SequenceGenerator(name = "day_id_seq", sequenceName = "day_id_seq")
-    @Column(name = "day_id")
+    @Column(name = "day_photo_id")
     private Long id;
 
     private String url;
