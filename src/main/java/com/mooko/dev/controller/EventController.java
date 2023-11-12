@@ -1,5 +1,6 @@
 package com.mooko.dev.controller;
 
+import com.mooko.dev.domain.PrincipalDetails;
 import com.mooko.dev.domain.User;
 import com.mooko.dev.dto.event.NewEventDto;
 import com.mooko.dev.facade.AggregationFacade;
