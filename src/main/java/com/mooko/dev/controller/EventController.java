@@ -3,6 +3,7 @@ package com.mooko.dev.controller;
 import com.mooko.dev.domain.PrincipalDetails;
 import com.mooko.dev.domain.User;
 import com.mooko.dev.dto.event.req.NewEventDto;
+import com.mooko.dev.dto.event.req.UpdateEventDateDto;
 import com.mooko.dev.dto.event.req.UpdateEventNameDto;
 import com.mooko.dev.dto.event.res.EventInfoDto;
 import com.mooko.dev.dto.event.res.UserInfoDto;
@@ -46,6 +47,17 @@ public class EventController {
     ) {
         User user = principalDetails.getUser();
         aggregationFacade.updateEventName(user, updateEventNameDto, eventId);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @PutMapping("/{eventId}/event-date")
+    public ResponseEntity<Void> updateEventDate(
+            @AuthenticationPrincipal PrincipalDetails principalDetails,
+            @RequestBody UpdateEventDateDto updateEventDateDto,
+            @PathVariable Long eventId
+    ) {
+        User user = principalDetails.getUser();
+        aggregationFacade.updateEventDate(user, updateEventDateDto, eventId);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 

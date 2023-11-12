@@ -47,4 +47,9 @@ public class Event {
         this.title = eventName;
     }
 
+    public void updateEventDate(String startDate, String endDate) {
+        this.startDate = startDate;
+        this.endDate = endDate;
+    }
+
 }
