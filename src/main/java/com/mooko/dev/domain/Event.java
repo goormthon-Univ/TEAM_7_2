@@ -43,4 +43,13 @@ public class Event {
 
     private LocalDateTime createdAt;
 
+    public void updateEventName(String eventName) {
+        this.title = eventName;
+    }
+
+    public void updateEventDate(String startDate, String endDate) {
+        this.startDate = startDate;
+        this.endDate = endDate;
+    }
+
 }

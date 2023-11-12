@@ -1,9 +1,10 @@
 package com.mooko.dev.facade;
 
 import com.mooko.dev.domain.Event;
-import com.mooko.dev.domain.EventPhoto;
 import com.mooko.dev.domain.User;
 import com.mooko.dev.dto.event.req.NewEventDto;
+import com.mooko.dev.dto.event.req.UpdateEventDateDto;
+import com.mooko.dev.dto.event.req.UpdateEventNameDto;
 import com.mooko.dev.dto.event.res.EventInfoDto;
 import com.mooko.dev.dto.event.res.UserInfoDto;
 import com.mooko.dev.exception.custom.CustomException;
@@ -16,7 +17,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +28,8 @@ public class AggregationFacade {
     /**
      * EventController
      */
+
+    //makeNewEvent
     public void makeNewEvent(User tempUser, NewEventDto newEventDto) {
         User user = userService.findUser(tempUser.getId());
         checkUserEventStatus(user);
@@ -41,6 +43,10 @@ public class AggregationFacade {
                 });
     }
 
+
+
+
+    //ShowEventPage
     public EventInfoDto showEventPage(User tmpUser, Long eventId) {
         User user = userService.findUser(tmpUser.getId());
         Event event = eventService.findEvent(eventId);
@@ -73,4 +79,31 @@ public class AggregationFacade {
                 .userInfo(userInfoList)
                 .build();
     }
+
+
+    //updateEventName
+    public void updateEventName(User tmpUser, UpdateEventNameDto updateEventNameDto, Long eventId) {
+        User user = userService.findUser(tmpUser.getId());
+        Event event = eventService.findEvent(eventId);
+        checkUserRoomMaker(user, event);
+        eventService.updateEventName(updateEventNameDto.getEventName(), event);
+    }
+
+
+    //updateEventDate
+    public void updateEventDate(User tmpUser, UpdateEventDateDto updateEventDateDto, Long eventId) {
+        User user = userService.findUser(tmpUser.getId());
+        Event event = eventService.findEvent(eventId);
+        checkUserRoomMaker(user, event);
+        eventService.updateEventDate(updateEventDateDto, event);
+    }
+
+    private void checkUserRoomMaker(User user, Event event) {
+        if(!event.getRoomMaker().equals(user)){
+            throw new CustomException(ErrorCode.NOT_ROOM_MAKER);
+        }
+    }
+
+
+
 }

@@ -8,6 +8,7 @@ public enum ErrorCode {
 
     //400
     USER_ALREADY_HAS_EVENT(HttpStatus.BAD_REQUEST, "USER ALREADY HAS EVENT"),
+    NOT_ROOM_MAKER(HttpStatus.BAD_REQUEST, "NOT ROOM MAKER"),
 
     //401
 

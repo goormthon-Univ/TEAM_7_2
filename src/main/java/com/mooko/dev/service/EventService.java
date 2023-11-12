@@ -3,6 +3,7 @@ package com.mooko.dev.service;
 import com.mooko.dev.domain.Event;
 import com.mooko.dev.domain.User;
 import com.mooko.dev.dto.event.req.NewEventDto;
+import com.mooko.dev.dto.event.req.UpdateEventDateDto;
 import com.mooko.dev.exception.custom.CustomException;
 import com.mooko.dev.exception.custom.ErrorCode;
 import com.mooko.dev.repository.EventRepository;
@@ -33,5 +34,17 @@ public class EventService {
                 .build();
 
         return eventRepository.save(event);
+    }
+
+    @Transactional
+    public void updateEventName(String eventName, Event event) {
+        event.updateEventName(eventName);
+        eventRepository.save(event);
+    }
+
+    @Transactional
+    public void updateEventDate(UpdateEventDateDto updateEventDateDto, Event event) {
+        event.updateEventDate(updateEventDateDto.getStartDate(), updateEventDateDto.getEndDate());
+        eventRepository.save(event);
     }
 }
