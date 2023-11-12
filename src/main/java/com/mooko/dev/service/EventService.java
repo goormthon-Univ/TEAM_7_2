@@ -34,4 +34,9 @@ public class EventService {
 
         return eventRepository.save(event);
     }
+
+    @Transactional
+    public void updateEventName(String eventName, Event event) {
+        event.updateEventName(eventName);
+    }
 }

@@ -43,4 +43,8 @@ public class Event {
 
     private LocalDateTime createdAt;
 
+    public void updateEventName(String eventName) {
+        this.title = eventName;
+    }
+
 }

@@ -4,6 +4,7 @@ import com.mooko.dev.domain.Event;
 import com.mooko.dev.domain.EventPhoto;
 import com.mooko.dev.domain.User;
 import com.mooko.dev.dto.event.req.NewEventDto;
+import com.mooko.dev.dto.event.req.UpdateEventNameDto;
 import com.mooko.dev.dto.event.res.EventInfoDto;
 import com.mooko.dev.dto.event.res.UserInfoDto;
 import com.mooko.dev.exception.custom.CustomException;
@@ -72,5 +73,14 @@ public class AggregationFacade {
                 .endDate(event.getEndDate())
                 .userInfo(userInfoList)
                 .build();
+    }
+
+    public void updateEventName(User tmpUser, UpdateEventNameDto updateEventNameDto, Long eventId) {
+        User user = userService.findUser(tmpUser.getId());
+        Event event = eventService.findEvent(eventId);
+        if(!event.getRoomMaker().equals(user)){
+            throw new CustomException(ErrorCode.NOT_ROOM_MAKER);
+        }
+        eventService.updateEventName(updateEventNameDto.getEventName(), event);
     }
 }
