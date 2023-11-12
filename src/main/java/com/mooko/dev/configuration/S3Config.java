@@ -25,11 +25,11 @@ public class S3Config {
     private String bucket;
     @Value("${cloud.aws.s3.profile-img}")
     private String profileImgDir;
-    @Value("${cloud.aws.s3.video}")
+    @Value("${cloud.aws.s3.barcode}")
     private String barcodeDir;
     @Value("${cloud.aws.s3.thumbnail}")
     private String thumbnailDir;
-    @Value("${cloud.aws.s3.total-cg-img}")
+    @Value("${cloud.aws.s3.day}")
     private String dayImageDir;
 
 
