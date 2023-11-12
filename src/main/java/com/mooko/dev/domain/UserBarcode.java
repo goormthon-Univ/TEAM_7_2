@@ -11,7 +11,7 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 @Table(name = "users_barcode")
-public class UsersBarcode {
+public class UserBarcode {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_barcode_id_seq")
