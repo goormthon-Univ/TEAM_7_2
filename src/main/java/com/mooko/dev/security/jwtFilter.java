@@ -45,7 +45,7 @@ public class jwtFilter extends OncePerRequestFilter {
             return;
         }
 
-        int userId = jwtUtil.getuserId(token, secretKey);
+        int userId = jwtUtil.getUserId(token, secretKey);
 
 
         UsernamePasswordAuthenticationToken authenticationToken =
