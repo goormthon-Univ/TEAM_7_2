@@ -27,6 +27,8 @@ public class Event {
 
     private Boolean activeStatus;
 
+    private String startDate;
+    private String endDate;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_maker_id")
