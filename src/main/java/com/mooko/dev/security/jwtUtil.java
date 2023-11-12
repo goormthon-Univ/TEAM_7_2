@@ -10,7 +10,7 @@ import java.util.Date;
 @Slf4j
 public class jwtUtil{
 
-    public static int getuserId(String token, String secretKey){
+    public static int getUserId(String token, String secretKey){
         return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token)
                 .getBody().get("userId", Integer.class);
     }

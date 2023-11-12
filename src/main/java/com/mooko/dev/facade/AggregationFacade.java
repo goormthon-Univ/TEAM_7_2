@@ -7,12 +7,14 @@ import com.mooko.dev.dto.event.req.UpdateEventDateDto;
 import com.mooko.dev.dto.event.req.UpdateEventNameDto;
 import com.mooko.dev.dto.event.res.EventInfoDto;
 import com.mooko.dev.dto.event.res.UserInfoDto;
+import com.mooko.dev.dto.user.res.UserEventStatusDto;
 import com.mooko.dev.exception.custom.CustomException;
 import com.mooko.dev.exception.custom.ErrorCode;
 import com.mooko.dev.service.EventPhotoService;
 import com.mooko.dev.service.EventService;
 import com.mooko.dev.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -105,5 +107,18 @@ public class AggregationFacade {
     }
 
 
+    public UserEventStatusDto showUserEventStatus(User tmpUser) {
+        User user = userService.findUser(tmpUser.getId());
+        if (user.getEvent() != null) {
+            return UserEventStatusDto.builder()
+                    .isExistEvent(true)
+                    .eventId(user.getEvent().getId().toString())
+                    .build();
+        }
 
+        return UserEventStatusDto.builder()
+                .isExistEvent(false)
+                .eventId(null)
+                .build();
+    }
 }
