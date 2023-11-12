@@ -15,7 +15,7 @@ public enum ErrorCode {
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER NOT FOUND"),
 
     //500
-
+    S3_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "S3_ERROR")
     ;
 
 

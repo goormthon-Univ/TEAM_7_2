@@ -49,3 +49,24 @@ redirect:
     userInfo: http://localhost:3000/userInfo
     main: http://localhost:3000/
 
+
+cloud:
+  aws:
+    s3:
+      bucket: mooko-bucket
+      profile-img: profile_img/
+      barcode: barcode/
+      thumbnail: thumbnail/
+      day: day/
+      default-img: https://mooko-bucket.s3.ap-northeast-2.amazonaws.com/profile_img/default_img.png
+
+    region:
+      static: ap-northeast-2
+      auto: false
+
+    stack:
+      auto: false
+
+    credentials:
+      access-key: AKIAZASRWGR3Y2SW7ZXB
+      secret-key: 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
