@@ -1,4 +1,7 @@
-package com.mooko.dev.OAuth2;
+package com.mooko.dev.configuration;
+
+import com.mooko.dev.handler.OAuth2SuccessHandler;
+import com.mooko.dev.service.OAuth2UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
@@ -14,9 +17,11 @@ import java.nio.charset.StandardCharsets;
 @EnableMethodSecurity
 public class SecurityConfig {
     private final OAuth2UserService oAuth2UserService;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
 
-    public SecurityConfig(OAuth2UserService oAuth2UserService) {
+    public SecurityConfig(OAuth2UserService oAuth2UserService, OAuth2SuccessHandler oAuth2SuccessHandler) {
         this.oAuth2UserService = oAuth2UserService;
+        this.oAuth2SuccessHandler = oAuth2SuccessHandler;
     }
 
     @Bean
@@ -25,28 +30,9 @@ public class SecurityConfig {
         http.authorizeHttpRequests(config -> config.anyRequest().permitAll());
         http.oauth2Login(oauth2Configurer -> oauth2Configurer
                 .loginPage("/oauth/authorization/kakao")
-                .successHandler(successHandler())
+                .successHandler(oAuth2SuccessHandler)
                 .userInfoEndpoint(userInfo -> userInfo.userService(oAuth2UserService)));
 
         return http.build();
-    }
-
-    @Bean
-    public AuthenticationSuccessHandler successHandler() {
-        return ((request, response, authentication) -> {
-            DefaultOAuth2User defaultOAuth2User = (DefaultOAuth2User) authentication.getPrincipal();
-
-            String id = defaultOAuth2User.getAttributes().get("id").toString();
-            String body = """
-                    {"id":"%s"}
-                    """.formatted(id);
-
-            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-
-            PrintWriter writer = response.getWriter();
-            writer.println(body);
-            writer.flush();
-        });
     }
 }
