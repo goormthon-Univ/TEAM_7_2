@@ -1,4 +1,5 @@
-package com.mooko.dev.OAuth2;
+package com.mooko.dev.configuration;
+import com.mooko.dev.service.OAuth2UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;

@@ -2,7 +2,9 @@ package com.mooko.dev.controller;
 
 import com.mooko.dev.domain.PrincipalDetails;
 import com.mooko.dev.domain.User;
-import com.mooko.dev.dto.event.NewEventDto;
+import com.mooko.dev.dto.event.req.NewEventDto;
+import com.mooko.dev.dto.event.res.EventInfoDto;
+import com.mooko.dev.dto.event.res.UserInfoDto;
 import com.mooko.dev.facade.AggregationFacade;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -25,4 +27,14 @@ public class EventController {
         aggregationFacade.makeNewEvent(user, newEventDto);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
+
+    @GetMapping("/{eventId}")
+    public ResponseEntity<EventInfoDto> showEventPage(
+            @AuthenticationPrincipal PrincipalDetails principalDetails,
+            @PathVariable Long eventId) {
+        User user = principalDetails.getUser();
+        EventInfoDto eventInfoDto = aggregationFacade.showEventPage(user, eventId);
+        return ResponseEntity.ok(eventInfoDto);
+    }
+
 }

@@ -13,6 +13,7 @@ public enum ErrorCode {
 
     //404
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER NOT FOUND"),
+    EVENT_NOT_FOUND(HttpStatus.NOT_FOUND, "EVENT NOT FOUND"),
 
     //500
     S3_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "S3_ERROR")

@@ -1,4 +1,4 @@
-package com.mooko.dev.OAuth2;
+package com.mooko.dev.service;
 import java.util.ArrayList;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
