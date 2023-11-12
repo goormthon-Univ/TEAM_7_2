@@ -2,19 +2,26 @@ package com.mooko.dev.service;
 
 import com.mooko.dev.domain.Event;
 import com.mooko.dev.domain.User;
-import com.mooko.dev.dto.event.NewEventDto;
+import com.mooko.dev.dto.event.req.NewEventDto;
+import com.mooko.dev.exception.custom.CustomException;
+import com.mooko.dev.exception.custom.ErrorCode;
 import com.mooko.dev.repository.EventRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class EventService {
 
     private final EventRepository eventRepository;
+
+    public Event findEvent(Long eventId) {
+        return eventRepository.findById(eventId).orElseThrow(() -> new CustomException(ErrorCode.EVENT_NOT_FOUND));
+    }
 
     @Transactional
     public Event makeNewEvent(NewEventDto newEventDto, User user) {

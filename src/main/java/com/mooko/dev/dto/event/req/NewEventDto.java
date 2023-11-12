@@ -1,4 +1,4 @@
-package com.mooko.dev.dto.event;
+package com.mooko.dev.dto.event.req;
 
 import lombok.*;
 
