@@ -1,0 +1,51 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/mooko-database?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: mooko-admin
+    password: mooko-admin
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            client-id: 0bcc5773a6c07d341036ecb7c393013f
+            client-secret: rhdZpPEWRvVMjIyvC4B1FBPhOU6gtUvh
+            scope:
+              - profile_nickname
+            client-name: kakao
+            authorization-grant-type: authorization_code
+            client-authentication-method: client_secret_post
+            redirect-uri: http://localhost:8080/login/oauth2/code/kakao
+
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize
+            token-uri: https://kauth.kakao.com/oauth/token
+            user-info-uri: https://kapi.kakao.com/v2/user/me
+            user-name-attribute: id
+
+jwt:
+  secretKey: asdfasdfasdfasdrtqwetqpkna;pilugipk1j23k4lhj1adfkj9312kl3n@*!!~asdkflj9@#Nvlny.asdf
+
+  access:
+    expiration: 604800000
+    header: Authorization
+
+  refresh:
+    expiration: 1209600000
+    header: ReAuthorization
+
+redirect:
+  url:
+    userInfo: http://localhost:3000/userInfo
+    main: http://localhost:3000/
+
