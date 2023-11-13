@@ -7,11 +7,14 @@ import com.mooko.dev.dto.event.req.UpdateEventDateDto;
 import com.mooko.dev.dto.event.req.UpdateEventNameDto;
 import com.mooko.dev.dto.event.res.EventInfoDto;
 import com.mooko.dev.dto.event.res.UserInfoDto;
+import com.mooko.dev.dto.event.socket.UserEventCheckStatusDto;
 import com.mooko.dev.dto.user.res.UserEventStatusDto;
+import com.mooko.dev.event.ButtonEvent;
 import com.mooko.dev.exception.custom.CustomException;
 import com.mooko.dev.exception.custom.ErrorCode;
 import com.mooko.dev.service.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -30,6 +33,7 @@ public class AggregationFacade {
     private final UserBarcodeService userBarcodeService;
     private final S3Service s3Service;
     private final S3Config s3Config;
+    private final ApplicationEventPublisher eventPublisher;
 
 
     /**
@@ -202,4 +206,35 @@ public class AggregationFacade {
         });
         eventPhotoService.deleteEventPhoto(eventPhotoList);
     }
+
+
+    /**
+     *
+     * SocketController
+     */
+
+    //updateUserEventCheckStatus
+    public UserEventCheckStatusDto updateUserEventCheckStatus(UserEventCheckStatusDto userEventCheckStatusDto, Long eventId) {
+        User user = userService.findUser(Long.parseLong(userEventCheckStatusDto.getUserId()));
+        userService.updateCheckStatus(user, userEventCheckStatusDto.isCheckStatus());
+        Event event = eventService.findEvent(eventId);
+        checkEventButtonStatus(event);
+        return UserEventCheckStatusDto.builder()
+                .checkStatus(user.getCheckStatus())
+                .userId(user.getId().toString())
+                .build();
+    }
+
+    //버튼 이벤트처리
+    private void checkEventButtonStatus(Event event) {
+        boolean allUsersChecked = event.getUsers().stream()
+                .allMatch(User::getCheckStatus);
+
+        eventPublisher.publishEvent(
+                ButtonEvent.builder()
+                        .buttonStatus(allUsersChecked)
+                        .eventId(event.getId().toString())
+                        .build());
+    }
+
 }
