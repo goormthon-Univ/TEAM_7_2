@@ -31,6 +31,8 @@ public class S3Config {
     private String thumbnailDir;
     @Value("${cloud.aws.s3.day}")
     private String dayImageDir;
+    @Value("${cloud.aws.s3.event}")
+    private String eventImageDir;
 
 
     @Bean

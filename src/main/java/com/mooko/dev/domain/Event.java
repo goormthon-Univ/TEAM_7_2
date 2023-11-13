@@ -52,4 +52,8 @@ public class Event {
         this.endDate = endDate;
     }
 
+    public void updateEventStatus(Boolean activeStatus) {
+        this.activeStatus = activeStatus;
+    }
+
 }
