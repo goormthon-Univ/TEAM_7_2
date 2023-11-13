@@ -10,9 +10,7 @@ import com.mooko.dev.dto.event.res.UserInfoDto;
 import com.mooko.dev.dto.user.res.UserEventStatusDto;
 import com.mooko.dev.exception.custom.CustomException;
 import com.mooko.dev.exception.custom.ErrorCode;
-import com.mooko.dev.service.EventPhotoService;
-import com.mooko.dev.service.EventService;
-import com.mooko.dev.service.UserService;
+import com.mooko.dev.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -26,6 +24,9 @@ public class AggregationFacade {
     private final EventService eventService;
     private final UserService userService;
     private final EventPhotoService eventPhotoService;
+    private final BarcodeService barcodeService;
+    private final UserBarcodeService userBarcodeService;
+    private final S3Service s3Service;
 
     /**
      * EventController
@@ -100,6 +101,15 @@ public class AggregationFacade {
         eventService.updateEventDate(updateEventDateDto, event);
     }
 
+    //makeNewBarcode
+    public Long makeNewBarcode(User tmpUser, Long eventId) {
+        User user = userService.findUser(tmpUser.getId());
+        Event event = eventService.findEvent(eventId);
+        checkUserRoomMaker(user, event);
+        List<String> eventPhotoList = eventPhotoService.findAllEventPhotoList(event);
+        Buffer
+    }
+
     private void checkUserRoomMaker(User user, Event event) {
         if(!event.getRoomMaker().equals(user)){
             throw new CustomException(ErrorCode.NOT_ROOM_MAKER);
@@ -121,4 +131,6 @@ public class AggregationFacade {
                 .eventId(null)
                 .build();
     }
+
+
 }

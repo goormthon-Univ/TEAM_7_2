@@ -5,6 +5,7 @@ import com.mooko.dev.domain.User;
 import com.mooko.dev.dto.event.req.NewEventDto;
 import com.mooko.dev.dto.event.req.UpdateEventDateDto;
 import com.mooko.dev.dto.event.req.UpdateEventNameDto;
+import com.mooko.dev.dto.event.res.BarcodeIdDto;
 import com.mooko.dev.dto.event.res.EventInfoDto;
 import com.mooko.dev.dto.event.res.UserInfoDto;
 import com.mooko.dev.facade.AggregationFacade;
@@ -61,4 +62,13 @@ public class EventController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
+
+    @PostMapping("{eventId}/result")
+    public ResponseEntity<BarcodeIdDto> makeNewBarcode(
+            @AuthenticationPrincipal PrincipalDetails principalDetails,
+            @PathVariable Long eventId
+    ){
+        User user = principalDetails.getUser();
+        Long barcodeId = aggregationFacade.makeNewBarcode(user, eventId);
+    }
 }
