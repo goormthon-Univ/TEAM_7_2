@@ -32,4 +32,7 @@ public class User {
     private Event event;
 
 
+    public void updateEvent(Event event) {
+        this.event = event;
+    }
 }

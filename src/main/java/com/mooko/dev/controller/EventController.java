@@ -2,12 +2,12 @@ package com.mooko.dev.controller;
 
 import com.mooko.dev.domain.PrincipalDetails;
 import com.mooko.dev.domain.User;
+import com.mooko.dev.dto.event.req.EventPhotoDto;
 import com.mooko.dev.dto.event.req.NewEventDto;
 import com.mooko.dev.dto.event.req.UpdateEventDateDto;
 import com.mooko.dev.dto.event.req.UpdateEventNameDto;
 import com.mooko.dev.dto.event.res.BarcodeIdDto;
 import com.mooko.dev.dto.event.res.EventInfoDto;
-import com.mooko.dev.dto.event.res.UserInfoDto;
 import com.mooko.dev.facade.AggregationFacade;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -65,7 +65,7 @@ public class EventController {
     }
 
 
-    @PostMapping("{eventId}/result")
+    @PostMapping("/{eventId}/result")
     public ResponseEntity<BarcodeIdDto> makeNewBarcode(
             @AuthenticationPrincipal PrincipalDetails principalDetails,
             @PathVariable Long eventId
@@ -74,5 +74,29 @@ public class EventController {
         Long barcodeId = aggregationFacade.makeNewBarcode(user, eventId);
         return ResponseEntity.ok(BarcodeIdDto.builder().barcodeId(barcodeId.toString()).build());
 
+    }
+
+
+    @PostMapping("/{eventId}")
+    public ResponseEntity<Void> updateUserEventPhoto(
+            @AuthenticationPrincipal PrincipalDetails principalDetails,
+            @PathVariable Long eventId,
+            @ModelAttribute EventPhotoDto eventPhotoDto)
+    {
+        User user = principalDetails.getUser();
+        aggregationFacade.updateUserEventPhoto(user, eventId, eventPhotoDto.getImageList());
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+
+    @DeleteMapping("/{eventId}/image-list")
+    public ResponseEntity<Void> deleteUserEventPhoto(
+            @AuthenticationPrincipal PrincipalDetails principalDetails,
+            @PathVariable Long eventId
+    )
+    {
+        User user = principalDetails.getUser();
+        aggregationFacade.deleteUserEventPhoto(user, eventId);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

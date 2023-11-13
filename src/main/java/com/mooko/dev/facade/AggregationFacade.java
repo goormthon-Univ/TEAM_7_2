@@ -1,10 +1,7 @@
 package com.mooko.dev.facade;
 
 import com.mooko.dev.configuration.S3Config;
-import com.mooko.dev.domain.Barcode;
-import com.mooko.dev.domain.BarcodeType;
-import com.mooko.dev.domain.Event;
-import com.mooko.dev.domain.User;
+import com.mooko.dev.domain.*;
 import com.mooko.dev.dto.event.req.NewEventDto;
 import com.mooko.dev.dto.event.req.UpdateEventDateDto;
 import com.mooko.dev.dto.event.req.UpdateEventNameDto;
@@ -15,13 +12,13 @@ import com.mooko.dev.exception.custom.CustomException;
 import com.mooko.dev.exception.custom.ErrorCode;
 import com.mooko.dev.service.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -54,28 +51,34 @@ public class AggregationFacade {
     }
 
 
-
-
     //ShowEventPage
     public EventInfoDto showEventPage(User tmpUser, Long eventId) {
         User user = userService.findUser(tmpUser.getId());
         Event event = eventService.findEvent(eventId);
+        if(event.getUsers().stream().noneMatch(existingUser -> existingUser.equals(user))){
+            eventService.addUser(user, event);
+            userService.addEvent(user, event);
+        }
+
         List<String> profilImgeUrlList = event.getUsers().stream().map(User::getProfileUrl).toList();
         boolean isRoomMaker = user.equals(event.getRoomMaker());
 
         List<UserInfoDto> userInfoList = event.getUsers().stream()
                 .map(eventUser -> {
-                    List<String> userEventPhotoList = eventPhotoService.findUserEventPhotoList(eventUser, event);
-                    if(userEventPhotoList.isEmpty()){
+                    List<EventPhoto> eventPhotoList = eventPhotoService.findUserEventPhotoList(eventUser, event);
+                    List<String> evnetPhotoUrlList = eventPhotoList.stream().map(EventPhoto::getUrl).toList();
+
+
+                    if (evnetPhotoUrlList.isEmpty()) {
                         return null;
                     }
 
                     return UserInfoDto.builder()
                             .userId(eventUser.getId().toString())
                             .nickname(eventUser.getNickname())
-                            .imageUrlList(userEventPhotoList)
+                            .imageUrlList(evnetPhotoUrlList)
                             .checkStatus(eventUser.getCheckStatus())
-                            .imageCount(userEventPhotoList.size())
+                            .imageCount(evnetPhotoUrlList.size())
                             .build();
                 })
                 .toList();
@@ -129,16 +132,18 @@ public class AggregationFacade {
                 BarcodeType.EVENT,
                 event);
         userBarcodeService.makeUserBarcode(event.getUsers(), barcode);
+        eventService.updateEventStatus(event, false);
         return barcode.getId();
     }
 
     private void checkUserRoomMaker(User user, Event event) {
-        if(!event.getRoomMaker().equals(user)){
+        if (!event.getRoomMaker().equals(user)) {
             throw new CustomException(ErrorCode.NOT_ROOM_MAKER);
         }
     }
 
 
+    //showUserEventStatus
     public UserEventStatusDto showUserEventStatus(User tmpUser) {
         User user = userService.findUser(tmpUser.getId());
         if (user.getEvent() != null) {
@@ -155,4 +160,46 @@ public class AggregationFacade {
     }
 
 
+    //updateUserEventPhoto
+    public void updateUserEventPhoto(User tmpUser, Long eventId, List<File> newPhotoList) {
+        User user = userService.findUser(tmpUser.getId());
+        Event event = eventService.findEvent(eventId);
+        if (!event.getActiveStatus()) {
+            throw new CustomException(ErrorCode.INVALID_REQUEST);
+        }
+
+        List<String> newPhotoUrlList = newPhotoList.parallelStream()
+                .map(newPhoto -> {
+                    String fileName = s3Service.makefileName();
+                    return s3Service.putFileToS3(newPhoto, fileName, s3Config.getEventImageDir());
+                }).collect(Collectors.toList());
+
+        List<EventPhoto> eventPhotoList = eventPhotoService.findUserEventPhotoList(user, event);
+        if (!eventPhotoList.isEmpty()) {
+            deleteExistingPhotos(eventPhotoList);
+        }
+        eventPhotoService.makeNewEventPhoto(user, event, newPhotoUrlList);
+    }
+
+
+
+    //deleteUserEventPhoto
+    public void deleteUserEventPhoto(User tmpUser, Long eventId) {
+        User user = userService.findUser(tmpUser.getId());
+        Event event = eventService.findEvent(eventId);
+        if (!event.getActiveStatus()) {
+            throw new CustomException(ErrorCode.INVALID_REQUEST);
+        }
+        List<EventPhoto> eventPhotoList = eventPhotoService.findUserEventPhotoList(user, event);
+        if (!eventPhotoList.isEmpty()) {
+            deleteExistingPhotos(eventPhotoList);
+        }
+    }
+
+    private void deleteExistingPhotos(List<EventPhoto> eventPhotoList) {
+        eventPhotoList.forEach(eventPhoto -> {
+            s3Service.deleteFromS3(eventPhoto.getUrl());
+        });
+        eventPhotoService.deleteEventPhoto(eventPhotoList);
+    }
 }

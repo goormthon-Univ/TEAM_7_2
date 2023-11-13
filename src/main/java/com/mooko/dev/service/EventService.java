@@ -47,4 +47,15 @@ public class EventService {
         event.updateEventDate(updateEventDateDto.getStartDate(), updateEventDateDto.getEndDate());
         eventRepository.save(event);
     }
+
+    @Transactional
+    public void updateEventStatus(Event event, boolean status) {
+        event.updateEventStatus(status);
+    }
+
+    @Transactional
+    public void addUser(User user, Event event) {
+        event.getUsers().add(user);
+        eventRepository.save(event);
+    }
 }

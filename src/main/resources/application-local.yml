@@ -58,6 +58,7 @@ cloud:
       barcode: barcode/
       thumbnail: thumbnail/
       day: day/
+      event: event/
       default-img: https://mooko-bucket.s3.ap-northeast-2.amazonaws.com/profile_img/default_img.png
 
     region:

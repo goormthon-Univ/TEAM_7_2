@@ -40,7 +40,7 @@ public class S3Service {
         return path.substring(s3Config.getBucket().length() + 2);
     }
 
-    // 사용 예
+
     public void deleteFromS3(String absolutePath) {
         try {
             String relativePath = convertToRelativePath(absolutePath);
