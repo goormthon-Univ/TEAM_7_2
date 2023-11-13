@@ -23,4 +23,10 @@ public class UserService {
         user.updateEvent(event);
         userRepository.save(user);
     }
+
+    @Transactional
+    public void updateCheckStatus(User user, boolean checkStatus) {
+        user.updateCheckStatus(checkStatus);
+        userRepository.save(user);
+    }
 }

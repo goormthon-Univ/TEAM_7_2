@@ -35,4 +35,8 @@ public class User {
     public void updateEvent(Event event) {
         this.event = event;
     }
+
+    public void updateCheckStatus(Boolean checkStatus) {
+        this.checkStatus = checkStatus;
+    }
 }
