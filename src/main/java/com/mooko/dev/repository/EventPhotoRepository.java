@@ -13,4 +13,6 @@ import java.util.Optional;
 
 public interface EventPhotoRepository extends JpaRepository<EventPhoto, Long> {
     List<EventPhoto> findByUserAndEvent(User user, Event event);
+
+    List<EventPhoto> findByEvent(Event event);
 }

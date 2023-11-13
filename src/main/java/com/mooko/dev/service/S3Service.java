@@ -51,17 +51,11 @@ public class S3Service {
     }
 
 
-    public String makefileName(String fileType) {
-        String extension;
-        if ("profile".equals(fileType) || "thumbnail".equals(fileType) || "totalCgImg".equals(fileType)) {
-            extension = ".jpeg";
-        } else if ("video".equals(fileType)) {
-            extension = ".mp4";
-        } else {
-            extension = ""; // 기본 확장자 또는 에러 처리
-        }
-        return UUID.randomUUID() + extension;
+    public String makefileName() {
+        return UUID.randomUUID() + ".jpg";
     }
+
+
 
 
 

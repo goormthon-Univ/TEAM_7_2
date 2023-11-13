@@ -18,4 +18,9 @@ public class EventPhotoService {
         List<EventPhoto> eventPhotoList = eventPhotoRepository.findByUserAndEvent(user, event);
         return eventPhotoList.stream().map(EventPhoto::getUrl).toList();
     }
+
+    public List<String> findAllEventPhotoList(Event event) {
+        List<EventPhoto> eventPhotos = eventPhotoRepository.findByEvent(event);
+        return eventPhotos.stream().map(EventPhoto::getUrl).toList();
+    }
 }
