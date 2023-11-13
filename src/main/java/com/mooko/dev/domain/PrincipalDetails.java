@@ -15,10 +15,22 @@ public class PrincipalDetails implements UserDetails, OAuth2User {
     public PrincipalDetails(User user){
         this.user = user;
     }
+
     // OAuth 로그인
     public PrincipalDetails(User user, Map<String, Object> attributes){
         this.user = user;
         this.attributes = attributes;
+    }
+
+    // OAuth2User //
+    @Override
+    public Map<String, Object> getAttributes() {
+        return attributes;
+    }
+
+    @Override
+    public String getName() {
+        return null;
     }
 
     // UserDetails //
@@ -62,14 +74,4 @@ public class PrincipalDetails implements UserDetails, OAuth2User {
         return true;
     }
 
-    // OAuth2User //
-    @Override
-    public Map<String, Object> getAttributes() {
-        return attributes;
-    }
-
-    @Override
-    public String getName() {
-        return null;
-    }
 }
