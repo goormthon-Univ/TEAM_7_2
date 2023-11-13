@@ -86,6 +86,17 @@ public class EventController {
         User user = principalDetails.getUser();
         aggregationFacade.updateUserEventPhoto(user, eventId, eventPhotoDto.getImageList());
         return ResponseEntity.status(HttpStatus.OK).build();
+    }
 
+
+    @DeleteMapping("/{eventId}/image-list")
+    public ResponseEntity<Void> deleteUserEventPhoto(
+            @AuthenticationPrincipal PrincipalDetails principalDetails,
+            @PathVariable Long eventId
+    )
+    {
+        User user = principalDetails.getUser();
+        aggregationFacade.deleteUserEventPhoto(user, eventId);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

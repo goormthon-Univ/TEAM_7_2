@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -56,6 +55,11 @@ public class AggregationFacade {
     public EventInfoDto showEventPage(User tmpUser, Long eventId) {
         User user = userService.findUser(tmpUser.getId());
         Event event = eventService.findEvent(eventId);
+        if(event.getUsers().stream().noneMatch(existingUser -> existingUser.equals(user))){
+            eventService.addUser(user, event);
+            userService.addEvent(user, event);
+        }
+
         List<String> profilImgeUrlList = event.getUsers().stream().map(User::getProfileUrl).toList();
         boolean isRoomMaker = user.equals(event.getRoomMaker());
 
@@ -139,6 +143,7 @@ public class AggregationFacade {
     }
 
 
+    //showUserEventStatus
     public UserEventStatusDto showUserEventStatus(User tmpUser) {
         User user = userService.findUser(tmpUser.getId());
         if (user.getEvent() != null) {
@@ -155,6 +160,7 @@ public class AggregationFacade {
     }
 
 
+    //updateUserEventPhoto
     public void updateUserEventPhoto(User tmpUser, Long eventId, List<File> newPhotoList) {
         User user = userService.findUser(tmpUser.getId());
         Event event = eventService.findEvent(eventId);
@@ -174,6 +180,22 @@ public class AggregationFacade {
         }
         eventPhotoService.makeNewEventPhoto(user, event, newPhotoUrlList);
     }
+
+
+
+    //deleteUserEventPhoto
+    public void deleteUserEventPhoto(User tmpUser, Long eventId) {
+        User user = userService.findUser(tmpUser.getId());
+        Event event = eventService.findEvent(eventId);
+        if (!event.getActiveStatus()) {
+            throw new CustomException(ErrorCode.INVALID_REQUEST);
+        }
+        List<EventPhoto> eventPhotoList = eventPhotoService.findUserEventPhotoList(user, event);
+        if (!eventPhotoList.isEmpty()) {
+            deleteExistingPhotos(eventPhotoList);
+        }
+    }
+
     private void deleteExistingPhotos(List<EventPhoto> eventPhotoList) {
         eventPhotoList.forEach(eventPhoto -> {
             s3Service.deleteFromS3(eventPhoto.getUrl());

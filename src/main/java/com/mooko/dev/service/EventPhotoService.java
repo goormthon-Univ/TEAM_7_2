@@ -34,20 +34,20 @@ public class EventPhotoService {
     }
 
     @Transactional
-    public List<EventPhoto> makeNewEventPhoto(User user, Event event, List<String> eventPhotoUrlList) {
+    public void makeNewEventPhoto(User user, Event event, List<String> eventPhotoUrlList) {
         List<EventPhoto> eventPhotos = new ArrayList<>();
 
-        for (String s : eventPhotoUrlList) {
+        for (String url : eventPhotoUrlList) {
             EventPhoto eventPhoto = EventPhoto.builder()
                     .user(user)
                     .event(event)
                     .createdAt(LocalDateTime.now())
-                    .url(s)
+                    .url(url)
                     .build();
-            eventPhotos.add(eventPhotoRepository.save(eventPhoto));
+            eventPhotos.add(eventPhoto);
         }
 
-        return eventPhotos;
+        eventPhotoRepository.saveAll(eventPhotos);
     }
 
 
