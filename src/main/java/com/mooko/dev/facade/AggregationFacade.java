@@ -1,5 +1,8 @@
 package com.mooko.dev.facade;
 
+import com.mooko.dev.configuration.S3Config;
+import com.mooko.dev.domain.Barcode;
+import com.mooko.dev.domain.BarcodeType;
 import com.mooko.dev.domain.Event;
 import com.mooko.dev.domain.User;
 import com.mooko.dev.dto.event.req.NewEventDto;
@@ -15,6 +18,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,6 +32,8 @@ public class AggregationFacade {
     private final BarcodeService barcodeService;
     private final UserBarcodeService userBarcodeService;
     private final S3Service s3Service;
+    private final S3Config s3Config;
+
 
     /**
      * EventController
@@ -102,12 +109,27 @@ public class AggregationFacade {
     }
 
     //makeNewBarcode
-    public Long makeNewBarcode(User tmpUser, Long eventId) {
+    public Long makeNewBarcode(User tmpUser, Long eventId) throws IOException {
         User user = userService.findUser(tmpUser.getId());
         Event event = eventService.findEvent(eventId);
         checkUserRoomMaker(user, event);
         List<String> eventPhotoList = eventPhotoService.findAllEventPhotoList(event);
-        Buffer
+
+        String barcodeFileName = s3Service.makefileName();
+        String barcodeFilePath = s3Config.getBarcodeDir() + barcodeFileName;
+
+        File barcodeFile = barcodeService.makeNewBarcode(eventPhotoList, barcodeFilePath);
+        s3Service.putFileToS3(barcodeFile, barcodeFileName, s3Config.getBarcodeDir());
+
+        Barcode barcode = barcodeService.saveBarcode(
+                barcodeFilePath,
+                event.getTitle(),
+                event.getStartDate(),
+                event.getEndDate(),
+                BarcodeType.EVENT,
+                event);
+        userBarcodeService.makeUserBarcode(event.getUsers(), barcode);
+        return barcode.getId();
     }
 
     private void checkUserRoomMaker(User user, Event event) {

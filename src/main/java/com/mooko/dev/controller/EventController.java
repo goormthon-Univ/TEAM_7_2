@@ -15,6 +15,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+
 import static org.springframework.http.ResponseEntity.ok;
 
 @RequiredArgsConstructor
@@ -67,8 +69,10 @@ public class EventController {
     public ResponseEntity<BarcodeIdDto> makeNewBarcode(
             @AuthenticationPrincipal PrincipalDetails principalDetails,
             @PathVariable Long eventId
-    ){
+    ) throws IOException {
         User user = principalDetails.getUser();
         Long barcodeId = aggregationFacade.makeNewBarcode(user, eventId);
+        return ResponseEntity.ok(BarcodeIdDto.builder().barcodeId(barcodeId.toString()).build());
+
     }
 }
