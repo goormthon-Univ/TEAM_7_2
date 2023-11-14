@@ -4,7 +4,9 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.mooko.dev.domain.PrincipalDetails;
 import com.mooko.dev.domain.User;
+import com.mooko.dev.dto.user.req.UserNewInfoDto;
 import com.mooko.dev.dto.user.res.UserEventStatusDto;
+import com.mooko.dev.dto.user.res.UserPassportDto;
 import com.mooko.dev.facade.AggregationFacade;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +19,8 @@ import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMap
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -76,4 +80,20 @@ public class UserController {
 
     }
 
+    @GetMapping("/user-info")
+    public ResponseEntity<UserPassportDto> showUserInfo(
+            @AuthenticationPrincipal PrincipalDetails principalDetails){
+        User user = principalDetails.getUser();
+        UserPassportDto userPassportDto = aggregationFacade.showUserInfo(user);
+        return ResponseEntity.ok(userPassportDto);
+    }
+
+    @PostMapping("/user-info")
+    public ResponseEntity<Void> updateUserInfo(
+            @AuthenticationPrincipal PrincipalDetails principalDetails,
+            @ModelAttribute UserNewInfoDto userNewInfoDto){
+        User user = principalDetails.getUser();
+        aggregationFacade.updateUserInfo(user, userNewInfoDto);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
 }

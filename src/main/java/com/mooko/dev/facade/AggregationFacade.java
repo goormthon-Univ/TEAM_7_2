@@ -2,19 +2,33 @@ package com.mooko.dev.facade;
 
 import com.mooko.dev.configuration.S3Config;
 import com.mooko.dev.domain.*;
+import com.mooko.dev.dto.day.req.BarcodeDateDto;
+import com.mooko.dev.dto.day.res.CalendarDto;
+import com.mooko.dev.dto.day.res.DayDto;
+import com.mooko.dev.dto.day.res.ThumbnailDto;
 import com.mooko.dev.dto.event.req.NewEventDto;
 import com.mooko.dev.dto.event.req.UpdateEventDateDto;
 import com.mooko.dev.dto.event.req.UpdateEventNameDto;
 import com.mooko.dev.dto.event.res.EventInfoDto;
 import com.mooko.dev.dto.event.res.UserInfoDto;
 import com.mooko.dev.dto.event.socket.UserEventCheckStatusDto;
+import com.mooko.dev.dto.user.req.UserNewInfoDto;
 import com.mooko.dev.dto.user.res.UserEventStatusDto;
+import com.mooko.dev.dto.user.res.UserPassportDto;
 import com.mooko.dev.event.ButtonEvent;
 import com.mooko.dev.event.LeaveEvent;
 import com.mooko.dev.exception.custom.CustomException;
 import com.mooko.dev.exception.custom.ErrorCode;
 import com.mooko.dev.service.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjusters;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Comparator;
+import java.util.Date;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
@@ -36,6 +50,8 @@ public class AggregationFacade {
     private final S3Service s3Service;
     private final S3Config s3Config;
     private final ApplicationEventPublisher eventPublisher;
+    private final DayService dayService;
+    private final DayPhotoService dayPhotoService;
 
     private final int MINIMUM_EVENT_PHOTO_COUNT = 2;
     private final int MAX_EVENT_PHOTO_COUNT = 130;
@@ -285,7 +301,165 @@ public class AggregationFacade {
     }
 
 
+    /**
+     *
+     * DayController
+     */
 
+    // showUserCalendar
+    public CalendarDto showCalendar(User tmpUser, String startDate, String endDate){
+        User user = userService.findUser(tmpUser.getId());
+
+        LocalDate startLocalDate = LocalDate.parse(startDate);
+        LocalDate endLocalDate = LocalDate.parse(endDate);
+
+        List<ThumbnailDto> thumbnailInfoList = new ArrayList<>();
+
+        Boolean buttonStatus = true;
+
+        while (!startLocalDate.isAfter(endLocalDate)) {
+            startLocalDate = startLocalDate.plusDays(1);
+
+            int year = startLocalDate.getYear();
+            int month = startLocalDate.getMonthValue();
+            int day = startLocalDate.getDayOfMonth();
+
+            Day currentDay = dayService.findDayId(user,year,month,day);
+
+            DayPhoto dayPhoto = dayPhotoService.findThumnail(currentDay);
+            if (dayPhoto.getUrl()==null){
+                buttonStatus=false;
+            }
+
+            ThumbnailDto thumbnailDto = ThumbnailDto.builder()
+                    .thumbnailUrl(dayPhoto.getUrl())
+                    .date(startLocalDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+                    .build();
+            thumbnailInfoList.add(thumbnailDto);
+        }
+
+        return CalendarDto.builder()
+                .thumbnailInfoList(thumbnailInfoList)
+                .buttonStatus(buttonStatus)
+                .build();
+    }
+
+    // showDayPost
+    public DayDto showDay(User tmpUser, String date){
+        User user = userService.findUser(tmpUser.getId());
+
+        LocalDate currentDate = LocalDate.parse(date, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+
+        int year = currentDate.getYear();
+        int month = currentDate.getMonthValue();
+        int day = currentDate.getDayOfMonth();
+
+        Day currentDay = dayService.findDayId(user,year,month,day);
+
+        if (currentDay.getId()==null){
+            currentDay = dayService.makeDay(user,year,month,day);
+        }
+
+        String memo = dayService.findMemo(currentDay);
+        List<DayPhoto> dayImageList = dayPhotoService.findDayPhotoList(currentDay);
+
+        List<String> dayPhotoUrlList = dayImageList.stream().map(DayPhoto::getUrl).toList();
+
+        return DayDto.builder()
+                .dayImageList(dayPhotoUrlList)
+                .memo(memo)
+                .build();
+    }
+
+    // post,updateDayPost
+    public void updateDay(User tmpUser, String date, String memo, File thumbnail, List<File> newDayPhotoList){
+        User user = userService.findUser(tmpUser.getId());
+
+        LocalDate currentDate = LocalDate.parse(date, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+
+        int year = currentDate.getYear();
+        int month = currentDate.getMonthValue();
+        int day = currentDate.getDayOfMonth();
+
+        Day currentDay = dayService.findDayId(user,year,month,day);
+
+        dayService.updateMemo(currentDay, memo);
+
+        // Thumbnail
+        String newThumbnailUrl = null;
+        if (thumbnail!=null){
+            String fileName = s3Service.makefileName();
+            newThumbnailUrl = s3Service.putFileToS3(thumbnail, fileName, s3Config.getEventImageDir());
+        }
+        DayPhoto dayThumbnail = dayPhotoService.findThumnail(currentDay);
+        if (dayThumbnail.getUrl()!=null) {
+            s3Service.deleteFromS3(dayThumbnail.getUrl());
+            dayPhotoService.deleteThumbnail(dayThumbnail);
+        }
+        dayPhotoService.makeNewThumbnail(currentDay,newThumbnailUrl, true);
+
+        // Photos except thumbnail
+        List<String> newDayPhotoUrlList = new ArrayList<>();;
+        if (newDayPhotoList!=null){
+            newDayPhotoUrlList = newDayPhotoList.parallelStream()
+                    .map(newPhoto -> {
+                        String fileName = s3Service.makefileName();
+                        return s3Service.putFileToS3(newPhoto, fileName, s3Config.getEventImageDir());
+                    }).collect(Collectors.toList());
+        }
+
+        List<DayPhoto> dayPhotoList = dayPhotoService.findDayPhotoList(currentDay);
+        if (!dayPhotoList.isEmpty()) {
+            deleteExistingDayPhotos(dayPhotoList);
+        }
+        dayPhotoService.makeNewDayPhoto(currentDay,newDayPhotoUrlList, false);
+    }
+
+    private void deleteExistingDayPhotos(List<DayPhoto> dayPhotoList) {
+        dayPhotoList.forEach(eventPhoto -> {
+            s3Service.deleteFromS3(eventPhoto.getUrl());
+        });
+        dayPhotoService.deleteDayPhotos(dayPhotoList);
+    }
+
+    // makeNewDayBarcode
+    public Long makeNewDayBarcode(User tmpUser, BarcodeDateDto barcodeDateDto) throws IOException {
+        User user = userService.findUser(tmpUser.getId());
+
+        int intYear = Integer.parseInt(barcodeDateDto.getYear());
+        int intMonth = Integer.parseInt(barcodeDateDto.getMonth());
+
+        List<Day> dayList = dayService.findDayIdList(user,intYear,intMonth);
+        List<String> allDayPhotos = new ArrayList<>();
+        for (Day day : dayList) {
+            List<String> photosForDay = dayPhotoService.findDayPhotoUrlList(day);
+            allDayPhotos.addAll(photosForDay);
+        }
+
+        String barcodeFileName = s3Service.makefileName();
+
+        File barcodeFile = barcodeService.makeNewBarcode(allDayPhotos);
+        String fullPath = s3Service.putFileToS3(barcodeFile, barcodeFileName, s3Config.getBarcodeDir());
+
+        // 해당 년월의 startDate,endDate 구하기
+        LocalDate firstDayOfMonth = LocalDate.of(intYear, intMonth, 1);
+        LocalDate lastDayOfMonth = firstDayOfMonth.with(TemporalAdjusters.lastDayOfMonth());
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        String startDate = firstDayOfMonth.format(formatter);
+        String endDate = lastDayOfMonth.format(formatter);
+
+        Barcode barcode = barcodeService.saveBarcode(
+                fullPath,
+                barcodeDateDto.getYear()+"년 "+barcodeDateDto.getMonth()+"월",
+                startDate,
+                endDate,
+                BarcodeType.DAY,
+                null);
+        userBarcodeService.makeUserDayBarcode(user, barcode);
+        return barcode.getId();
+    }
 
     /**
      * UserController
@@ -313,4 +487,52 @@ public class AggregationFacade {
     }
 
 
+    // showUserInfo
+    public UserPassportDto showUserInfo(User tmpUser){
+        User user = userService.findUser(tmpUser.getId());
+
+        List<UserBarcode> userBarcodeList = userBarcodeService.findUserBarcodeList(user);
+
+        String recentBarcodeImg = userBarcodeList.stream()
+                .map(UserBarcode::getBarcode)
+                .sorted(Comparator.comparing(Barcode::getCreatedAt).reversed())
+                .map(Barcode::getBarcodeUrl)
+                .findFirst()
+                .orElse(null);
+
+        List<String> recentBarcodeTitleList = userBarcodeList.stream()
+                .map(UserBarcode::getBarcode)
+                .sorted(Comparator.comparing(Barcode::getCreatedAt).reversed())
+                .map(Barcode::getTitle)
+                .limit(3)
+                .collect(Collectors.toList());
+
+        return UserPassportDto.builder()
+                .nickname(user.getNickname())
+                .birth(user.getBirth())
+                .gender(user.getGender())
+                .dateOfIssue(user.getDateOfIssue())
+                .barcodeCount(userBarcodeList.size())
+                .profileUrl(user.getProfileUrl())
+                .recentBarcodeImg(recentBarcodeImg)
+                .recentBarcodeTitleList(recentBarcodeTitleList)
+                .modalActive(user.getModalActive())
+                .build();
+    }
+
+    // showUserInfo
+    @Value("${cloud.aws.s3.default-img}")
+    private String USER_DEFAULT_PROFILE_IMAGE;
+    public void updateUserInfo(User tmpUser, UserNewInfoDto userNewInfoDto){
+        User user = userService.findUser(tmpUser.getId());
+
+        String fileName = s3Service.makefileName();
+        String newProfileImgUrl = s3Service.putFileToS3(userNewInfoDto.getProfileImage(), fileName, s3Config.getEventImageDir());
+
+        if (user.getProfileUrl()!=USER_DEFAULT_PROFILE_IMAGE) {
+            s3Service.deleteFromS3(user.getProfileUrl());
+        }
+        user.updateUserInfo(newProfileImgUrl,userNewInfoDto.getNickname(), userNewInfoDto.getBirth(),
+                userNewInfoDto.getGender(), false);
+    }
 }
