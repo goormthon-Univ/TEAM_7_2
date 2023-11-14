@@ -10,6 +10,7 @@ import com.mooko.dev.dto.event.res.UserInfoDto;
 import com.mooko.dev.dto.event.socket.UserEventCheckStatusDto;
 import com.mooko.dev.dto.user.res.UserEventStatusDto;
 import com.mooko.dev.event.ButtonEvent;
+import com.mooko.dev.event.LeaveEvent;
 import com.mooko.dev.exception.custom.CustomException;
 import com.mooko.dev.exception.custom.ErrorCode;
 import com.mooko.dev.service.*;
@@ -65,7 +66,7 @@ public class AggregationFacade {
 
         // 이벤트에 사용자 등록 여부 확인 및 등록
         if (event.getUsers().stream().noneMatch(existingUser -> existingUser.equals(user))) {
-            eventService.addUser(user, event);
+            eventService.addEventUser(user, event);
             userService.addEvent(user, event);
         }
 
@@ -181,7 +182,7 @@ public class AggregationFacade {
                 }).collect(Collectors.toList());
 
 
-        deleteExistingPhotoOrEventUser(user, event, false);
+        deleteExistingPhotoOrEventUser(user, event, false, false);
         eventPhotoService.makeNewEventPhoto(user, event, newPhotoUrlList);
     }
 
@@ -211,7 +212,7 @@ public class AggregationFacade {
         if (!Objects.equals(tmpUserId, user.getId())) {
             throw new CustomException(ErrorCode.USER_NOT_MATCH);
         }
-        deleteExistingPhotoOrEventUser(user, event, false);
+        deleteExistingPhotoOrEventUser(user, event, false, false);
 
     }
 
@@ -219,19 +220,32 @@ public class AggregationFacade {
     public void deleteUserEvent(User tmpUser, Long eventId) {
         User user = userService.findUser(tmpUser.getId());
         Event event = eventService.findEvent(eventId);
-        deleteExistingPhotoOrEventUser(user, event, true);
+        if (event.getRoomMaker().equals(user)) {
+            eventPublisher.publishEvent(
+                    LeaveEvent.builder()
+                            .eventStatus(true)
+                            .eventId(event.getId().toString())
+                            .build()
+            );
+            deleteExistingPhotoOrEventUser(user, event, true, true);
+            return;
+        }
+        deleteExistingPhotoOrEventUser(user, event, true, false);
     }
 
-    private void deleteExistingPhotoOrEventUser(User user, Event event, boolean flag) {
+    private void deleteExistingPhotoOrEventUser(User user, Event event, boolean isLeaveEvent, boolean isDeleteEvent) {
         List<EventPhoto> eventPhotoList = eventPhotoService.findUserEventPhotoList(user, event);
         if (!eventPhotoList.isEmpty()) {
             eventPhotoList.forEach(eventPhoto -> {
                 s3Service.deleteFromS3(eventPhoto.getUrl());
             });
             eventPhotoService.deleteEventPhoto(eventPhotoList);
-            if (flag) {
-                eventService.deleteUser(user, event);
+            if (isLeaveEvent) {
+                eventService.deleteEventUser(user, event);
                 userService.deleteEvent(user);
+                if(isDeleteEvent){
+                    eventService.deleteEvent(event);
+                }
             }
         }
     }
