@@ -29,6 +29,7 @@ public class User {
     private String birth;
     private String gender;
     private String dateOfIssue;     //유저가 회원가입했을때의 시점으로
+    private Boolean modalActive;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "event_id")
