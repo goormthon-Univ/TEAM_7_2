@@ -93,6 +93,7 @@ public class EventController {
     }
 
 
+    //3-5. 이벤트 사진 리스트 삭제
     @DeleteMapping("/{eventId}/image-list")
     public ResponseEntity<Void> deleteUserEventPhoto(
             @AuthenticationPrincipal PrincipalDetails principalDetails,
