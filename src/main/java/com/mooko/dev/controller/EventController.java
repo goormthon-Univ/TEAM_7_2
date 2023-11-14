@@ -34,7 +34,7 @@ public class EventController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-
+    //3-C. 이벤트 바코드 생성
     @PostMapping("/{eventId}/result")
     public ResponseEntity<BarcodeIdDto> makeNewBarcode(
             @AuthenticationPrincipal PrincipalDetails principalDetails,
