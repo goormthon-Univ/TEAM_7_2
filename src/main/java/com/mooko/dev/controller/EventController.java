@@ -68,6 +68,7 @@ public class EventController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
+    //3-2. 이벤트 기간 수정
     @PutMapping("/{eventId}/event-date")
     public ResponseEntity<Void> updateEventDate(
             @AuthenticationPrincipal PrincipalDetails principalDetails,
