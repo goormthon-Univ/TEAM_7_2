@@ -180,10 +180,8 @@ public class AggregationFacade {
                     return s3Service.putFileToS3(newPhoto, fileName, s3Config.getEventImageDir());
                 }).collect(Collectors.toList());
 
-        List<EventPhoto> eventPhotoList = eventPhotoService.findUserEventPhotoList(user, event);
-        if (!eventPhotoList.isEmpty()) {
-            deleteExistingPhotos(eventPhotoList);
-        }
+
+        deleteExistingPhotos(user, event, false);
         eventPhotoService.makeNewEventPhoto(user, event, newPhotoUrlList);
     }
 
@@ -213,23 +211,29 @@ public class AggregationFacade {
         if (!Objects.equals(tmpUserId, user.getId())) {
             throw new CustomException(ErrorCode.USER_NOT_MATCH);
         }
+        deleteExistingPhotos(user, event, false);
 
-        List<EventPhoto> eventPhotoList = eventPhotoService.findUserEventPhotoList(user, event);
-        if (!eventPhotoList.isEmpty()) {
-            deleteExistingPhotos(eventPhotoList);
-        }
     }
-
-    private void deleteExistingPhotos(List<EventPhoto> eventPhotoList) {
-        eventPhotoList.forEach(eventPhoto -> {
-            s3Service.deleteFromS3(eventPhoto.getUrl());
-        });
-        eventPhotoService.deleteEventPhoto(eventPhotoList);
-    }
-
 
     //deleteUserEvent
-    public void deleteUserEvent(User user, Long eventId) {
+    public void deleteUserEvent(User tmpUser, Long eventId) {
+        User user = userService.findUser(tmpUser.getId());
+        Event event = eventService.findEvent(eventId);
+        deleteExistingPhotos(user, event, true);
+    }
+
+    private void deleteExistingPhotos(User user, Event event, boolean flag) {
+        List<EventPhoto> eventPhotoList = eventPhotoService.findUserEventPhotoList(user, event);
+        if (!eventPhotoList.isEmpty()) {
+            eventPhotoList.forEach(eventPhoto -> {
+                s3Service.deleteFromS3(eventPhoto.getUrl());
+            });
+            eventPhotoService.deleteEventPhoto(eventPhotoList);
+            if (flag) {
+                eventService.deleteUser(user, event);
+                userService.deleteEvent(user);
+            }
+        }
     }
 
 

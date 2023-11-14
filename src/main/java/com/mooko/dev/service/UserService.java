@@ -34,4 +34,10 @@ public class UserService {
     public User save(User user){
         return userRepository.save(user);
     }
+
+    @Transactional
+    public void deleteEvent(User user) {
+        user.updateEvent(null);
+        userRepository.save(user);
+    }
 }
