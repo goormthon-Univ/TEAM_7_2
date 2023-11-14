@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -43,15 +42,21 @@ public class AggregationFacade {
     //makeNewEvent
     public void makeNewEvent(User tempUser, NewEventDto newEventDto) {
         User user = userService.findUser(tempUser.getId());
-        checkUserEventStatus(user);
-        eventService.makeNewEvent(newEventDto, user);
+        checkUserAlreadyInEvent(user);
+        Event event = eventService.makeNewEvent(newEventDto, user);
+        userService.addEvent(user, event);
     }
 
-    private void checkUserEventStatus(User user) {
-        Optional.ofNullable(user.getEvent())
-                .ifPresent(e -> {
-                    throw new CustomException(ErrorCode.USER_ALREADY_HAS_EVENT);
-                });
+    private void checkUserAlreadyInEvent(User user) {
+
+        if(user.getEvent() == null){
+            return;
+        }
+
+        if (user.getEvent().getActiveStatus()){
+            throw new CustomException(ErrorCode.USER_ALREADY_HAS_EVENT);
+        }
+
     }
 
 
@@ -150,7 +155,8 @@ public class AggregationFacade {
     //showUserEventStatus
     public UserEventStatusDto showUserEventStatus(User tmpUser) {
         User user = userService.findUser(tmpUser.getId());
-        if (user.getEvent() != null) {
+
+        if (user.getEvent().getActiveStatus()) {
             return UserEventStatusDto.builder()
                     .isExistEvent(true)
                     .eventId(user.getEvent().getId().toString())
