@@ -13,6 +13,6 @@ import lombok.Setter;
 @Setter
 @Builder
 public class CalendarDto {
-    List<ThumbnailDto> thumbnailInfoList;
-    Boolean buttonStatus;
+    private List<ThumbnailDto> thumbnailInfoList;
+    private Boolean buttonStatus;
 }

@@ -4,6 +4,7 @@ import com.mooko.dev.domain.Barcode;
 import com.mooko.dev.domain.BarcodeType;
 import com.mooko.dev.domain.Event;
 import com.mooko.dev.repository.BarcodeRepository;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -101,5 +102,10 @@ public class BarcodeService {
                  .build();
 
         return barcodeRepository.save(barcode);
+    }
+
+    public Barcode findBarcode(Long id){
+        Optional<Barcode> barcode = barcodeRepository.findById(id);
+        return barcode.get();
     }
 }

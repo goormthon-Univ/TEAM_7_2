@@ -13,6 +13,6 @@ import lombok.Setter;
 @Setter
 @Builder
 public class DayDto {
-    List<String> dayImageList;
-    String memo;
+    private List<String> dayImageList;
+    private String memo;
 }

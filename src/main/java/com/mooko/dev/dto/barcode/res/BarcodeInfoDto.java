@@ -1,4 +1,4 @@
-package com.mooko.dev.dto.day.req;
+package com.mooko.dev.dto.barcode.res;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,7 +11,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder
-public class BarcodeDateDto {
-    private String year;
-    private String month;
+public class BarcodeInfoDto {
+    private String id;
+    private String imageUrl;
+    private String title;
 }
