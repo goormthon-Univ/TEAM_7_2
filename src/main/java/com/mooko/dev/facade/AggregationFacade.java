@@ -87,7 +87,7 @@ public class AggregationFacade {
                 .eventName(event.getTitle())
                 .startDate(event.getStartDate())
                 .endDate(event.getEndDate())
-                .userId(user.getId().toString())
+                .loginUserId(user.getId().toString())
                 .userInfo(userInfoList)
                 .build();
     }
