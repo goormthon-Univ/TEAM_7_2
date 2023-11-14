@@ -32,4 +32,11 @@ public class Day {
     private User user;
 
     private LocalDateTime createdAt;
+
+    public void updateMemo(String memo) {
+        this.memo = memo;
+    }
+
 }
+
+

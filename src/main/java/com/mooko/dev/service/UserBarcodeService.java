@@ -25,4 +25,13 @@ public class UserBarcodeService {
             userBarcodeRepository.save(userBarcode);
         });
     }
+
+    @Transactional
+    public void makeUserDayBarcode(User user, Barcode barcode) {
+        UserBarcode userBarcode = UserBarcode.builder()
+                .user(user)
+                .barcode(barcode)
+                .build();
+        userBarcodeRepository.save(userBarcode);
+    }
 }

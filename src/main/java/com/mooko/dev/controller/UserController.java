@@ -20,15 +20,6 @@ public class UserController {
 
     private final AggregationFacade aggregationFacade;
 
-//    @RequestMapping("/oauth/authorization/kakao")
-//    public ResponseEntity login(Authentication authentication,
-//            @AuthenticationPrincipal PrincipalDetails principalDetails){
-//
-//        PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
-//        System.out.println("authentication: " + principalDetails.getUser());
-//    }
-
-
     @GetMapping("/api/v1/user/my-event")
     public ResponseEntity<UserEventStatusDto> showUserEventStatus(@AuthenticationPrincipal PrincipalDetails principalDetails) {
         User user = principalDetails.getUser();

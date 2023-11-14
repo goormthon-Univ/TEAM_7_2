@@ -22,7 +22,7 @@ public class DayPhoto {
 
     private String url;
 
-    private String thumbnail;
+    private Boolean thumbnail;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "day_id")
