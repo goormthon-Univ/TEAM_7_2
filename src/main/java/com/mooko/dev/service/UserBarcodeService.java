@@ -34,4 +34,9 @@ public class UserBarcodeService {
                 .build();
         userBarcodeRepository.save(userBarcode);
     }
+
+    public List<UserBarcode> findUserBarcodeList(User user){
+        List<UserBarcode> userBarcodeList = userBarcodeRepository.findByUser(user);
+        return userBarcodeList;
+    }
 }

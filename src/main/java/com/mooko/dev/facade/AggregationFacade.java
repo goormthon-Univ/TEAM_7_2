@@ -12,7 +12,9 @@ import com.mooko.dev.dto.event.req.UpdateEventNameDto;
 import com.mooko.dev.dto.event.res.EventInfoDto;
 import com.mooko.dev.dto.event.res.UserInfoDto;
 import com.mooko.dev.dto.event.socket.UserEventCheckStatusDto;
+import com.mooko.dev.dto.user.req.UserNewInfoDto;
 import com.mooko.dev.dto.user.res.UserEventStatusDto;
+import com.mooko.dev.dto.user.res.UserPassportDto;
 import com.mooko.dev.event.ButtonEvent;
 import com.mooko.dev.event.LeaveEvent;
 import com.mooko.dev.exception.custom.CustomException;
@@ -23,8 +25,10 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.Date;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
@@ -473,4 +477,52 @@ public class AggregationFacade {
                         .build());
     }
 
+    // showUserInfo
+    public UserPassportDto showUserInfo(User tmpUser){
+        User user = userService.findUser(tmpUser.getId());
+
+        List<UserBarcode> userBarcodeList = userBarcodeService.findUserBarcodeList(user);
+
+        String recentBarcodeImg = userBarcodeList.stream()
+                .map(UserBarcode::getBarcode)
+                .sorted(Comparator.comparing(Barcode::getCreatedAt).reversed())
+                .map(Barcode::getBarcodeUrl)
+                .findFirst()
+                .orElse(null);
+
+        List<String> recentBarcodeTitleList = userBarcodeList.stream()
+                .map(UserBarcode::getBarcode)
+                .sorted(Comparator.comparing(Barcode::getCreatedAt).reversed())
+                .map(Barcode::getTitle)
+                .limit(3)
+                .collect(Collectors.toList());
+
+        return UserPassportDto.builder()
+                .nickname(user.getNickname())
+                .birth(user.getBirth())
+                .gender(user.getGender())
+                .dateOfIssue(user.getDateOfIssue())
+                .barcodeCount(userBarcodeList.size())
+                .profileUrl(user.getProfileUrl())
+                .recentBarcodeImg(recentBarcodeImg)
+                .recentBarcodeTitleList(recentBarcodeTitleList)
+                .modalActive(user.getModalActive())
+                .build();
+    }
+
+    // showUserInfo
+    @Value("${cloud.aws.s3.default-img}")
+    private String USER_DEFAULT_PROFILE_IMAGE;
+    public void updateUserInfo(User tmpUser, UserNewInfoDto userNewInfoDto){
+        User user = userService.findUser(tmpUser.getId());
+
+        String fileName = s3Service.makefileName();
+        String newProfileImgUrl = s3Service.putFileToS3(userNewInfoDto.getProfileImage(), fileName, s3Config.getEventImageDir());
+
+        if (user.getProfileUrl()!=USER_DEFAULT_PROFILE_IMAGE) {
+            s3Service.deleteFromS3(user.getProfileUrl());
+        }
+        user.updateUserInfo(newProfileImgUrl,userNewInfoDto.getNickname(), userNewInfoDto.getBirth(),
+                userNewInfoDto.getGender(), false);
+    }
 }
