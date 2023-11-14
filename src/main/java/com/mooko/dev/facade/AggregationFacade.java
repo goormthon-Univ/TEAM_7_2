@@ -228,6 +228,11 @@ public class AggregationFacade {
     }
 
 
+    //deleteUserEvent
+    public void deleteUserEvent(User user, Long eventId) {
+    }
+
+
     /**
      *
      * SocketController
@@ -279,5 +284,6 @@ public class AggregationFacade {
                         .eventId(null)
                         .build());
     }
+
 
 }

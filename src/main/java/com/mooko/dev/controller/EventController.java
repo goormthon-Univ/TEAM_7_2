@@ -105,4 +105,14 @@ public class EventController {
         aggregationFacade.deleteUserEventPhoto(user, eventId, userId);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
+
+    @DeleteMapping("/{eventId}")
+    public ResponseEntity<Void> deleteUserEvent(
+            @AuthenticationPrincipal PrincipalDetails principalDetails,
+            @PathVariable Long eventId
+    ) {
+        User user = principalDetails.getUser();
+        aggregationFacade.deleteUserEvent(user, eventId);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
 }
