@@ -203,12 +203,17 @@ public class AggregationFacade {
 
 
     //deleteUserEventPhoto
-    public void deleteUserEventPhoto(User tmpUser, Long eventId) {
+    public void deleteUserEventPhoto(User tmpUser, Long eventId, Long tmpUserId) {
         User user = userService.findUser(tmpUser.getId());
         Event event = eventService.findEvent(eventId);
+
         if (!event.getActiveStatus()) {
             throw new CustomException(ErrorCode.INVALID_REQUEST);
         }
+        if (!Objects.equals(tmpUserId, user.getId())) {
+            throw new CustomException(ErrorCode.USER_NOT_MATCH);
+        }
+
         List<EventPhoto> eventPhotoList = eventPhotoService.findUserEventPhotoList(user, event);
         if (!eventPhotoList.isEmpty()) {
             deleteExistingPhotos(eventPhotoList);
