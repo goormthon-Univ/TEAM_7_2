@@ -14,6 +14,7 @@ import com.mooko.dev.dto.event.res.UserInfoDto;
 import com.mooko.dev.dto.event.socket.UserEventCheckStatusDto;
 import com.mooko.dev.dto.user.res.UserEventStatusDto;
 import com.mooko.dev.event.ButtonEvent;
+import com.mooko.dev.event.LeaveEvent;
 import com.mooko.dev.exception.custom.CustomException;
 import com.mooko.dev.exception.custom.ErrorCode;
 import com.mooko.dev.service.*;
@@ -30,6 +31,7 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -55,13 +57,15 @@ public class AggregationFacade {
     //makeNewEvent
     public void makeNewEvent(User tempUser, NewEventDto newEventDto) {
         User user = userService.findUser(tempUser.getId());
-        checkUserEventStatus(user);
-        eventService.makeNewEvent(newEventDto, user);
+        checkUserAlreadyInEvent(user);
+        Event event = eventService.makeNewEvent(newEventDto, user);
+        userService.addEvent(user, event);
     }
 
-    private void checkUserEventStatus(User user) {
+    private void checkUserAlreadyInEvent(User user) {
         Optional.ofNullable(user.getEvent())
-                .ifPresent(e -> {
+                .filter(Event::getActiveStatus)
+                .ifPresent(event -> {
                     throw new CustomException(ErrorCode.USER_ALREADY_HAS_EVENT);
                 });
     }
@@ -71,43 +75,54 @@ public class AggregationFacade {
     public EventInfoDto showEventPage(User tmpUser, Long eventId) {
         User user = userService.findUser(tmpUser.getId());
         Event event = eventService.findEvent(eventId);
-        if(event.getUsers().stream().noneMatch(existingUser -> existingUser.equals(user))){
-            eventService.addUser(user, event);
+
+        // 이벤트에 사용자 등록 여부 확인 및 등록
+        if (event.getUsers().stream().noneMatch(existingUser -> existingUser.equals(user))) {
+            eventService.addEventUser(user, event);
             userService.addEvent(user, event);
         }
 
-        List<String> profilImgeUrlList = event.getUsers().stream().map(User::getProfileUrl).toList();
+        List<String> profileImageUrlList = event.getUsers().stream()
+                .map(User::getProfileUrl)
+                .collect(Collectors.toList());
+
         boolean isRoomMaker = user.equals(event.getRoomMaker());
 
         List<UserInfoDto> userInfoList = event.getUsers().stream()
-                .map(eventUser -> {
-                    List<EventPhoto> eventPhotoList = eventPhotoService.findUserEventPhotoList(eventUser, event);
-                    List<String> evnetPhotoUrlList = eventPhotoList.stream().map(EventPhoto::getUrl).toList();
-
-
-                    if (evnetPhotoUrlList.isEmpty()) {
-                        return null;
-                    }
-
-                    return UserInfoDto.builder()
-                            .userId(eventUser.getId().toString())
-                            .nickname(eventUser.getNickname())
-                            .imageUrlList(evnetPhotoUrlList)
-                            .checkStatus(eventUser.getCheckStatus())
-                            .imageCount(evnetPhotoUrlList.size())
-                            .build();
-                })
-                .toList();
+                .map(eventUser -> createUserInfoDto(eventUser, event))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
 
         return EventInfoDto.builder()
-                .profileImgUrlList(profilImgeUrlList)
+                .profileImgUrlList(profileImageUrlList)
                 .isRoomMaker(isRoomMaker)
                 .eventName(event.getTitle())
                 .startDate(event.getStartDate())
                 .endDate(event.getEndDate())
+                .loginUserId(user.getId().toString())
                 .userInfo(userInfoList)
                 .build();
     }
+
+    private UserInfoDto createUserInfoDto(User eventUser, Event event) {
+        List<EventPhoto> eventPhotoList = eventPhotoService.findUserEventPhotoList(eventUser, event);
+        List<String> eventPhotoUrlList = eventPhotoList.stream()
+                .map(EventPhoto::getUrl)
+                .collect(Collectors.toList());
+
+        if (eventPhotoUrlList.isEmpty()) {
+            return null;
+        }
+
+        return UserInfoDto.builder()
+                .userId(eventUser.getId().toString())
+                .nickname(eventUser.getNickname())
+                .imageUrlList(eventPhotoUrlList)
+                .checkStatus(eventUser.getCheckStatus())
+                .imageCount(eventPhotoUrlList.size())
+                .build();
+    }
+
 
 
     //updateEventName
@@ -127,27 +142,28 @@ public class AggregationFacade {
         eventService.updateEventDate(updateEventDateDto, event);
     }
 
-    //makeNewBarcode
-    public Long makeNewBarcode(User tmpUser, Long eventId) throws IOException {
+    //makeNewEventBarcode
+    public Long makeNewEventBarcode(User tmpUser, Long eventId) throws IOException {
         User user = userService.findUser(tmpUser.getId());
         Event event = eventService.findEvent(eventId);
         checkUserRoomMaker(user, event);
         List<String> eventPhotoList = eventPhotoService.findAllEventPhotoList(event);
+        checkEventPhotoCount(event, 0, true);
 
         String barcodeFileName = s3Service.makefileName();
-        String barcodeFilePath = s3Config.getBarcodeDir() + barcodeFileName;
 
-        File barcodeFile = barcodeService.makeNewBarcode(eventPhotoList, barcodeFilePath);
-        s3Service.putFileToS3(barcodeFile, barcodeFileName, s3Config.getBarcodeDir());
+        File barcodeFile = barcodeService.makeNewBarcode(eventPhotoList);
+        String fullPath = s3Service.putFileToS3(barcodeFile, barcodeFileName, s3Config.getBarcodeDir());
 
         Barcode barcode = barcodeService.saveBarcode(
-                barcodeFilePath,
+                fullPath,
                 event.getTitle(),
                 event.getStartDate(),
                 event.getEndDate(),
                 BarcodeType.EVENT,
                 event);
         userBarcodeService.makeUserBarcode(event.getUsers(), barcode);
+        eventService.addBarcode(event, barcode);
         eventService.updateEventStatus(event, false);
         return barcode.getId();
     }
@@ -159,23 +175,6 @@ public class AggregationFacade {
     }
 
 
-    //showUserEventStatus
-    public UserEventStatusDto showUserEventStatus(User tmpUser) {
-        User user = userService.findUser(tmpUser.getId());
-        if (user.getEvent() != null) {
-            return UserEventStatusDto.builder()
-                    .isExistEvent(true)
-                    .eventId(user.getEvent().getId().toString())
-                    .build();
-        }
-
-        return UserEventStatusDto.builder()
-                .isExistEvent(false)
-                .eventId(null)
-                .build();
-    }
-
-
     //updateUserEventPhoto
     public void updateUserEventPhoto(User tmpUser, Long eventId, List<File> newPhotoList) {
         User user = userService.findUser(tmpUser.getId());
@@ -183,6 +182,10 @@ public class AggregationFacade {
         if (!event.getActiveStatus()) {
             throw new CustomException(ErrorCode.INVALID_REQUEST);
         }
+        checkEventPhotoCount(event, newPhotoList.size(), false);
+        List<EventPhoto> userEventPhotoList = eventPhotoService.findUserEventPhotoList(user, event);
+        userEventPhotoList.forEach(eventPhoto -> s3Service.deleteFromS3(eventPhoto.getUrl()));
+        eventPhotoService.deleteEventPhoto(userEventPhotoList);
 
         List<String> newPhotoUrlList = newPhotoList.parallelStream()
                 .map(newPhoto -> {
@@ -190,33 +193,73 @@ public class AggregationFacade {
                     return s3Service.putFileToS3(newPhoto, fileName, s3Config.getEventImageDir());
                 }).collect(Collectors.toList());
 
-        List<EventPhoto> eventPhotoList = eventPhotoService.findUserEventPhotoList(user, event);
-        if (!eventPhotoList.isEmpty()) {
-            deleteExistingPhotos(eventPhotoList);
-        }
+
+        deleteExistingPhotoOrEventUser(user, event, false, false);
         eventPhotoService.makeNewEventPhoto(user, event, newPhotoUrlList);
+    }
+
+    public void checkEventPhotoCount(Event event, int additionalCount, boolean checkMinimum) {
+        List<String> eventPhotoList = eventPhotoService.findAllEventPhotoList(event);
+        int totalSize = eventPhotoList.size() + additionalCount;
+
+        if (checkMinimum && totalSize < 30) {
+            throw new CustomException(ErrorCode.EVENT_PHOTO_IS_LESS_THAN);
+        }
+
+        if (totalSize > 130) {
+            throw new CustomException(ErrorCode.EVENT_PHOTO_EXCEED);
+        }
     }
 
 
 
     //deleteUserEventPhoto
-    public void deleteUserEventPhoto(User tmpUser, Long eventId) {
+    public void deleteUserEventPhoto(User tmpUser, Long eventId, Long tmpUserId) {
         User user = userService.findUser(tmpUser.getId());
         Event event = eventService.findEvent(eventId);
+
         if (!event.getActiveStatus()) {
             throw new CustomException(ErrorCode.INVALID_REQUEST);
         }
-        List<EventPhoto> eventPhotoList = eventPhotoService.findUserEventPhotoList(user, event);
-        if (!eventPhotoList.isEmpty()) {
-            deleteExistingPhotos(eventPhotoList);
+        if (!Objects.equals(tmpUserId, user.getId())) {
+            throw new CustomException(ErrorCode.USER_NOT_MATCH);
         }
+        deleteExistingPhotoOrEventUser(user, event, false, false);
+
     }
 
-    private void deleteExistingPhotos(List<EventPhoto> eventPhotoList) {
-        eventPhotoList.forEach(eventPhoto -> {
-            s3Service.deleteFromS3(eventPhoto.getUrl());
-        });
-        eventPhotoService.deleteEventPhoto(eventPhotoList);
+    //deleteUserEvent
+    public void deleteUserEvent(User tmpUser, Long eventId) {
+        User user = userService.findUser(tmpUser.getId());
+        Event event = eventService.findEvent(eventId);
+        if (event.getRoomMaker().equals(user)) {
+            eventPublisher.publishEvent(
+                    LeaveEvent.builder()
+                            .eventStatus(true)
+                            .eventId(event.getId().toString())
+                            .build()
+            );
+            deleteExistingPhotoOrEventUser(user, event, true, true);
+            return;
+        }
+        deleteExistingPhotoOrEventUser(user, event, true, false);
+    }
+
+    private void deleteExistingPhotoOrEventUser(User user, Event event, boolean isLeaveEvent, boolean isDeleteEvent) {
+        List<EventPhoto> eventPhotoList = eventPhotoService.findUserEventPhotoList(user, event);
+        if (!eventPhotoList.isEmpty()) {
+            eventPhotoList.forEach(eventPhoto -> {
+                s3Service.deleteFromS3(eventPhoto.getUrl());
+            });
+            eventPhotoService.deleteEventPhoto(eventPhotoList);
+            if (isLeaveEvent) {
+                eventService.deleteEventUser(user, event);
+                userService.deleteEvent(user);
+                if(isDeleteEvent){
+                    eventService.deleteEvent(event);
+                }
+            }
+        }
     }
 
 
@@ -237,7 +280,7 @@ public class AggregationFacade {
                 .build();
     }
 
-    //버튼 이벤트처리
+    //바코드 생성버튼 이벤트처리
     private void checkEventButtonStatus(Event event) {
         boolean allUsersChecked = event.getUsers().stream()
                 .allMatch(User::getCheckStatus);
@@ -248,6 +291,7 @@ public class AggregationFacade {
                         .eventId(event.getId().toString())
                         .build());
     }
+
 
     /**
      *
@@ -385,10 +429,9 @@ public class AggregationFacade {
         }
 
         String barcodeFileName = s3Service.makefileName();
-        String barcodeFilePath = s3Config.getBarcodeDir() + barcodeFileName;
 
-        File barcodeFile = barcodeService.makeNewBarcode(allDayPhotos, barcodeFilePath);
-        s3Service.putFileToS3(barcodeFile, barcodeFileName, s3Config.getBarcodeDir());
+        File barcodeFile = barcodeService.makeNewBarcode(allDayPhotos);
+        String fullPath = s3Service.putFileToS3(barcodeFile, barcodeFileName, s3Config.getBarcodeDir());
 
         // 해당 년월의 startDate,endDate 구하기
         LocalDate firstDayOfMonth = LocalDate.of(intYear, intMonth, 1);
@@ -400,7 +443,7 @@ public class AggregationFacade {
         String endDate = lastDayOfMonth.format(formatter);
 
         Barcode barcode = barcodeService.saveBarcode(
-                barcodeFilePath,
+                fullPath,
                 barcodeDateDto.getYear()+"년 "+barcodeDateDto.getMonth()+"월",
                 startDate,
                 endDate,
@@ -409,4 +452,25 @@ public class AggregationFacade {
         userBarcodeService.makeUserDayBarcode(user, barcode);
         return barcode.getId();
     }
+
+    /**
+     * UserController
+     */
+
+    //showUserEventStatus
+    public UserEventStatusDto showUserEventStatus(User tmpUser) {
+        User user = userService.findUser(tmpUser.getId());
+
+        return Optional.ofNullable(user.getEvent())
+                .filter(Event::getActiveStatus)
+                .map(event -> UserEventStatusDto.builder()
+                        .isExistEvent(true)
+                        .eventId(event.getId().toString())
+                        .build())
+                .orElseGet(() -> UserEventStatusDto.builder()
+                        .isExistEvent(false)
+                        .eventId(null)
+                        .build());
+    }
+
 }

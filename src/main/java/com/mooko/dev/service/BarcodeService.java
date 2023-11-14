@@ -5,6 +5,7 @@ import com.mooko.dev.domain.BarcodeType;
 import com.mooko.dev.domain.Event;
 import com.mooko.dev.repository.BarcodeRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +21,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class BarcodeService {
 
     //바코드 사이즈 상수화
@@ -81,12 +83,10 @@ public class BarcodeService {
     /**
      *
      * @param imageFiles    바코드를 만들 이미지 파일들
-     * @param outputPath    바코드가 최종 생성돼서 저장되어야 하는 경로
      *
-     *                      outputPath는 aggregationFacade에서 가져오기
      *
      */
-    public File makeNewBarcode(List<String> imageURLs, String outputPath) throws IOException {
+    public File makeNewBarcode(List<String> imageURLs) throws IOException {
         List<File> imageFiles = new ArrayList<>();
 
         for (String imageUrl : imageURLs) {
@@ -97,15 +97,45 @@ public class BarcodeService {
         }
 
         BufferedImage combined = combineImagesHorizontally(imageFiles, NEW_WIDTH, NEW_HEIGHT);
-        File resultBarcode = new File(outputPath);
-        ImageIO.write(combined, "jpg", resultBarcode);
+        File barcodeFile = File.createTempFile("barcode", ".jpg");
+        ImageIO.write(combined, "jpg", barcodeFile);
 
-        // 임시 파일들 삭제
-        for (File tempFile : imageFiles) {
-            tempFile.delete();
+        deleteTemporaryFilesWithRetry(imageFiles);
+
+        return barcodeFile;
+    }
+
+    public void deleteTemporaryFilesWithRetry(List<File> tempFiles) {
+        final int maxRetries = 3;
+        final long retryDelayMillis = 1000;
+
+        for (File file : tempFiles) {
+            int retryCount = 0;
+
+            while (retryCount < maxRetries) {
+                try {
+                    if (file.delete()) {
+                        log.info("파일 삭제 성공: " + file.getAbsolutePath());
+                        break;
+                    } else {
+                        retryCount++;
+                        log.warn("파일 삭제 실패, 재시도 중 (" + retryCount + "/" + maxRetries + "): " + file.getAbsolutePath());
+                        Thread.sleep(retryDelayMillis);
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    log.error("파일 삭제 중 인터럽트 발생: " + file.getAbsolutePath(), e);
+                    break;
+                } catch (SecurityException e) {
+                    log.error("파일 삭제 중 보안 예외 발생: " + file.getAbsolutePath(), e);
+                    break;
+                }
+            }
+
+            if (retryCount == maxRetries) {
+                log.error("파일 삭제 실패, 최대 재시도 횟수 도달: " + file.getAbsolutePath());
+            }
         }
-
-        return resultBarcode;
     }
 
     @Transactional

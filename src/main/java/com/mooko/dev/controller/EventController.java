@@ -24,13 +24,29 @@ public class EventController {
 
     private final AggregationFacade aggregationFacade;
 
+    //3-A. 이벤트생성
     @PostMapping("/new-event")
-    public ResponseEntity<Void> makeNewEvent(@AuthenticationPrincipal PrincipalDetails principalDetails, @RequestBody NewEventDto newEventDto){
+    public ResponseEntity<Void> makeNewEvent(
+            @AuthenticationPrincipal PrincipalDetails principalDetails,
+            @RequestBody NewEventDto newEventDto) {
         User user = principalDetails.getUser();
         aggregationFacade.makeNewEvent(user, newEventDto);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
+    //3-C. 이벤트 바코드 생성
+    @PostMapping("/{eventId}/result")
+    public ResponseEntity<BarcodeIdDto> makeNewEventBarcode(
+            @AuthenticationPrincipal PrincipalDetails principalDetails,
+            @PathVariable Long eventId
+    ) throws IOException {
+        User user = principalDetails.getUser();
+        Long barcodeId = aggregationFacade.makeNewEventBarcode(user, eventId);
+        return ResponseEntity.ok(BarcodeIdDto.builder().barcodeId(barcodeId.toString()).build());
+
+    }
+
+    //3-0. 이벤트 페이지
     @GetMapping("/{eventId}")
     public ResponseEntity<EventInfoDto> showEventPage(
             @AuthenticationPrincipal PrincipalDetails principalDetails,
@@ -40,6 +56,7 @@ public class EventController {
         return ResponseEntity.ok(eventInfoDto);
     }
 
+    //3-1. 이벤트 이름 수정
     @PutMapping("/{eventId}/event-name")
     public ResponseEntity<Void> updateEventName(
             @AuthenticationPrincipal PrincipalDetails principalDetails,
@@ -51,6 +68,7 @@ public class EventController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
+    //3-2. 이벤트 기간 수정
     @PutMapping("/{eventId}/event-date")
     public ResponseEntity<Void> updateEventDate(
             @AuthenticationPrincipal PrincipalDetails principalDetails,
@@ -62,19 +80,7 @@ public class EventController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-
-    @PostMapping("/{eventId}/result")
-    public ResponseEntity<BarcodeIdDto> makeNewBarcode(
-            @AuthenticationPrincipal PrincipalDetails principalDetails,
-            @PathVariable Long eventId
-    ) throws IOException {
-        User user = principalDetails.getUser();
-        Long barcodeId = aggregationFacade.makeNewBarcode(user, eventId);
-        return ResponseEntity.ok(BarcodeIdDto.builder().barcodeId(barcodeId.toString()).build());
-
-    }
-
-
+    //3-4. 이벤트 사진 등록/수정
     @PostMapping("/{eventId}")
     public ResponseEntity<Void> updateUserEventPhoto(
             @AuthenticationPrincipal PrincipalDetails principalDetails,
@@ -87,14 +93,27 @@ public class EventController {
     }
 
 
-    @DeleteMapping("/{eventId}/image-list")
+    //3-5. 이벤트 사진 리스트 삭제
+    @DeleteMapping("/{eventId}/{userId}/image-list")
     public ResponseEntity<Void> deleteUserEventPhoto(
             @AuthenticationPrincipal PrincipalDetails principalDetails,
+            @PathVariable Long userId,
             @PathVariable Long eventId
     )
     {
         User user = principalDetails.getUser();
-        aggregationFacade.deleteUserEventPhoto(user, eventId);
+        aggregationFacade.deleteUserEventPhoto(user, eventId, userId);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    //3-6. 이벤트 나가기
+    @DeleteMapping("/{eventId}")
+    public ResponseEntity<Void> deleteUserEvent(
+            @AuthenticationPrincipal PrincipalDetails principalDetails,
+            @PathVariable Long eventId
+    ) {
+        User user = principalDetails.getUser();
+        aggregationFacade.deleteUserEvent(user, eventId);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

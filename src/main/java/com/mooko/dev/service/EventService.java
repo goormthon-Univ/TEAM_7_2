@@ -1,5 +1,6 @@
 package com.mooko.dev.service;
 
+import com.mooko.dev.domain.Barcode;
 import com.mooko.dev.domain.Event;
 import com.mooko.dev.domain.User;
 import com.mooko.dev.dto.event.req.NewEventDto;
@@ -12,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -54,8 +54,28 @@ public class EventService {
     }
 
     @Transactional
-    public void addUser(User user, Event event) {
+    public void addEventUser(User user, Event event) {
         event.getUsers().add(user);
         eventRepository.save(event);
+    }
+
+    @Transactional
+    public void addBarcode(Event event, Barcode barcode) {
+        event.updateBarcode(barcode);
+        eventRepository.save(event);
+    }
+
+    @Transactional
+    public void deleteEventUser(User user, Event event) {
+        if (event.getUsers().removeIf(u -> u.equals(user))) {
+            eventRepository.save(event);
+        } else {
+            throw new CustomException(ErrorCode.USER_NOT_FOUND);
+        }
+    }
+
+    @Transactional
+    public void deleteEvent(Event event) {
+        eventRepository.delete(event);
     }
 }

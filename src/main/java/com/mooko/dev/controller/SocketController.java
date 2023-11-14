@@ -16,6 +16,8 @@ public class SocketController {
     private final SimpMessagingTemplate simpMessagingTemplate;
     private final AggregationFacade aggregationFacade;
 
+
+    //3-3. 사진 업로드 완료 버튼
     @MessageMapping("/check/{eventId}")
     public void updateUserEventCheckStatus(@DestinationVariable Long eventId, @RequestBody UserEventCheckStatusDto userEventCheckStatusDto) {
         UserEventCheckStatusDto messageBody = aggregationFacade.updateUserEventCheckStatus(userEventCheckStatusDto, eventId);
