@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -61,36 +62,26 @@ public class AggregationFacade {
     public EventInfoDto showEventPage(User tmpUser, Long eventId) {
         User user = userService.findUser(tmpUser.getId());
         Event event = eventService.findEvent(eventId);
-        if(event.getUsers().stream().noneMatch(existingUser -> existingUser.equals(user))){
+
+        // 이벤트에 사용자 등록 여부 확인 및 등록
+        if (event.getUsers().stream().noneMatch(existingUser -> existingUser.equals(user))) {
             eventService.addUser(user, event);
             userService.addEvent(user, event);
         }
 
-        List<String> profilImgeUrlList = event.getUsers().stream().map(User::getProfileUrl).toList();
+        List<String> profileImageUrlList = event.getUsers().stream()
+                .map(User::getProfileUrl)
+                .collect(Collectors.toList());
+
         boolean isRoomMaker = user.equals(event.getRoomMaker());
 
         List<UserInfoDto> userInfoList = event.getUsers().stream()
-                .map(eventUser -> {
-                    List<EventPhoto> eventPhotoList = eventPhotoService.findUserEventPhotoList(eventUser, event);
-                    List<String> evnetPhotoUrlList = eventPhotoList.stream().map(EventPhoto::getUrl).toList();
-
-
-                    if (evnetPhotoUrlList.isEmpty()) {
-                        return null;
-                    }
-
-                    return UserInfoDto.builder()
-                            .userId(eventUser.getId().toString())
-                            .nickname(eventUser.getNickname())
-                            .imageUrlList(evnetPhotoUrlList)
-                            .checkStatus(eventUser.getCheckStatus())
-                            .imageCount(evnetPhotoUrlList.size())
-                            .build();
-                })
-                .toList();
+                .map(eventUser -> createUserInfoDto(eventUser, event))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
 
         return EventInfoDto.builder()
-                .profileImgUrlList(profilImgeUrlList)
+                .profileImgUrlList(profileImageUrlList)
                 .isRoomMaker(isRoomMaker)
                 .eventName(event.getTitle())
                 .startDate(event.getStartDate())
@@ -98,6 +89,26 @@ public class AggregationFacade {
                 .userInfo(userInfoList)
                 .build();
     }
+
+    private UserInfoDto createUserInfoDto(User eventUser, Event event) {
+        List<EventPhoto> eventPhotoList = eventPhotoService.findUserEventPhotoList(eventUser, event);
+        List<String> eventPhotoUrlList = eventPhotoList.stream()
+                .map(EventPhoto::getUrl)
+                .collect(Collectors.toList());
+
+        if (eventPhotoUrlList.isEmpty()) {
+            return null;
+        }
+
+        return UserInfoDto.builder()
+                .userId(eventUser.getId().toString())
+                .nickname(eventUser.getNickname())
+                .imageUrlList(eventPhotoUrlList)
+                .checkStatus(eventUser.getCheckStatus())
+                .imageCount(eventPhotoUrlList.size())
+                .build();
+    }
+
 
 
     //updateEventName
@@ -123,6 +134,7 @@ public class AggregationFacade {
         Event event = eventService.findEvent(eventId);
         checkUserRoomMaker(user, event);
         List<String> eventPhotoList = eventPhotoService.findAllEventPhotoList(event);
+        checkEventPhotoCount(event, 0, true);
 
         String barcodeFileName = s3Service.makefileName();
 
@@ -149,24 +161,6 @@ public class AggregationFacade {
     }
 
 
-    //showUserEventStatus
-    public UserEventStatusDto showUserEventStatus(User tmpUser) {
-        User user = userService.findUser(tmpUser.getId());
-
-        return Optional.ofNullable(user.getEvent())
-                .filter(Event::getActiveStatus)
-                .map(event -> UserEventStatusDto.builder()
-                        .isExistEvent(true)
-                        .eventId(event.getId().toString())
-                        .build())
-                .orElseGet(() -> UserEventStatusDto.builder()
-                        .isExistEvent(false)
-                        .eventId(null)
-                        .build());
-    }
-
-
-
     //updateUserEventPhoto
     public void updateUserEventPhoto(User tmpUser, Long eventId, List<File> newPhotoList) {
         User user = userService.findUser(tmpUser.getId());
@@ -174,6 +168,10 @@ public class AggregationFacade {
         if (!event.getActiveStatus()) {
             throw new CustomException(ErrorCode.INVALID_REQUEST);
         }
+        checkEventPhotoCount(event, newPhotoList.size(), false);
+        List<EventPhoto> userEventPhotoList = eventPhotoService.findUserEventPhotoList(user, event);
+        userEventPhotoList.forEach(eventPhoto -> s3Service.deleteFromS3(eventPhoto.getUrl()));
+        eventPhotoService.deleteEventPhoto(userEventPhotoList);
 
         List<String> newPhotoUrlList = newPhotoList.parallelStream()
                 .map(newPhoto -> {
@@ -186,6 +184,19 @@ public class AggregationFacade {
             deleteExistingPhotos(eventPhotoList);
         }
         eventPhotoService.makeNewEventPhoto(user, event, newPhotoUrlList);
+    }
+
+    public void checkEventPhotoCount(Event event, int additionalCount, boolean checkMinimum) {
+        List<String> eventPhotoList = eventPhotoService.findAllEventPhotoList(event);
+        int totalSize = eventPhotoList.size() + additionalCount;
+
+        if (checkMinimum && totalSize < 30) {
+            throw new CustomException(ErrorCode.EVENT_PHOTO_IS_LESS_THAN);
+        }
+
+        if (totalSize > 130) {
+            throw new CustomException(ErrorCode.EVENT_PHOTO_EXCEED);
+        }
     }
 
 
@@ -237,6 +248,29 @@ public class AggregationFacade {
                 ButtonEvent.builder()
                         .buttonStatus(allUsersChecked)
                         .eventId(event.getId().toString())
+                        .build());
+    }
+
+
+
+
+    /**
+     * UserController
+     */
+
+    //showUserEventStatus
+    public UserEventStatusDto showUserEventStatus(User tmpUser) {
+        User user = userService.findUser(tmpUser.getId());
+
+        return Optional.ofNullable(user.getEvent())
+                .filter(Event::getActiveStatus)
+                .map(event -> UserEventStatusDto.builder()
+                        .isExistEvent(true)
+                        .eventId(event.getId().toString())
+                        .build())
+                .orElseGet(() -> UserEventStatusDto.builder()
+                        .isExistEvent(false)
+                        .eventId(null)
                         .build());
     }
 

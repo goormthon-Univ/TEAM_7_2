@@ -46,6 +46,7 @@ public class EventController {
 
     }
 
+    //3-0. 이벤트 페이지
     @GetMapping("/{eventId}")
     public ResponseEntity<EventInfoDto> showEventPage(
             @AuthenticationPrincipal PrincipalDetails principalDetails,
@@ -55,6 +56,7 @@ public class EventController {
         return ResponseEntity.ok(eventInfoDto);
     }
 
+    //3-1. 이벤트 이름 수정
     @PutMapping("/{eventId}/event-name")
     public ResponseEntity<Void> updateEventName(
             @AuthenticationPrincipal PrincipalDetails principalDetails,
@@ -66,6 +68,7 @@ public class EventController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
+    //3-2. 이벤트 기간 수정
     @PutMapping("/{eventId}/event-date")
     public ResponseEntity<Void> updateEventDate(
             @AuthenticationPrincipal PrincipalDetails principalDetails,
@@ -77,10 +80,7 @@ public class EventController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-
-
-
-
+    //3-4. 이벤트 사진 등록/수정
     @PostMapping("/{eventId}")
     public ResponseEntity<Void> updateUserEventPhoto(
             @AuthenticationPrincipal PrincipalDetails principalDetails,
