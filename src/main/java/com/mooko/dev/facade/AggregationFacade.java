@@ -134,6 +134,7 @@ public class AggregationFacade {
         Event event = eventService.findEvent(eventId);
         checkUserRoomMaker(user, event);
         List<String> eventPhotoList = eventPhotoService.findAllEventPhotoList(event);
+        checkEventPhotoCountInMakeBarcode(event);
 
         String barcodeFileName = s3Service.makefileName();
 
@@ -159,7 +160,17 @@ public class AggregationFacade {
         }
     }
 
+    public void checkEventPhotoCountInMakeBarcode(Event event) {
+        int size = eventPhotoService.findAllEventPhotoList(event).size();
+        if (size < 30) {
+            throw new CustomException(ErrorCode.EVENT_PHOTO_IS_LESS_THAN);
+        }
 
+        if (size > 130) {
+            throw new CustomException(ErrorCode.EVENT_PHOTO_EXCEED);
+
+        }
+    }
 
 
     //updateUserEventPhoto
