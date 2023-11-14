@@ -54,13 +54,8 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    @GetMapping("/for-test/{userId}")
-    public void test(@PathVariable Long userId){
-        User user = aggregationFacade.test(userId);
-        PrincipalDetails principalDetails = new PrincipalDetails(user);
-        Authentication authentication = new UsernamePasswordAuthenticationToken(
-                principalDetails, null, authoritiesMapper.mapAuthorities(principalDetails.getAuthorities()));
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+    @GetMapping("/for-test")
+    public void test(){
         Date nowDate = new Date();
 
         String accessToken1 = JWT.create()
