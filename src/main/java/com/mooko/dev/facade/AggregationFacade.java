@@ -49,7 +49,6 @@ public class AggregationFacade {
     }
 
     private void checkUserAlreadyInEvent(User user) {
-
         Optional.ofNullable(user.getEvent())
                 .filter(Event::getActiveStatus)
                 .ifPresent(event -> {
