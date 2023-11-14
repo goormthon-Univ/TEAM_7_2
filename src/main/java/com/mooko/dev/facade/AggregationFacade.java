@@ -254,7 +254,7 @@ public class AggregationFacade {
                 .build();
     }
 
-    //버튼 이벤트처리
+    //바코드 생성버튼 이벤트처리
     private void checkEventButtonStatus(Event event) {
         boolean allUsersChecked = event.getUsers().stream()
                 .allMatch(User::getCheckStatus);
