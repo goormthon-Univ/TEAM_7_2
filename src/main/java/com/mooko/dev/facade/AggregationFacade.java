@@ -117,21 +117,20 @@ public class AggregationFacade {
         eventService.updateEventDate(updateEventDateDto, event);
     }
 
-    //makeNewBarcode
-    public Long makeNewBarcode(User tmpUser, Long eventId) throws IOException {
+    //makeNewEventBarcode
+    public Long makeNewEventBarcode(User tmpUser, Long eventId) throws IOException {
         User user = userService.findUser(tmpUser.getId());
         Event event = eventService.findEvent(eventId);
         checkUserRoomMaker(user, event);
         List<String> eventPhotoList = eventPhotoService.findAllEventPhotoList(event);
 
         String barcodeFileName = s3Service.makefileName();
-        String barcodeFilePath = s3Config.getBarcodeDir() + barcodeFileName;
 
-        File barcodeFile = barcodeService.makeNewBarcode(eventPhotoList, barcodeFilePath);
-        s3Service.putFileToS3(barcodeFile, barcodeFileName, s3Config.getBarcodeDir());
+        File barcodeFile = barcodeService.makeNewBarcode(eventPhotoList);
+        String fullPath = s3Service.putFileToS3(barcodeFile, barcodeFileName, s3Config.getBarcodeDir());
 
         Barcode barcode = barcodeService.saveBarcode(
-                barcodeFilePath,
+                fullPath,
                 event.getTitle(),
                 event.getStartDate(),
                 event.getEndDate(),

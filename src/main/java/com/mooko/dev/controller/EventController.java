@@ -36,12 +36,12 @@ public class EventController {
 
     //3-C. 이벤트 바코드 생성
     @PostMapping("/{eventId}/result")
-    public ResponseEntity<BarcodeIdDto> makeNewBarcode(
+    public ResponseEntity<BarcodeIdDto> makeNewEventBarcode(
             @AuthenticationPrincipal PrincipalDetails principalDetails,
             @PathVariable Long eventId
     ) throws IOException {
         User user = principalDetails.getUser();
-        Long barcodeId = aggregationFacade.makeNewBarcode(user, eventId);
+        Long barcodeId = aggregationFacade.makeNewEventBarcode(user, eventId);
         return ResponseEntity.ok(BarcodeIdDto.builder().barcodeId(barcodeId.toString()).build());
 
     }

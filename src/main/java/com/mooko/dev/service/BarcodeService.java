@@ -86,7 +86,7 @@ public class BarcodeService {
      *                      outputPath는 aggregationFacade에서 가져오기
      *
      */
-    public File makeNewBarcode(List<String> imageURLs, String outputPath) throws IOException {
+    public File makeNewBarcode(List<String> imageURLs) throws IOException {
         List<File> imageFiles = new ArrayList<>();
 
         for (String imageUrl : imageURLs) {
@@ -97,16 +97,17 @@ public class BarcodeService {
         }
 
         BufferedImage combined = combineImagesHorizontally(imageFiles, NEW_WIDTH, NEW_HEIGHT);
-        File resultBarcode = new File(outputPath);
-        ImageIO.write(combined, "jpg", resultBarcode);
+        File barcodeFile = File.createTempFile("barcode", ".jpg");
+        ImageIO.write(combined, "jpg", barcodeFile);
 
         // 임시 파일들 삭제
         for (File tempFile : imageFiles) {
             tempFile.delete();
         }
 
-        return resultBarcode;
+        return barcodeFile;
     }
+
 
     @Transactional
     public Barcode saveBarcode(String barcodeFilePath, String title, String startDate, String endDate, BarcodeType barcodeType, Event event) {

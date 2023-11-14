@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.File;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -24,8 +25,12 @@ public class EventPhotoService {
 
     public List<String> findAllEventPhotoList(Event event) {
         List<EventPhoto> eventPhotos = eventPhotoRepository.findByEvent(event);
-        return eventPhotos.stream().map(EventPhoto::getUrl).toList();
+        return eventPhotos.stream()
+                .sorted(Comparator.comparing(EventPhoto::getCreatedAt))
+                .map(EventPhoto::getUrl)
+                .toList();
     }
+
 
 
     @Transactional
