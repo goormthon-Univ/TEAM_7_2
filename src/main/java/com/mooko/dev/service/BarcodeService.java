@@ -14,6 +14,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -31,34 +32,21 @@ public class BarcodeService {
     private final BarcodeRepository barcodeRepository;
 
     public BufferedImage resizeImage(BufferedImage original, int targetWidth, int targetHeight) {
-        int originalWidth = original.getWidth();
-        int originalHeight = original.getHeight();
-        double aspectRatio = (double) originalWidth / originalHeight;
-
-        int newWidth, newHeight;
-
-        if (originalHeight > targetHeight) {
-            newHeight = targetHeight;
-            newWidth = (int) (newHeight * aspectRatio);
-        } else {
-            newWidth = targetWidth;
-            newHeight = (int) (newWidth / aspectRatio);
-        }
-
-        BufferedImage resized = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB);
+        BufferedImage resized = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_RGB);
         Graphics2D g = resized.createGraphics();
-        g.drawImage(original, 0, 0, newWidth, newHeight, null);
+        g.drawImage(original, 0, 0, targetWidth, targetHeight, null);
         g.dispose();
         return resized;
     }
 
 
-    public BufferedImage combineImagesHorizontally(List<File> imageFiles, int totalWidth, int totalHeight) throws IOException {
-        int singleImageWidth = totalWidth / imageFiles.size();
+
+    public BufferedImage combineImagesHorizontally(List<String> imageURLs, int totalWidth, int totalHeight) throws IOException {
+        int singleImageWidth = totalWidth / imageURLs.size();
         List<BufferedImage> resizedImages = new ArrayList<>();
 
-        for (File imageFile : imageFiles) {
-            BufferedImage original = ImageIO.read(imageFile);
+        for (String imageURL : imageURLs) {
+            BufferedImage original = ImageIO.read(new URL(imageURL));
             BufferedImage resized = resizeImage(original, singleImageWidth, totalHeight);
             resizedImages.add(resized);
         }
@@ -78,6 +66,7 @@ public class BarcodeService {
 
 
 
+
     //바코드를 만들때는 이 함수를 사용하기
 
     /**
@@ -87,56 +76,17 @@ public class BarcodeService {
      *
      */
     public File makeNewBarcode(List<String> imageURLs) throws IOException {
-        List<File> imageFiles = new ArrayList<>();
+        log.info("imageURLs size = {}", imageURLs.size());
 
-        for (String imageUrl : imageURLs) {
-            BufferedImage image = ImageIO.read(new URL(imageUrl));
-            File tempFile = File.createTempFile("image", ".jpg");
-            ImageIO.write(image, "jpg", tempFile);
-            imageFiles.add(tempFile);
-        }
-
-        BufferedImage combined = combineImagesHorizontally(imageFiles, NEW_WIDTH, NEW_HEIGHT);
+        BufferedImage combined = combineImagesHorizontally(imageURLs, NEW_WIDTH, NEW_HEIGHT);
         File barcodeFile = File.createTempFile("barcode", ".jpg");
         ImageIO.write(combined, "jpg", barcodeFile);
 
-        deleteTemporaryFilesWithRetry(imageFiles);
 
         return barcodeFile;
     }
 
-    public void deleteTemporaryFilesWithRetry(List<File> tempFiles) {
-        final int maxRetries = 3;
-        final long retryDelayMillis = 1000;
 
-        for (File file : tempFiles) {
-            int retryCount = 0;
-
-            while (retryCount < maxRetries) {
-                try {
-                    if (file.delete()) {
-                        log.info("파일 삭제 성공: " + file.getAbsolutePath());
-                        break;
-                    } else {
-                        retryCount++;
-                        log.warn("파일 삭제 실패, 재시도 중 (" + retryCount + "/" + maxRetries + "): " + file.getAbsolutePath());
-                        Thread.sleep(retryDelayMillis);
-                    }
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    log.error("파일 삭제 중 인터럽트 발생: " + file.getAbsolutePath(), e);
-                    break;
-                } catch (SecurityException e) {
-                    log.error("파일 삭제 중 보안 예외 발생: " + file.getAbsolutePath(), e);
-                    break;
-                }
-            }
-
-            if (retryCount == maxRetries) {
-                log.error("파일 삭제 실패, 최대 재시도 횟수 도달: " + file.getAbsolutePath());
-            }
-        }
-    }
 
     @Transactional
     public Barcode saveBarcode(String barcodeFilePath, String title, String startDate, String endDate, BarcodeType barcodeType, Event event) {
