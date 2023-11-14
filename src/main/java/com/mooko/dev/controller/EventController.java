@@ -24,11 +24,26 @@ public class EventController {
 
     private final AggregationFacade aggregationFacade;
 
+    //3-A. 이벤트생성
     @PostMapping("/new-event")
-    public ResponseEntity<Void> makeNewEvent(@AuthenticationPrincipal PrincipalDetails principalDetails, @RequestBody NewEventDto newEventDto){
+    public ResponseEntity<Void> makeNewEvent(
+            @AuthenticationPrincipal PrincipalDetails principalDetails,
+            @RequestBody NewEventDto newEventDto) {
         User user = principalDetails.getUser();
         aggregationFacade.makeNewEvent(user, newEventDto);
         return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    //3-C. 이벤트 바코드 생성
+    @PostMapping("/{eventId}/result")
+    public ResponseEntity<BarcodeIdDto> makeNewEventBarcode(
+            @AuthenticationPrincipal PrincipalDetails principalDetails,
+            @PathVariable Long eventId
+    ) throws IOException {
+        User user = principalDetails.getUser();
+        Long barcodeId = aggregationFacade.makeNewEventBarcode(user, eventId);
+        return ResponseEntity.ok(BarcodeIdDto.builder().barcodeId(barcodeId.toString()).build());
+
     }
 
     @GetMapping("/{eventId}")
@@ -63,16 +78,7 @@ public class EventController {
     }
 
 
-    @PostMapping("/{eventId}/result")
-    public ResponseEntity<BarcodeIdDto> makeNewBarcode(
-            @AuthenticationPrincipal PrincipalDetails principalDetails,
-            @PathVariable Long eventId
-    ) throws IOException {
-        User user = principalDetails.getUser();
-        Long barcodeId = aggregationFacade.makeNewBarcode(user, eventId);
-        return ResponseEntity.ok(BarcodeIdDto.builder().barcodeId(barcodeId.toString()).build());
 
-    }
 
 
     @PostMapping("/{eventId}")

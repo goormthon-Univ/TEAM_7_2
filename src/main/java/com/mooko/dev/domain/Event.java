@@ -56,4 +56,8 @@ public class Event {
         this.activeStatus = activeStatus;
     }
 
+    public void updateBarcode(Barcode barcode) {
+        this.barcode = barcode;
+    }
+
 }

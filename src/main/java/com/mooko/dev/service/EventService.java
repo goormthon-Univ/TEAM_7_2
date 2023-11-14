@@ -1,5 +1,6 @@
 package com.mooko.dev.service;
 
+import com.mooko.dev.domain.Barcode;
 import com.mooko.dev.domain.Event;
 import com.mooko.dev.domain.User;
 import com.mooko.dev.dto.event.req.NewEventDto;
@@ -56,6 +57,12 @@ public class EventService {
     @Transactional
     public void addUser(User user, Event event) {
         event.getUsers().add(user);
+        eventRepository.save(event);
+    }
+
+    @Transactional
+    public void addBarcode(Event event, Barcode barcode) {
+        event.updateBarcode(barcode);
         eventRepository.save(event);
     }
 }

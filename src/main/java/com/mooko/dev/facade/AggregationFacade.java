@@ -43,13 +43,15 @@ public class AggregationFacade {
     //makeNewEvent
     public void makeNewEvent(User tempUser, NewEventDto newEventDto) {
         User user = userService.findUser(tempUser.getId());
-        checkUserEventStatus(user);
-        eventService.makeNewEvent(newEventDto, user);
+        checkUserAlreadyInEvent(user);
+        Event event = eventService.makeNewEvent(newEventDto, user);
+        userService.addEvent(user, event);
     }
 
-    private void checkUserEventStatus(User user) {
+    private void checkUserAlreadyInEvent(User user) {
         Optional.ofNullable(user.getEvent())
-                .ifPresent(e -> {
+                .filter(Event::getActiveStatus)
+                .ifPresent(event -> {
                     throw new CustomException(ErrorCode.USER_ALREADY_HAS_EVENT);
                 });
     }
@@ -115,27 +117,27 @@ public class AggregationFacade {
         eventService.updateEventDate(updateEventDateDto, event);
     }
 
-    //makeNewBarcode
-    public Long makeNewBarcode(User tmpUser, Long eventId) throws IOException {
+    //makeNewEventBarcode
+    public Long makeNewEventBarcode(User tmpUser, Long eventId) throws IOException {
         User user = userService.findUser(tmpUser.getId());
         Event event = eventService.findEvent(eventId);
         checkUserRoomMaker(user, event);
         List<String> eventPhotoList = eventPhotoService.findAllEventPhotoList(event);
 
         String barcodeFileName = s3Service.makefileName();
-        String barcodeFilePath = s3Config.getBarcodeDir() + barcodeFileName;
 
-        File barcodeFile = barcodeService.makeNewBarcode(eventPhotoList, barcodeFilePath);
-        s3Service.putFileToS3(barcodeFile, barcodeFileName, s3Config.getBarcodeDir());
+        File barcodeFile = barcodeService.makeNewBarcode(eventPhotoList);
+        String fullPath = s3Service.putFileToS3(barcodeFile, barcodeFileName, s3Config.getBarcodeDir());
 
         Barcode barcode = barcodeService.saveBarcode(
-                barcodeFilePath,
+                fullPath,
                 event.getTitle(),
                 event.getStartDate(),
                 event.getEndDate(),
                 BarcodeType.EVENT,
                 event);
         userBarcodeService.makeUserBarcode(event.getUsers(), barcode);
+        eventService.addBarcode(event, barcode);
         eventService.updateEventStatus(event, false);
         return barcode.getId();
     }
@@ -150,18 +152,19 @@ public class AggregationFacade {
     //showUserEventStatus
     public UserEventStatusDto showUserEventStatus(User tmpUser) {
         User user = userService.findUser(tmpUser.getId());
-        if (user.getEvent() != null) {
-            return UserEventStatusDto.builder()
-                    .isExistEvent(true)
-                    .eventId(user.getEvent().getId().toString())
-                    .build();
-        }
 
-        return UserEventStatusDto.builder()
-                .isExistEvent(false)
-                .eventId(null)
-                .build();
+        return Optional.ofNullable(user.getEvent())
+                .filter(Event::getActiveStatus)
+                .map(event -> UserEventStatusDto.builder()
+                        .isExistEvent(true)
+                        .eventId(event.getId().toString())
+                        .build())
+                .orElseGet(() -> UserEventStatusDto.builder()
+                        .isExistEvent(false)
+                        .eventId(null)
+                        .build());
     }
+
 
 
     //updateUserEventPhoto
