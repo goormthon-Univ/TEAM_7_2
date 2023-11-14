@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -49,14 +50,11 @@ public class AggregationFacade {
 
     private void checkUserAlreadyInEvent(User user) {
 
-        if(user.getEvent() == null){
-            return;
-        }
-
-        if (user.getEvent().getActiveStatus()){
-            throw new CustomException(ErrorCode.USER_ALREADY_HAS_EVENT);
-        }
-
+        Optional.ofNullable(user.getEvent())
+                .filter(Event::getActiveStatus)
+                .ifPresent(event -> {
+                    throw new CustomException(ErrorCode.USER_ALREADY_HAS_EVENT);
+                });
     }
 
 
@@ -156,18 +154,18 @@ public class AggregationFacade {
     public UserEventStatusDto showUserEventStatus(User tmpUser) {
         User user = userService.findUser(tmpUser.getId());
 
-        if (user.getEvent().getActiveStatus()) {
-            return UserEventStatusDto.builder()
-                    .isExistEvent(true)
-                    .eventId(user.getEvent().getId().toString())
-                    .build();
-        }
-
-        return UserEventStatusDto.builder()
-                .isExistEvent(false)
-                .eventId(null)
-                .build();
+        return Optional.ofNullable(user.getEvent())
+                .filter(Event::getActiveStatus)
+                .map(event -> UserEventStatusDto.builder()
+                        .isExistEvent(true)
+                        .eventId(event.getId().toString())
+                        .build())
+                .orElseGet(() -> UserEventStatusDto.builder()
+                        .isExistEvent(false)
+                        .eventId(null)
+                        .build());
     }
+
 
 
     //updateUserEventPhoto
