@@ -42,4 +42,8 @@ public class User {
     public void updateCheckStatus(Boolean checkStatus) {
         this.checkStatus = checkStatus;
     }
+
+    public void updateRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
+    }
 }
