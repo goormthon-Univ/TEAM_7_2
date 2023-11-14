@@ -2,6 +2,9 @@ package com.mooko.dev.facade;
 
 import com.mooko.dev.configuration.S3Config;
 import com.mooko.dev.domain.*;
+import com.mooko.dev.dto.barcode.res.BarcodeInfoDto;
+import com.mooko.dev.dto.barcode.res.ImageInfoDto;
+import com.mooko.dev.dto.barcode.res.TicketDto;
 import com.mooko.dev.dto.day.req.BarcodeDateDto;
 import com.mooko.dev.dto.day.res.CalendarDto;
 import com.mooko.dev.dto.day.res.DayDto;
@@ -20,6 +23,7 @@ import com.mooko.dev.event.LeaveEvent;
 import com.mooko.dev.exception.custom.CustomException;
 import com.mooko.dev.exception.custom.ErrorCode;
 import com.mooko.dev.service.*;
+import java.awt.Image;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
@@ -534,5 +538,78 @@ public class AggregationFacade {
         }
         user.updateUserInfo(newProfileImgUrl,userNewInfoDto.getNickname(), userNewInfoDto.getBirth(),
                 userNewInfoDto.getGender(), false);
+    }
+
+    /**
+     * BarcodeController
+     */
+
+    //showBarcodeInfo(moodCloud)
+    public List<BarcodeInfoDto> showBarcodeInfo(User tmpUser){
+        User user = userService.findUser(tmpUser.getId());
+
+        List<UserBarcode> userBarcodeList = userBarcodeService.findUserBarcodeList(user);
+
+        List<BarcodeInfoDto> recentBarcodeInfo = userBarcodeList.stream()
+                .map(UserBarcode::getBarcode)
+                .sorted(Comparator.comparing(Barcode::getCreatedAt).reversed())
+                .map(barcode -> new BarcodeInfoDto(barcode.getId().toString(), barcode.getBarcodeUrl(), barcode.getTitle()))
+                .collect(Collectors.toList());
+
+        return recentBarcodeInfo;
+    }
+
+    // showTicketInfo(my-ticket/quest-ticket)
+    public TicketDto showTicketInfo(User tmpUser, Long barcodeId){
+        User user = userService.findUser(tmpUser.getId());
+        Barcode barcode = barcodeService.findBarcode(barcodeId);
+        Event event = eventService.findEventByBarcode(barcode);
+
+        int memberCnt = event.getUsers().size();
+        List<ImageInfoDto> imageInfoList = new ArrayList<>();;
+
+        if (barcode.getType()==BarcodeType.DAY){
+            LocalDate startLocalDate = LocalDate.parse(barcode.getStartDate());
+            LocalDate endLocalDate = LocalDate.parse(barcode.getEndDate());
+            while (!startLocalDate.isAfter(endLocalDate)) {
+                startLocalDate = startLocalDate.plusDays(1);
+
+                int year = startLocalDate.getYear();
+                int month = startLocalDate.getMonthValue();
+                int day = startLocalDate.getDayOfMonth();
+
+                Day currentDay = dayService.findDayId(user,year,month,day);
+
+                List<String> dayPhotoUrlList = dayPhotoService.findDayPhotoUrlList(currentDay);
+
+                ImageInfoDto imageInfoDto = ImageInfoDto
+                        .builder()
+                        .date(startLocalDate.toString())
+                        .imageList(dayPhotoUrlList)
+                        .build();
+                imageInfoList.add(imageInfoDto);
+            }
+        } else {
+            List<String> eventPhotoUrlList = eventPhotoService.findAllEventPhotoList(event);
+            ImageInfoDto imageInfoDto = ImageInfoDto
+                    .builder()
+                    .date(null)
+                    .imageList(eventPhotoUrlList)
+                    .build();
+            imageInfoList.add(imageInfoDto);
+        }
+
+        TicketDto ticketDto = TicketDto
+                .builder()
+                .nickname(user.getNickname())
+                .title(barcode.getTitle())
+                .barcodeUrl(barcode.getBarcodeUrl())
+                .startDate(barcode.getStartDate())
+                .endDate(barcode.getEndDate())
+                .createdAt(barcode.getCreatedAt().toString())
+                .memberCnt(memberCnt)
+                .imageInfoList(imageInfoList)
+                .build();
+        return ticketDto;
     }
 }

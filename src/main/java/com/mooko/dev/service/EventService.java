@@ -80,4 +80,8 @@ public class EventService {
     public void deleteEvent(Event event) {
         eventRepository.delete(event);
     }
+
+    public Event findEventByBarcode(Barcode barcode){
+        return eventRepository.findByBarcode(barcode);
+    }
 }
