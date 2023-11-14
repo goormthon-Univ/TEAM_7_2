@@ -29,6 +29,8 @@ public class EventService {
         Event event = Event.builder()
                 .title(newEventDto.getTitle())
                 .activeStatus(true)
+                .startDate(newEventDto.getStartDate())
+                .endDate(newEventDto.getEndDate())
                 .roomMaker(user)
                 .createdAt(LocalDateTime.now())
                 .build();
