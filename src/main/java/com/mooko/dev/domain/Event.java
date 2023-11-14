@@ -38,6 +38,7 @@ public class Event {
     @JoinColumn(name = "barcode_id")
     private Barcode barcode;
 
+    @Builder.Default
     @OneToMany(mappedBy = "event", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<User> users = new ArrayList<>();
 
