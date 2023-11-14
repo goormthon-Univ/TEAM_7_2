@@ -56,6 +56,7 @@ public class EventController {
         return ResponseEntity.ok(eventInfoDto);
     }
 
+    //3-1. 이벤트 이름 수정
     @PutMapping("/{eventId}/event-name")
     public ResponseEntity<Void> updateEventName(
             @AuthenticationPrincipal PrincipalDetails principalDetails,
