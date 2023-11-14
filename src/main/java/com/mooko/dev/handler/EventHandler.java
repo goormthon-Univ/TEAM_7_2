@@ -16,21 +16,13 @@ public class EventHandler {
 
     @EventListener(ButtonEvent.class)
     public void buttonEventHandler(ButtonEvent buttonEvent) {
-        simpMessagingTemplate.convertAndSend("/subscribe/button/" + buttonEvent.getEventId(),
-                ButtonEvent.builder()
-                        .eventId(buttonEvent.getEventId())
-                        .buttonStatus(buttonEvent.isButtonStatus())
-                        .build()
-                );
+        simpMessagingTemplate.convertAndSend("/subscribe/button/"
+                        + buttonEvent.getEventId(), buttonEvent);
     }
 
     @EventListener(LeaveEvent.class)
     public void leaveEventHandler(LeaveEvent leaveEvent) {
-        simpMessagingTemplate.convertAndSend("/subscribe/leave-event/" + leaveEvent.getEventId(),
-                LeaveEvent.builder()
-                        .eventId(leaveEvent.getEventId())
-                        .eventStatus(leaveEvent.isEventStatus())
-                        .build()
-                );
+        simpMessagingTemplate.convertAndSend("/subscribe/leave-event/"
+                        + leaveEvent.getEventId(), leaveEvent);
     }
 }

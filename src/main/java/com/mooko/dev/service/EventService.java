@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -55,7 +54,7 @@ public class EventService {
     }
 
     @Transactional
-    public void addUser(User user, Event event) {
+    public void addEventUser(User user, Event event) {
         event.getUsers().add(user);
         eventRepository.save(event);
     }
@@ -67,11 +66,16 @@ public class EventService {
     }
 
     @Transactional
-    public void deleteUser(User user, Event event) {
+    public void deleteEventUser(User user, Event event) {
         if (event.getUsers().removeIf(u -> u.equals(user))) {
             eventRepository.save(event);
         } else {
             throw new CustomException(ErrorCode.USER_NOT_FOUND);
         }
+    }
+
+    @Transactional
+    public void deleteEvent(Event event) {
+        eventRepository.delete(event);
     }
 }

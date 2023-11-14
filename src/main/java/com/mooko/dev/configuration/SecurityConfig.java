@@ -38,6 +38,7 @@ public class SecurityConfig {
                         sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(config -> config
                         .requestMatchers("/oauth2/authorization/kakao", "/login/oauth2/code/kakao").permitAll()
+                        .requestMatchers("/ws-check", "/ws-button", "/ws-leave-event").permitAll()
                         .anyRequest().authenticated()
                 );
 
