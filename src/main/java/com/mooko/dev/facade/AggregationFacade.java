@@ -137,6 +137,7 @@ public class AggregationFacade {
                 BarcodeType.EVENT,
                 event);
         userBarcodeService.makeUserBarcode(event.getUsers(), barcode);
+        eventService.addBarcode(event, barcode);
         eventService.updateEventStatus(event, false);
         return barcode.getId();
     }
