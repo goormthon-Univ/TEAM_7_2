@@ -303,5 +303,10 @@ public class AggregationFacade {
                         .build());
     }
 
+    //test
+    public User test(Long userId){
+        return userService.findUser(userId);
+    }
+
 
 }
