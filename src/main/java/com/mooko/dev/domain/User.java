@@ -1,6 +1,7 @@
 package com.mooko.dev.domain;
 
 import jakarta.persistence.*;
+import java.io.File;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -46,5 +47,14 @@ public class User {
 
     public void updateRefreshToken(String refreshToken) {
         this.refreshToken = refreshToken;
+    }
+
+    public void updateUserInfo(String profileUrl, String nickname,
+            String birth, String gender, Boolean modalActive){
+        this.profileUrl = profileUrl;
+        this.nickname = nickname;
+        this.birth = birth;
+        this.gender = gender;
+        this.modalActive = modalActive;
     }
 }
