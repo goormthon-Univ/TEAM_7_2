@@ -170,6 +170,7 @@ public class AggregationFacade {
         }
         checkEventPhotoCount(event, newPhotoList.size(), false);
         List<EventPhoto> userEventPhotoList = eventPhotoService.findUserEventPhotoList(user, event);
+        userEventPhotoList.forEach(eventPhoto -> s3Service.deleteFromS3(eventPhoto.getUrl()));
         eventPhotoService.deleteEventPhoto(userEventPhotoList);
 
         List<String> newPhotoUrlList = newPhotoList.parallelStream()
