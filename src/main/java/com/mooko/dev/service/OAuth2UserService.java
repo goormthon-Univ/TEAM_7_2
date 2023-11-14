@@ -1,22 +1,19 @@
 package com.mooko.dev.service;
-import com.mooko.dev.domain.PrincipalDetails;
 import com.mooko.dev.domain.User;
 import com.mooko.dev.oauth.CustomOAuth2user;
 import com.mooko.dev.oauth.KakaoUserInfo;
 import com.mooko.dev.repository.UserRepository;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
-import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -27,6 +24,10 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
     private final UserService userService;
     private final UserRepository userRepository;
 
+    @Value("${cloud.aws.s3.default-img}")
+    private String USER_DEFAULT_PROFILE_IMAGE;
+
+
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         OAuth2User oAuth2User = super.loadUser(userRequest);
@@ -34,31 +35,43 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
         String userNameAttributeName = userRequest.getClientRegistration().getProviderDetails().getUserInfoEndpoint().getUserNameAttributeName();
         KakaoUserInfo kakaoUserInfo = new KakaoUserInfo(attributes);
 
-        User user = getUser(kakaoUserInfo);
+        checkUser(kakaoUserInfo);
 
         return new CustomOAuth2user(
-                Collections.singleton(new SimpleGrantedAuthority(null)),
+                Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")),
                 attributes,
                 userNameAttributeName,
                 kakaoUserInfo.getId()
         );
     }
 
-    private User getUser(KakaoUserInfo kakaoUserInfo) {
+    private void checkUser(KakaoUserInfo kakaoUserInfo) {
 
         Optional<User> bySocialId = userRepository.findBySocialId(kakaoUserInfo.getId());
-        if(bySocialId.isPresent()){
-            return bySocialId.get();
+        if (bySocialId.isPresent()) {
+            return;
         }
 
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
+        String formattedDate = LocalDateTime.now().format(formatter);
+
         User user = User.builder()
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
                 .socialId(kakaoUserInfo.getId())
-                .role(Role.GUEST)
+                .createdAt(LocalDateTime.now())
+                .dateOfIssue(formattedDate)
+                .profileUrl(USER_DEFAULT_PROFILE_IMAGE)
+                .checkStatus(false)
                 .build();
 
+        /**
+         * nickname
+         * birth
+         * gender
+         * 는 추가 정보 입력할떄
+         *
+         * refreshToken은 로그인 성공하고나서 입력받기
+         */
         userService.save(user);
-        return user;
     }
+}
 

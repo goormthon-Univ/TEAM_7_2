@@ -2,7 +2,10 @@ package com.mooko.dev.configuration;
 
 import com.mooko.dev.handler.OAuth2LoginFailureHandler;
 import com.mooko.dev.handler.OAuth2LoginSuccessHandler;
+import com.mooko.dev.oauth.CustomAuthenticationEntryPoint;
+import com.mooko.dev.security.JwtFilter;
 import com.mooko.dev.service.OAuth2UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -10,18 +13,19 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
+import org.springframework.web.filter.CorsFilter;
 
 @Configuration
 @EnableMethodSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
     private final OAuth2UserService oAuth2UserService;
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
     private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
-
-    public SecurityConfig(OAuth2UserService oAuth2UserService, OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler) {
-        this.oAuth2UserService = oAuth2UserService;
-        this.oAuth2LoginSuccessHandler = oAuth2LoginSuccessHandler;
-    }
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+    private final CorsFilter corsFilter;
+    private final JwtFilter jwtFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -45,13 +49,15 @@ public class SecurityConfig {
                                 .userService(oAuth2UserService))
                 );
 
-/*        http.csrf(AbstractHttpConfigurer::disable);
-        http.authorizeHttpRequests(config -> config.anyRequest().permitAll());
-        http.oauth2Login(oauth2Configurer -> oauth2Configurer
-                .loginPage("/oauth/authorization/kakao")
-                .successHandler(oAuth2SuccessHandler)
-                .userInfoEndpoint(userInfo -> userInfo.userService(oAuth2UserService)));
+        http
+                .addFilterBefore(jwtFilter, LogoutFilter.class);
 
-        return http.build();*/
+        http
+                .exceptionHandling(config -> config.authenticationEntryPoint(customAuthenticationEntryPoint));
+
+        http
+                .addFilter(corsFilter);
+
+        return http.build();
     }
 }

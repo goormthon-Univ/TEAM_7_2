@@ -17,8 +17,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 
-import static org.springframework.http.ResponseEntity.ok;
-
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/event")
