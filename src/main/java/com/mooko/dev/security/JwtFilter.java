@@ -22,11 +22,15 @@ import java.util.List;
 @Component
 public class JwtFilter extends OncePerRequestFilter {
 
-    @Value("${jwt.secretKey}")
-    private String secretKey;
+
+
+    private final JwtUtil jwtUtil;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException{
+
+
+
         final String authorization = request.getHeader("Authorization");
 
         if(authorization == null || !authorization.startsWith("Bearer ")){
@@ -35,13 +39,13 @@ public class JwtFilter extends OncePerRequestFilter {
             return;
         }
         String token = authorization.split(" ")[1];
-        if(JwtUtil.isExpired(token, secretKey)){
+        if(jwtUtil.isExpired(token)){
             log.error("토큰이 만료되었습니다.");
             filterChain.doFilter(request, response);
             return;
         }
 
-        int userId = JwtUtil.getUserId(token, secretKey);
+        int userId = jwtUtil.getUserId(token, secretKey);
 
 
         UsernamePasswordAuthenticationToken authenticationToken =

@@ -19,10 +19,10 @@ import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 
 @Component
-public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
+public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
-    public OAuth2SuccessHandler(JwtUtil jwtUtil, UserRepository userRepository) {
+    public OAuth2LoginSuccessHandler(JwtUtil jwtUtil, UserRepository userRepository) {
         this.jwtUtil = jwtUtil;
         this.userRepository = userRepository;
     }

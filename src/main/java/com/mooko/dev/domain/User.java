@@ -26,6 +26,9 @@ public class User {
     private String socialId;
     private LocalDateTime createdAt;
     private Boolean checkStatus;
+    private String birth;
+    private String gender;
+    private String dateOfIssue;     //유저가 회원가입했을때의 시점으로
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "event_id")
