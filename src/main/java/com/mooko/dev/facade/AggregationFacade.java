@@ -37,6 +37,10 @@ public class AggregationFacade {
     private final S3Config s3Config;
     private final ApplicationEventPublisher eventPublisher;
 
+    private final int MINIMUM_EVENT_PHOTO_COUNT = 2;
+    private final int MAX_EVENT_PHOTO_COUNT = 130;
+
+
 
     /**
      * EventController
@@ -190,11 +194,11 @@ public class AggregationFacade {
         List<String> eventPhotoList = eventPhotoService.findAllEventPhotoList(event);
         int totalSize = eventPhotoList.size() + additionalCount;
 
-        if (checkMinimum && totalSize < 30) {
+        if (checkMinimum && totalSize < MINIMUM_EVENT_PHOTO_COUNT) {
             throw new CustomException(ErrorCode.EVENT_PHOTO_IS_LESS_THAN);
         }
 
-        if (totalSize > 130) {
+        if (totalSize > MAX_EVENT_PHOTO_COUNT) {
             throw new CustomException(ErrorCode.EVENT_PHOTO_EXCEED);
         }
     }
