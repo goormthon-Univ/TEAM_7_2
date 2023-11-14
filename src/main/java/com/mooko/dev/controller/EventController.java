@@ -80,10 +80,7 @@ public class EventController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-
-
-
-
+    //3-4. 이벤트 사진 등록/수정
     @PostMapping("/{eventId}")
     public ResponseEntity<Void> updateUserEventPhoto(
             @AuthenticationPrincipal PrincipalDetails principalDetails,
