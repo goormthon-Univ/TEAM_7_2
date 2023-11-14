@@ -16,20 +16,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
 @RestController
+@RequestMapping("/api/v1/user")
 public class UserController {
 
     private final AggregationFacade aggregationFacade;
 
-//    @RequestMapping("/oauth/authorization/kakao")
-//    public ResponseEntity login(Authentication authentication,
-//            @AuthenticationPrincipal PrincipalDetails principalDetails){
-//
-//        PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
-//        System.out.println("authentication: " + principalDetails.getUser());
-//    }
 
-
-    @GetMapping("/api/v1/user/my-event")
+    @GetMapping("/my-event")
     public ResponseEntity<UserEventStatusDto> showUserEventStatus(@AuthenticationPrincipal PrincipalDetails principalDetails) {
         User user = principalDetails.getUser();
         UserEventStatusDto userEventStatusDto = aggregationFacade.showUserEventStatus(user);

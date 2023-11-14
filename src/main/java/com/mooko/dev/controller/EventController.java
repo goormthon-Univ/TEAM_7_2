@@ -24,8 +24,6 @@ public class EventController {
 
     private final AggregationFacade aggregationFacade;
 
-    @PostMapping("/my-event")
-    public ResponseEntity
     @PostMapping("/new-event")
     public ResponseEntity<Void> makeNewEvent(@AuthenticationPrincipal PrincipalDetails principalDetails, @RequestBody NewEventDto newEventDto) {
         User user = principalDetails.getUser();
