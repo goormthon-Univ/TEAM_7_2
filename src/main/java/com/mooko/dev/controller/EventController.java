@@ -46,6 +46,7 @@ public class EventController {
 
     }
 
+    //3-0. 이벤트 페이지
     @GetMapping("/{eventId}")
     public ResponseEntity<EventInfoDto> showEventPage(
             @AuthenticationPrincipal PrincipalDetails principalDetails,
