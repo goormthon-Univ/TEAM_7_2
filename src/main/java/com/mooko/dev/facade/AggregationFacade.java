@@ -134,7 +134,7 @@ public class AggregationFacade {
         Event event = eventService.findEvent(eventId);
         checkUserRoomMaker(user, event);
         List<String> eventPhotoList = eventPhotoService.findAllEventPhotoList(event);
-        checkEventPhotoCountInMakeBarcode(event);
+        checkEventPhotoCount(event, 0, true);
 
         String barcodeFileName = s3Service.makefileName();
 
@@ -160,18 +160,6 @@ public class AggregationFacade {
         }
     }
 
-    public void checkEventPhotoCountInMakeBarcode(Event event) {
-        int size = eventPhotoService.findAllEventPhotoList(event).size();
-        if (size < 30) {
-            throw new CustomException(ErrorCode.EVENT_PHOTO_IS_LESS_THAN);
-        }
-
-        if (size > 130) {
-            throw new CustomException(ErrorCode.EVENT_PHOTO_EXCEED);
-
-        }
-    }
-
 
     //updateUserEventPhoto
     public void updateUserEventPhoto(User tmpUser, Long eventId, List<File> newPhotoList) {
@@ -180,7 +168,7 @@ public class AggregationFacade {
         if (!event.getActiveStatus()) {
             throw new CustomException(ErrorCode.INVALID_REQUEST);
         }
-        checkEventPhotoCount(event, newPhotoList.size());
+        checkEventPhotoCount(event, newPhotoList.size(), false);
         List<EventPhoto> userEventPhotoList = eventPhotoService.findUserEventPhotoList(user, event);
         eventPhotoService.deleteEventPhoto(userEventPhotoList);
 
@@ -197,11 +185,19 @@ public class AggregationFacade {
         eventPhotoService.makeNewEventPhoto(user, event, newPhotoUrlList);
     }
 
-    public void checkEventPhotoCount(Event event, int size) {
-        if(eventPhotoService.findAllEventPhotoList(event).size() + size > 130){
+    public void checkEventPhotoCount(Event event, int additionalCount, boolean checkMinimum) {
+        List<String> eventPhotoList = eventPhotoService.findAllEventPhotoList(event);
+        int totalSize = eventPhotoList.size() + additionalCount;
+
+        if (checkMinimum && totalSize < 30) {
+            throw new CustomException(ErrorCode.EVENT_PHOTO_IS_LESS_THAN);
+        }
+
+        if (totalSize > 130) {
             throw new CustomException(ErrorCode.EVENT_PHOTO_EXCEED);
         }
     }
+
 
 
     //deleteUserEventPhoto
