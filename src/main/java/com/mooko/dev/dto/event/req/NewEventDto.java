@@ -8,6 +8,7 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 public class NewEventDto {
+
     private String title;
     private String startDate;
     private String endDate;

@@ -160,22 +160,6 @@ public class AggregationFacade {
     }
 
 
-    //showUserEventStatus
-    public UserEventStatusDto showUserEventStatus(User tmpUser) {
-        User user = userService.findUser(tmpUser.getId());
-
-        return Optional.ofNullable(user.getEvent())
-                .filter(Event::getActiveStatus)
-                .map(event -> UserEventStatusDto.builder()
-                        .isExistEvent(true)
-                        .eventId(event.getId().toString())
-                        .build())
-                .orElseGet(() -> UserEventStatusDto.builder()
-                        .isExistEvent(false)
-                        .eventId(null)
-                        .build());
-    }
-
 
 
     //updateUserEventPhoto
@@ -185,6 +169,9 @@ public class AggregationFacade {
         if (!event.getActiveStatus()) {
             throw new CustomException(ErrorCode.INVALID_REQUEST);
         }
+        checkEventPhotoCount(event, newPhotoList.size());
+        List<EventPhoto> userEventPhotoList = eventPhotoService.findUserEventPhotoList(user, event);
+        eventPhotoService.deleteEventPhoto(userEventPhotoList);
 
         List<String> newPhotoUrlList = newPhotoList.parallelStream()
                 .map(newPhoto -> {
@@ -199,6 +186,11 @@ public class AggregationFacade {
         eventPhotoService.makeNewEventPhoto(user, event, newPhotoUrlList);
     }
 
+    public void checkEventPhotoCount(Event event, int size) {
+        if(eventPhotoService.findAllEventPhotoList(event).size() + size > 130){
+            throw new CustomException(ErrorCode.EVENT_PHOTO_EXCEED);
+        }
+    }
 
 
     //deleteUserEventPhoto
@@ -248,6 +240,29 @@ public class AggregationFacade {
                 ButtonEvent.builder()
                         .buttonStatus(allUsersChecked)
                         .eventId(event.getId().toString())
+                        .build());
+    }
+
+
+
+
+    /**
+     * UserController
+     */
+
+    //showUserEventStatus
+    public UserEventStatusDto showUserEventStatus(User tmpUser) {
+        User user = userService.findUser(tmpUser.getId());
+
+        return Optional.ofNullable(user.getEvent())
+                .filter(Event::getActiveStatus)
+                .map(event -> UserEventStatusDto.builder()
+                        .isExistEvent(true)
+                        .eventId(event.getId().toString())
+                        .build())
+                .orElseGet(() -> UserEventStatusDto.builder()
+                        .isExistEvent(false)
+                        .eventId(null)
                         .build());
     }
 
