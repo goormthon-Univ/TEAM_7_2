@@ -93,14 +93,27 @@ public class EventController {
     }
 
 
-    @DeleteMapping("/{eventId}/image-list")
+    //3-5. 이벤트 사진 리스트 삭제
+    @DeleteMapping("/{eventId}/{userId}/image-list")
     public ResponseEntity<Void> deleteUserEventPhoto(
             @AuthenticationPrincipal PrincipalDetails principalDetails,
+            @PathVariable Long userId,
             @PathVariable Long eventId
     )
     {
         User user = principalDetails.getUser();
-        aggregationFacade.deleteUserEventPhoto(user, eventId);
+        aggregationFacade.deleteUserEventPhoto(user, eventId, userId);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    //3-6. 이벤트 나가기
+    @DeleteMapping("/{eventId}")
+    public ResponseEntity<Void> deleteUserEvent(
+            @AuthenticationPrincipal PrincipalDetails principalDetails,
+            @PathVariable Long eventId
+    ) {
+        User user = principalDetails.getUser();
+        aggregationFacade.deleteUserEvent(user, eventId);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

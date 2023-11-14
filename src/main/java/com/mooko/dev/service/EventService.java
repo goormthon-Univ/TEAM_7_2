@@ -65,4 +65,13 @@ public class EventService {
         event.updateBarcode(barcode);
         eventRepository.save(event);
     }
+
+    @Transactional
+    public void deleteUser(User user, Event event) {
+        if (event.getUsers().removeIf(u -> u.equals(user))) {
+            eventRepository.save(event);
+        } else {
+            throw new CustomException(ErrorCode.USER_NOT_FOUND);
+        }
+    }
 }
