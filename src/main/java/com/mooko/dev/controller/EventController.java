@@ -106,6 +106,7 @@ public class EventController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
+    //3-6. 이벤트 나가기
     @DeleteMapping("/{eventId}")
     public ResponseEntity<Void> deleteUserEvent(
             @AuthenticationPrincipal PrincipalDetails principalDetails,

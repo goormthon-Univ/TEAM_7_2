@@ -181,7 +181,7 @@ public class AggregationFacade {
                 }).collect(Collectors.toList());
 
 
-        deleteExistingPhotos(user, event, false);
+        deleteExistingPhotoOrEventUser(user, event, false);
         eventPhotoService.makeNewEventPhoto(user, event, newPhotoUrlList);
     }
 
@@ -211,7 +211,7 @@ public class AggregationFacade {
         if (!Objects.equals(tmpUserId, user.getId())) {
             throw new CustomException(ErrorCode.USER_NOT_MATCH);
         }
-        deleteExistingPhotos(user, event, false);
+        deleteExistingPhotoOrEventUser(user, event, false);
 
     }
 
@@ -219,10 +219,10 @@ public class AggregationFacade {
     public void deleteUserEvent(User tmpUser, Long eventId) {
         User user = userService.findUser(tmpUser.getId());
         Event event = eventService.findEvent(eventId);
-        deleteExistingPhotos(user, event, true);
+        deleteExistingPhotoOrEventUser(user, event, true);
     }
 
-    private void deleteExistingPhotos(User user, Event event, boolean flag) {
+    private void deleteExistingPhotoOrEventUser(User user, Event event, boolean flag) {
         List<EventPhoto> eventPhotoList = eventPhotoService.findUserEventPhotoList(user, event);
         if (!eventPhotoList.isEmpty()) {
             eventPhotoList.forEach(eventPhoto -> {
