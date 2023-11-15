@@ -3,12 +3,14 @@ package com.mooko.dev.service;
 import com.mooko.dev.domain.Barcode;
 import com.mooko.dev.domain.BarcodeType;
 import com.mooko.dev.domain.Event;
+import com.mooko.dev.exception.custom.CustomException;
 import com.mooko.dev.repository.BarcodeRepository;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.mooko.dev.exception.custom.ErrorCode;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -29,6 +31,8 @@ public class BarcodeService {
     //바코드 사이즈 상수화
     private final int NEW_WIDTH = 340;
     private final int NEW_HEIGHT = 160;
+    private final int MIN_PHOTO_COUNT_FOR_BARCODE = 30;
+    private final int MAX_PHOTO_COUNT_FOR_BARCODE = 130;
 
     private final BarcodeRepository barcodeRepository;
 
@@ -43,6 +47,9 @@ public class BarcodeService {
 
 
     public BufferedImage combineImagesHorizontally(List<String> imageURLs, int totalWidth, int totalHeight) throws IOException {
+        if (imageURLs == null || imageURLs.isEmpty()) {
+            throw new IllegalArgumentException("바코드 생성을 위한 사진 개수가 부족합니다.");
+        }
         int singleImageWidth = totalWidth / imageURLs.size();
         List<BufferedImage> resizedImages = new ArrayList<>();
 
@@ -78,6 +85,11 @@ public class BarcodeService {
      */
     public File makeNewBarcode(List<String> imageURLs) throws IOException {
         log.info("imageURLs size = {}", imageURLs.size());
+        if (imageURLs.size()<MIN_PHOTO_COUNT_FOR_BARCODE){
+            throw new CustomException(ErrorCode.PHOTO_FOR_BARCODE_LESS_THEN);
+        }else if(imageURLs.size()>MAX_PHOTO_COUNT_FOR_BARCODE){
+            throw new CustomException(ErrorCode.PHOTO_FOR_BARCODE_EXCEED);
+        }
 
         BufferedImage combined = combineImagesHorizontally(imageURLs, NEW_WIDTH, NEW_HEIGHT);
         File barcodeFile = File.createTempFile("barcode", ".jpg");

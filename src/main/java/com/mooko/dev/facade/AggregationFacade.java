@@ -57,8 +57,6 @@ public class AggregationFacade {
     private final int MINIMUM_EVENT_PHOTO_COUNT = 2;
     private final int MAX_EVENT_PHOTO_COUNT = 130;
 
-
-
     /**
      * EventController
      */
@@ -109,6 +107,7 @@ public class AggregationFacade {
                 .startDate(event.getStartDate())
                 .endDate(event.getEndDate())
                 .loginUserId(user.getId().toString())
+                .userCount(event.getUsers().size())
                 .userInfo(userInfoList)
                 .build();
     }
@@ -624,7 +623,7 @@ public class AggregationFacade {
             }
 
         } else {
-            memberCnt = event.getUsers().size();
+            memberCnt = event.getUsers().size()-1;
 
             List<String> eventPhotoUrlList = eventPhotoService.findAllEventPhotoList(event);
             ImageInfoDto imageInfoDto = ImageInfoDto
