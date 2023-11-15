@@ -16,6 +16,7 @@ public class CorsConfig {
 
 
         configuration.addAllowedOrigin("http://localhost:3000");
+        configuration.addAllowedOrigin("https://moodbarcode.com");
         configuration.addAllowedMethod("GET");
         configuration.addAllowedMethod("POST");
         configuration.addAllowedMethod("DELETE");
