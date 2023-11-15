@@ -531,12 +531,14 @@ public class AggregationFacade {
         User user = userService.findUser(tmpUser.getId());
 
         String fileName = s3Service.makefileName();
-        String newProfileImgUrl = s3Service.putFileToS3(userNewInfoDto.getProfileImage(), fileName, s3Config.getEventImageDir());
+        String newProfileImgUrl = s3Service.putFileToS3(userNewInfoDto.getProfileImage(), fileName, s3Config.getProfileImgDir());
+        System.out.println("newProfileImgUrl : "+newProfileImgUrl);
+        System.out.println("user.getProfileUrl() : "+user.getProfileUrl());
 
-        if (user.getProfileUrl()!=USER_DEFAULT_PROFILE_IMAGE) {
+        if (!user.getProfileUrl().equals(USER_DEFAULT_PROFILE_IMAGE)) {
             s3Service.deleteFromS3(user.getProfileUrl());
         }
-        user.updateUserInfo(newProfileImgUrl,userNewInfoDto.getNickname(), userNewInfoDto.getBirth(),
+        userService.updateUserInfo(user, newProfileImgUrl,userNewInfoDto.getNickname(), userNewInfoDto.getBirth(),
                 userNewInfoDto.getGender(), false);
     }
 
