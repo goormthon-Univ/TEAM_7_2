@@ -52,7 +52,7 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
             return;
         }
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         String formattedDate = LocalDateTime.now().format(formatter);
 
         User user = User.builder()
