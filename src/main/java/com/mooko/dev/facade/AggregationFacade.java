@@ -417,8 +417,7 @@ public class AggregationFacade {
             s3Service.deleteFromS3(dayThumbnail.getUrl());
             dayPhotoService.deleteThumbnail(dayThumbnail);
         }
-
-        dayPhotoService.makeNewThumbnail(day,newThumbnailUrl,true);
+        if(newThumbnailUrl!=null){ dayPhotoService.makeNewThumbnail(day,newThumbnailUrl,true);}
     }
 
     private void updateDayPhotos(List<File> newDayPhotoList, Day day){
@@ -435,7 +434,8 @@ public class AggregationFacade {
         if (dayPhotoList!=null) {
             deleteExistingDayPhotos(dayPhotoList);
         }
-        dayPhotoService.makeNewDayPhoto(day,newDayPhotoUrlList, false);
+
+        if(newDayPhotoList!=null){dayPhotoService.makeNewDayPhoto(day,newDayPhotoUrlList,false);}
     }
 
     private void deleteExistingDayPhotos(List<DayPhoto> dayPhotoList) {
@@ -589,7 +589,7 @@ public class AggregationFacade {
         return recentBarcodeInfo;
     }
 
-    // showTicketInfo(my-ticket/quest-ticket)
+    // showTicketInfo(my-ticket)
     public TicketDto showTicketInfo(User tmpUser, Long barcodeId){
         User user = userService.findUser(tmpUser.getId());
         Barcode barcode = barcodeService.findBarcode(barcodeId);
@@ -647,5 +647,12 @@ public class AggregationFacade {
                 .imageInfoList(imageInfoList)
                 .build();
         return ticketDto;
+    }
+
+    public TicketDto showTicketInfoGuest(Long barcodeId){
+        Barcode barcode = barcodeService.findBarcode(barcodeId);
+        UserBarcode userBarcode = userBarcodeService.findUserBarcodeByBarcode(barcode);
+        User user = userBarcode.getUser();
+        return showTicketInfo(user, barcodeId);
     }
 }
