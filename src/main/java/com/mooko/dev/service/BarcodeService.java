@@ -108,4 +108,17 @@ public class BarcodeService {
         Optional<Barcode> barcode = barcodeRepository.findById(id);
         return barcode.get();
     }
+
+    public Barcode findBarcodeByTitle(String title){
+        Optional<Barcode> barcode = barcodeRepository.findByTitle(title);
+        if (barcode.isPresent()){
+            return barcode.get();
+        } else {
+            return null;
+        }
+    }
+
+    public void deleteBarcode(Barcode barcode){
+        barcodeRepository.delete(barcode);
+    }
 }

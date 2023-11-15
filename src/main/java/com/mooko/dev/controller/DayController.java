@@ -63,12 +63,7 @@ public class DayController {
             @ModelAttribute DayPhotoDto dayPhotoDto){
         User user = principalDetails.getUser();
 
-        List<File> DayPhotoList = Arrays.asList(dayPhotoDto.getPhoto1(),dayPhotoDto.getPhoto2(), dayPhotoDto.getPhoto3())
-                .stream()
-                .filter(photo -> photo != null && photo.length() > 0)
-                .collect(Collectors.toList());
-
-        aggregationFacade.updateDay(user,date,dayPhotoDto.getMemo(),dayPhotoDto.getThumbnail(),DayPhotoList);
+        aggregationFacade.updateDay(user,date,dayPhotoDto);
 
         return ResponseEntity.status(HttpStatus.OK).build();
 

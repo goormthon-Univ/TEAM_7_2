@@ -18,15 +18,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class DayPhotoService {
     private final DayPhotoRepository dayPhotoRepository;
     public DayPhoto findThumnail(Day day){
-        DayPhoto dayPhoto = dayPhotoRepository.findByDayAndThumbnailTrue(day).get();
-        return dayPhoto;
-    }
-
-    public Optional<DayPhoto> findThumnailOptional(Day day){
         Optional<DayPhoto> dayPhoto = dayPhotoRepository.findByDayAndThumbnailTrue(day);
-        return dayPhoto;
+        if (dayPhoto.isPresent()){
+            return dayPhoto.get();
+        }else{
+            return null;
+        }
     }
-
 
     public List<DayPhoto> findDayPhotoList(Day day){
 

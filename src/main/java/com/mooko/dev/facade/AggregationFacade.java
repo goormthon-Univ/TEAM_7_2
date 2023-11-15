@@ -6,6 +6,7 @@ import com.mooko.dev.dto.barcode.res.BarcodeInfoDto;
 import com.mooko.dev.dto.barcode.res.ImageInfoDto;
 import com.mooko.dev.dto.barcode.res.TicketDto;
 import com.mooko.dev.dto.day.req.BarcodeDateDto;
+import com.mooko.dev.dto.day.req.DayPhotoDto;
 import com.mooko.dev.dto.day.res.CalendarDto;
 import com.mooko.dev.dto.day.res.DayDto;
 import com.mooko.dev.dto.day.res.ThumbnailDto;
@@ -23,8 +24,11 @@ import com.mooko.dev.event.LeaveEvent;
 import com.mooko.dev.exception.custom.CustomException;
 import com.mooko.dev.exception.custom.ErrorCode;
 import com.mooko.dev.service.*;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cglib.core.Local;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
@@ -127,8 +131,6 @@ public class AggregationFacade {
                 .imageCount(eventPhotoUrlList.size())
                 .build();
     }
-
-
 
     //updateEventName
     public void updateEventName(User tmpUser, UpdateEventNameDto updateEventNameDto, Long eventId) {
@@ -322,16 +324,16 @@ public class AggregationFacade {
             int day = startLocalDate.getDayOfMonth();
 
             Optional<Day> currentDay = dayService.findDayIdOptinal(user,year,month,day);
-            Optional<DayPhoto> dayPhoto = Optional.empty();
+            DayPhoto dayPhoto = null;
             if (currentDay.isPresent()){
                 System.out.println(dayPhoto);
-                dayPhoto = dayPhotoService.findThumnailOptional(currentDay.get());
+                dayPhoto = dayPhotoService.findThumnail(currentDay.get());
                 System.out.println(dayPhoto);
             }
 
-            if (dayPhoto.isPresent()){
+            if (dayPhoto!=null){
                 ThumbnailDto thumbnailDto = ThumbnailDto.builder()
-                        .thumbnailUrl(dayPhoto.get().getUrl())
+                        .thumbnailUrl(dayPhoto.getUrl())
                         .date(startLocalDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
                         .build();
                 thumbnailInfoList.add(thumbnailDto);
@@ -379,49 +381,61 @@ public class AggregationFacade {
     }
 
     // post,updateDayPost
-    public void updateDay(User tmpUser, String date, String memo, File thumbnail, List<File> newDayPhotoList){
+    public void updateDay(User tmpUser, String date, DayPhotoDto dayPhotoDto){
         User user = userService.findUser(tmpUser.getId());
 
-        LocalDate currentDate = LocalDate.parse(date, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        List<File> newDayPhotoList = Arrays.asList(dayPhotoDto.getPhoto1(),dayPhotoDto.getPhoto2(), dayPhotoDto.getPhoto3())
+                .stream()
+                .filter(photo -> photo != null && photo.length() > 0)
+                .collect(Collectors.toList());
 
+        LocalDate currentDate = LocalDate.parse(date, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         int year = currentDate.getYear();
         int month = currentDate.getMonthValue();
         int day = currentDate.getDayOfMonth();
 
         Day currentDay = dayService.findDayId(user,year,month,day);
 
-        dayService.updateMemo(currentDay, memo);
+        dayService.updateMemo(currentDay, dayPhotoDto.getMemo());
 
         // Thumbnail
+        updateThumbnail(dayPhotoDto.getThumbnail(), currentDay);
+
+        // Photos except thumbnail
+        updateDayPhotos(newDayPhotoList, currentDay);
+    }
+
+    private void updateThumbnail(File thumbnail, Day day){
         String newThumbnailUrl = null;
         if (thumbnail!=null){
             String fileName = s3Service.makefileName();
-            newThumbnailUrl = s3Service.putFileToS3(thumbnail, fileName, s3Config.getEventImageDir());
+            newThumbnailUrl = s3Service.putFileToS3(thumbnail, fileName, s3Config.getDayImageDir());
         }
 
-        Optional<DayPhoto> dayThumbnail = dayPhotoService.findThumnailOptional(currentDay);
-        if (dayThumbnail.isPresent()&&dayThumbnail.get().getUrl()!=null) {
-            s3Service.deleteFromS3(dayThumbnail.get().getUrl());
-            dayPhotoService.deleteThumbnail(dayThumbnail.get());
+        DayPhoto dayThumbnail = dayPhotoService.findThumnail(day);
+        if (dayThumbnail!=null) {
+            s3Service.deleteFromS3(dayThumbnail.getUrl());
+            dayPhotoService.deleteThumbnail(dayThumbnail);
         }
 
-        dayPhotoService.makeNewThumbnail(currentDay,newThumbnailUrl,true);
+        dayPhotoService.makeNewThumbnail(day,newThumbnailUrl,true);
+    }
 
-        // Photos except thumbnail
+    private void updateDayPhotos(List<File> newDayPhotoList, Day day){
         List<String> newDayPhotoUrlList = new ArrayList<>();
         if (newDayPhotoList!=null){
             newDayPhotoUrlList = newDayPhotoList.parallelStream()
                     .map(newPhoto -> {
                         String fileName = s3Service.makefileName();
-                        return s3Service.putFileToS3(newPhoto, fileName, s3Config.getEventImageDir());
+                        return s3Service.putFileToS3(newPhoto, fileName, s3Config.getDayImageDir());
                     }).collect(Collectors.toList());
         }
 
-        List<DayPhoto> dayPhotoList = dayPhotoService.findDayPhotoList(currentDay);
+        List<DayPhoto> dayPhotoList = dayPhotoService.findDayPhotoList(day);
         if (dayPhotoList!=null) {
             deleteExistingDayPhotos(dayPhotoList);
         }
-        dayPhotoService.makeNewDayPhoto(currentDay,newDayPhotoUrlList, false);
+        dayPhotoService.makeNewDayPhoto(day,newDayPhotoUrlList, false);
     }
 
     private void deleteExistingDayPhotos(List<DayPhoto> dayPhotoList) {
@@ -438,7 +452,16 @@ public class AggregationFacade {
         int intYear = Integer.parseInt(barcodeDateDto.getYear());
         int intMonth = Integer.parseInt(barcodeDateDto.getMonth());
 
-        // intyear/intmonth로 바코드 검색 후 존재시 삭제
+        String barcodeTitle = barcodeDateDto.getYear()+"년 "+barcodeDateDto.getMonth()+"월";
+
+        Barcode pastBarcode = barcodeService.findBarcodeByTitle(barcodeTitle);
+        UserBarcode userBarcode = userBarcodeService.findUserBarcodeByBarcode(pastBarcode);
+
+        if (pastBarcode!=null) {
+            s3Service.deleteFromS3(pastBarcode.getBarcodeUrl());
+            userBarcodeService.deleteUserBarcode(userBarcode);
+            barcodeService.deleteBarcode(pastBarcode);
+        }
 
         List<Day> dayList = dayService.findDayIdList(user,intYear,intMonth);
         List<String> allDayPhotos = new ArrayList<>();
@@ -461,15 +484,15 @@ public class AggregationFacade {
         String startDate = firstDayOfMonth.format(formatter);
         String endDate = lastDayOfMonth.format(formatter);
 
-        Barcode barcode = barcodeService.saveBarcode(
+        Barcode currentBarcode = barcodeService.saveBarcode(
                 fullPath,
-                barcodeDateDto.getYear()+"년 "+barcodeDateDto.getMonth()+"월",
+                barcodeTitle,
                 startDate,
                 endDate,
                 BarcodeType.DAY,
                 null);
-        userBarcodeService.makeUserDayBarcode(user, barcode);
-        return barcode.getId();
+        userBarcodeService.makeUserDayBarcode(user, currentBarcode);
+        return currentBarcode.getId();
     }
 
     /**
@@ -531,7 +554,7 @@ public class AggregationFacade {
                 .build();
     }
 
-    // showUserInfo
+    // updateUserInfo
     @Value("${cloud.aws.s3.default-img}")
     private String USER_DEFAULT_PROFILE_IMAGE;
     public void updateUserInfo(User tmpUser, UserNewInfoDto userNewInfoDto){
@@ -571,6 +594,9 @@ public class AggregationFacade {
         User user = userService.findUser(tmpUser.getId());
         Barcode barcode = barcodeService.findBarcode(barcodeId);
         Event event = eventService.findEventByBarcode(barcode);
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
+        String createdAt = barcode.getCreatedAt().format(formatter);
 
         int memberCnt = 0;
         List<ImageInfoDto> imageInfoList = new ArrayList<>();;
@@ -616,7 +642,7 @@ public class AggregationFacade {
                 .barcodeUrl(barcode.getBarcodeUrl())
                 .startDate(barcode.getStartDate())
                 .endDate(barcode.getEndDate())
-                .createdAt(barcode.getCreatedAt().toString())
+                .createdAt(createdAt)
                 .memberCnt(memberCnt)
                 .imageInfoList(imageInfoList)
                 .build();
