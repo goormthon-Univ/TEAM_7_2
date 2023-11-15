@@ -8,6 +8,7 @@ import com.mooko.dev.dto.event.req.UpdateEventDateDto;
 import com.mooko.dev.dto.event.req.UpdateEventNameDto;
 import com.mooko.dev.dto.event.res.BarcodeIdDto;
 import com.mooko.dev.dto.event.res.EventInfoDto;
+import com.mooko.dev.dto.event.res.EventPhotoResDto;
 import com.mooko.dev.facade.AggregationFacade;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -80,7 +81,18 @@ public class EventController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    //3-4. 이벤트 사진 등록/수정
+    //3-4. 이벤트 사진
+    @GetMapping("/{eventId}/image-list")
+    public ResponseEntity<EventPhotoResDto> showUserEventPhoto(
+            @AuthenticationPrincipal PrincipalDetails principalDetails,
+            @PathVariable Long eventId
+    ) {
+        User user = principalDetails.getUser();
+        EventPhotoResDto eventPhotoResDto = aggregationFacade.showUserEventPhoto(user, eventId);
+        return ResponseEntity.ok(eventPhotoResDto);
+    }
+
+    //3-5. 이벤트 사진 등록/수정
     @PostMapping("/{eventId}")
     public ResponseEntity<Void> updateUserEventPhoto(
             @AuthenticationPrincipal PrincipalDetails principalDetails,
@@ -93,7 +105,7 @@ public class EventController {
     }
 
 
-    //3-5. 이벤트 사진 리스트 삭제
+    //3-6. 이벤트 사진 리스트 삭제
     @DeleteMapping("/{eventId}/{userId}/image-list")
     public ResponseEntity<Void> deleteUserEventPhoto(
             @AuthenticationPrincipal PrincipalDetails principalDetails,
@@ -106,7 +118,7 @@ public class EventController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    //3-6. 이벤트 나가기
+    //3-7. 이벤트 나가기
     @DeleteMapping("/{eventId}")
     public ResponseEntity<Void> deleteUserEvent(
             @AuthenticationPrincipal PrincipalDetails principalDetails,
