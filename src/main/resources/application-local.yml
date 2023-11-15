@@ -4,6 +4,10 @@ spring:
     username: mooko-admin
     password: mooko-admin
     driver-class-name: com.mysql.cj.jdbc.Driver
+  servlet:
+    multipart:
+      max-file-size: 2MB
+      max-request-size: 100MB
 
   jpa:
     hibernate:
