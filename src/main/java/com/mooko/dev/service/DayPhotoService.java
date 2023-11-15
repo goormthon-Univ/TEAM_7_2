@@ -8,17 +8,25 @@ import com.mooko.dev.repository.DayRepository;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 public class DayPhotoService {
     private final DayPhotoRepository dayPhotoRepository;
     public DayPhoto findThumnail(Day day){
-        DayPhoto dayPhoto = dayPhotoRepository.findByDayAndThumbnailTrue(day);
+        DayPhoto dayPhoto = dayPhotoRepository.findByDayAndThumbnailTrue(day).get();
         return dayPhoto;
     }
+
+    public Optional<DayPhoto> findThumnailOptional(Day day){
+        Optional<DayPhoto> dayPhoto = dayPhotoRepository.findByDayAndThumbnailTrue(day);
+        return dayPhoto;
+    }
+
 
     public List<DayPhoto> findDayPhotoList(Day day){
 
@@ -26,11 +34,13 @@ public class DayPhotoService {
         return DayPhotos;
     }
 
+    @Transactional
     public void deleteThumbnail(DayPhoto dayThumbnail){
         dayPhotoRepository.delete(dayThumbnail);
     }
 
-    public void makeNewThumbnail(Day day, String newThumbnailUrl, Boolean isThumbnail){
+    @Transactional
+    public void makeNewThumbnail(Day day,String newThumbnailUrl,boolean isThumbnail){
         DayPhoto dayPhoto = DayPhoto.builder()
                 .url(newThumbnailUrl)
                 .thumbnail(isThumbnail)
@@ -40,11 +50,13 @@ public class DayPhotoService {
         dayPhotoRepository.save(dayPhoto);
     }
 
+    @Transactional
     public void deleteDayPhotos(List<DayPhoto> dayPhotoList){
         dayPhotoRepository.deleteAll(dayPhotoList);
     }
 
-    public void makeNewDayPhoto(Day day, List<String> dayPhotoUrlList, Boolean isThumbnail){
+    @Transactional
+    public void makeNewDayPhoto(Day day, List<String> dayPhotoUrlList, boolean isThumbnail){
         List<DayPhoto> dayPhotos = new ArrayList<>();
 
         for (String url : dayPhotoUrlList) {
