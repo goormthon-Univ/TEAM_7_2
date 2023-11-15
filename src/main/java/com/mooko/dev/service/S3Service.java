@@ -7,6 +7,7 @@ import com.mooko.dev.configuration.S3Config;
 import com.mooko.dev.exception.custom.CustomException;
 import com.mooko.dev.exception.custom.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -16,6 +17,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class S3Service {
 
     private final AmazonS3Client amazonS3Client;
@@ -28,6 +30,7 @@ public class S3Service {
 
             return amazonS3Client.getUrl(s3Config.getBucket(), fullPath).toString();
         } catch (AmazonS3Exception e) {
+            log.error("putFileError");
             throw new CustomException(ErrorCode.S3_ERROR);
         }
     }
@@ -46,6 +49,7 @@ public class S3Service {
             String relativePath = convertToRelativePath(absolutePath);
             amazonS3Client.deleteObject(s3Config.getBucket(), relativePath);
         } catch (AmazonS3Exception | URISyntaxException e) {
+            log.error("deleteFileError");
             throw new CustomException(ErrorCode.S3_ERROR);
         }
     }
