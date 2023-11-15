@@ -14,6 +14,7 @@ import com.mooko.dev.dto.event.req.NewEventDto;
 import com.mooko.dev.dto.event.req.UpdateEventDateDto;
 import com.mooko.dev.dto.event.req.UpdateEventNameDto;
 import com.mooko.dev.dto.event.res.EventInfoDto;
+import com.mooko.dev.dto.event.res.EventPhotoResDto;
 import com.mooko.dev.dto.event.res.UserInfoDto;
 import com.mooko.dev.dto.event.socket.UserEventCheckStatusDto;
 import com.mooko.dev.dto.user.req.UserNewInfoDto;
@@ -234,6 +235,22 @@ public class AggregationFacade {
 
     }
 
+    //showUserEventPhoto
+    public EventPhotoResDto showUserEventPhoto(User tmpUser, Long eventId){
+        User user = userService.findUser(tmpUser.getId());
+        Event event = eventService.findEvent(eventId);
+        List<EventPhoto> eventPhotoList = eventPhotoService.findUserEventPhotoList(user, event);
+        List<String> eventPhotoUrlList = eventPhotoList.stream()
+                .map(EventPhoto::getUrl)
+                .collect(Collectors.toList());
+
+        return EventPhotoResDto
+                .builder()
+                .eventId(eventId)
+                .imageUrlList(eventPhotoUrlList)
+                .build();
+    }
+
     //deleteUserEvent
     public void deleteUserEvent(User tmpUser, Long eventId) {
         User user = userService.findUser(tmpUser.getId());
@@ -394,6 +411,7 @@ public class AggregationFacade {
         int day = currentDate.getDayOfMonth();
 
         Day currentDay = dayService.findDayId(user,year,month,day);
+        if(currentDay==null){throw new CustomException(ErrorCode.DAY_NOT_FOUND);}
 
         dayService.updateMemo(currentDay, dayPhotoDto.getMemo());
 
@@ -648,6 +666,7 @@ public class AggregationFacade {
         return ticketDto;
     }
 
+    // showTicketInfo(quest-ticket)
     public TicketDto showTicketInfoGuest(Long barcodeId){
         Barcode barcode = barcodeService.findBarcode(barcodeId);
         UserBarcode userBarcode = userBarcodeService.findUserBarcodeByBarcode(barcode);
