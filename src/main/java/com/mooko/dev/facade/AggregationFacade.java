@@ -23,14 +23,6 @@ import com.mooko.dev.event.LeaveEvent;
 import com.mooko.dev.exception.custom.CustomException;
 import com.mooko.dev.exception.custom.ErrorCode;
 import com.mooko.dev.service.*;
-import java.awt.Image;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAdjusters;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Comparator;
-import java.util.Date;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
@@ -38,9 +30,10 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjusters;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -403,7 +396,7 @@ public class AggregationFacade {
         dayPhotoService.makeNewThumbnail(currentDay,newThumbnailUrl, true);
 
         // Photos except thumbnail
-        List<String> newDayPhotoUrlList = new ArrayList<>();;
+        List<String> newDayPhotoUrlList = new ArrayList<>();
         if (newDayPhotoList!=null){
             newDayPhotoUrlList = newDayPhotoList.parallelStream()
                     .map(newPhoto -> {
@@ -531,12 +524,15 @@ public class AggregationFacade {
         User user = userService.findUser(tmpUser.getId());
 
         String fileName = s3Service.makefileName();
-        String newProfileImgUrl = s3Service.putFileToS3(userNewInfoDto.getProfileImage(), fileName, s3Config.getEventImageDir());
+        String newProfileImgUrl = s3Service.putFileToS3(userNewInfoDto.getProfileImage(), fileName, s3Config.getProfileImgDir());
+        System.out.println("newProfileImgUrl : "+newProfileImgUrl);
+        System.out.println("user.getProfileUrl() : "+user.getProfileUrl());
 
-        if (!Objects.equals(user.getProfileUrl(), USER_DEFAULT_PROFILE_IMAGE)) {
+
+        if (!user.getProfileUrl().equals(USER_DEFAULT_PROFILE_IMAGE)) {
             s3Service.deleteFromS3(user.getProfileUrl());
         }
-        user.updateUserInfo(newProfileImgUrl,userNewInfoDto.getNickname(), userNewInfoDto.getBirth(),
+        userService.updateUserInfo(user, newProfileImgUrl,userNewInfoDto.getNickname(), userNewInfoDto.getBirth(),
                 userNewInfoDto.getGender(), false);
     }
 
