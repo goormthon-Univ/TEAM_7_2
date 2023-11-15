@@ -20,7 +20,16 @@ public class DayService {
     private final DayRepository dayRepository;
 
     public Day findDayId(User user, int year, int month, int day){
-        Day currentDay = dayRepository.findByUserAndYearAndMonthAndDay(user,year,month,day);
+        Optional<Day> currentDay = dayRepository.findByUserAndYearAndMonthAndDay(user,year,month,day);
+        if (currentDay.isPresent()){
+            return currentDay.get();
+        } else {
+            return null;
+        }
+    }
+
+    public Optional<Day> findDayIdOptinal(User user, int year, int month, int day){
+        Optional<Day> currentDay = dayRepository.findByUserAndYearAndMonthAndDay(user,year,month,day);
         return currentDay;
     }
 
