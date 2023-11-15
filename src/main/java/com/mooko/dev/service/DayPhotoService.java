@@ -28,7 +28,7 @@ public class DayPhotoService {
 
     public List<DayPhoto> findDayPhotoList(Day day){
 
-        List<DayPhoto> DayPhotos = dayPhotoRepository.findByDay(day);
+        List<DayPhoto> DayPhotos = dayPhotoRepository.findByDayAndThumbnailFalse(day);
         return DayPhotos;
     }
 

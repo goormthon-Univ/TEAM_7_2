@@ -16,5 +16,7 @@ public interface DayPhotoRepository extends JpaRepository<DayPhoto, Long> {
 
     Optional<DayPhoto> findByDayAndThumbnailTrue(Day day);
 
+    List<DayPhoto> findByDayAndThumbnailFalse(Day day);
+
     List<DayPhoto> findByDay(Day day);
 }
