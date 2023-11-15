@@ -49,6 +49,7 @@ public class DayService {
                 .month(month)
                 .day(day)
                 .user(user)
+                .createdAt(LocalDateTime.now())
                 .build();
         return dayRepository.save(currentDay);
     }

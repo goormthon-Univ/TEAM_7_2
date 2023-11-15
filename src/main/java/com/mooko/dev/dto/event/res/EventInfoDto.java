@@ -16,5 +16,6 @@ public class EventInfoDto {
     private String startDate;
     private String endDate;
     private String loginUserId;
+    private int userCount;
     private List<UserInfoDto> userInfo;
 }
