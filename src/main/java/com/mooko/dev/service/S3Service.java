@@ -49,6 +49,7 @@ public class S3Service {
             String relativePath = convertToRelativePath(absolutePath);
             amazonS3Client.deleteObject(s3Config.getBucket(), relativePath);
         } catch (AmazonS3Exception | URISyntaxException e) {
+            log.error(e.getMessage());
             log.error("deleteFileError");
             throw new CustomException(ErrorCode.S3_ERROR);
         }
