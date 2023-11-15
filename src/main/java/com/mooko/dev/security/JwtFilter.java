@@ -29,6 +29,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private static final String NO_CHECK_URL_LOGIN = "/oauth2/authorization/kakao";
     private static final String NO_CHECK_URL_REDIRECT = "/login/oauth2/code/kakao";
+    private static final String NO_CHECK_URL_HANDSHAKING = "/ws-check/info";
 
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
@@ -48,7 +49,9 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     private boolean isPathExcluded(String path) {
-        return antPathMatcher.match(NO_CHECK_URL_LOGIN, path) || antPathMatcher.match(NO_CHECK_URL_REDIRECT, path);
+        return antPathMatcher.match(NO_CHECK_URL_LOGIN, path)
+                || antPathMatcher.match(NO_CHECK_URL_REDIRECT, path)
+                || antPathMatcher.match(NO_CHECK_URL_HANDSHAKING, path);
     }
 
     private void processTokenAuthentication(HttpServletRequest request, HttpServletResponse response) {
