@@ -40,10 +40,8 @@ public class BarcodeController {
 
     @GetMapping("/{barcodeId}/guest-ticket")
     public ResponseEntity<TicketDto> showGuestTicket(
-            @AuthenticationPrincipal PrincipalDetails principalDetails,
             @PathVariable Long barcodeId){
-        User user = principalDetails.getUser();
-        TicketDto ticketDto = aggregationFacade.showTicketInfo(user, barcodeId);
+        TicketDto ticketDto = aggregationFacade.showTicketInfoGuest(barcodeId);
         return ResponseEntity.ok(ticketDto);
     }
 

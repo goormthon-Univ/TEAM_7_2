@@ -589,7 +589,7 @@ public class AggregationFacade {
         return recentBarcodeInfo;
     }
 
-    // showTicketInfo(my-ticket/quest-ticket)
+    // showTicketInfo(my-ticket)
     public TicketDto showTicketInfo(User tmpUser, Long barcodeId){
         User user = userService.findUser(tmpUser.getId());
         Barcode barcode = barcodeService.findBarcode(barcodeId);
@@ -647,5 +647,12 @@ public class AggregationFacade {
                 .imageInfoList(imageInfoList)
                 .build();
         return ticketDto;
+    }
+
+    public TicketDto showTicketInfoGuest(Long barcodeId){
+        Barcode barcode = barcodeService.findBarcode(barcodeId);
+        UserBarcode userBarcode = userBarcodeService.findUserBarcodeByBarcode(barcode);
+        User user = userBarcode.getUser();
+        return showTicketInfo(user, barcodeId);
     }
 }
