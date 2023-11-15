@@ -533,7 +533,7 @@ public class AggregationFacade {
         String fileName = s3Service.makefileName();
         String newProfileImgUrl = s3Service.putFileToS3(userNewInfoDto.getProfileImage(), fileName, s3Config.getEventImageDir());
 
-        if (user.getProfileUrl()!=USER_DEFAULT_PROFILE_IMAGE) {
+        if (!Objects.equals(user.getProfileUrl(), USER_DEFAULT_PROFILE_IMAGE)) {
             s3Service.deleteFromS3(user.getProfileUrl());
         }
         user.updateUserInfo(newProfileImgUrl,userNewInfoDto.getNickname(), userNewInfoDto.getBirth(),
