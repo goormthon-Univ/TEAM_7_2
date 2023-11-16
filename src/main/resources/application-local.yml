@@ -48,10 +48,6 @@ jwt:
     expiration: 1209600000
     header: ReAuthorization
 
-redirect:
-  url:
-    userInfo: http://localhost:3000/userInfo
-    main: http://localhost:3000/
 
 
 cloud:

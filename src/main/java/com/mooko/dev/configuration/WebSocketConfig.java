@@ -20,17 +20,17 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws-check")//처음 핸드쉐이킹
-                .setAllowedOrigins("http://localhost:3000")
+//                .setAllowedOrigins("http://localhost:3000")
                 .setAllowedOrigins("https://moodbarcode.com")
                 .withSockJS();
 
         registry.addEndpoint("/ws-button")
-                .setAllowedOrigins("http://localhost:3000")
+//                .setAllowedOrigins("http://localhost:3000")
                 .setAllowedOrigins("https://moodbarcode.com")
                 .withSockJS();
 
         registry.addEndpoint("/ws-leave-event")
-                .setAllowedOrigins("http://localhost:3000")
+//                .setAllowedOrigins("http://localhost:3000")
                 .setAllowedOrigins("https://moodbarcode.com")
                 .withSockJS();
     }
