@@ -6,8 +6,10 @@ import com.mooko.dev.dto.barcode.res.BarcodeInfoDto;
 import com.mooko.dev.dto.barcode.res.ImageInfoDto;
 import com.mooko.dev.dto.barcode.res.TicketDto;
 import com.mooko.dev.dto.day.req.BarcodeDateDto;
+import com.mooko.dev.dto.day.req.CalendarReqDto;
 import com.mooko.dev.dto.day.req.DayPhotoDto;
-import com.mooko.dev.dto.day.res.CalendarDto;
+import com.mooko.dev.dto.day.res.ButtonStatus;
+import com.mooko.dev.dto.day.res.CalendarResDto;
 import com.mooko.dev.dto.day.res.DayDto;
 import com.mooko.dev.dto.day.res.ThumbnailDto;
 import com.mooko.dev.dto.event.req.NewEventDto;
@@ -25,11 +27,8 @@ import com.mooko.dev.event.LeaveEvent;
 import com.mooko.dev.exception.custom.CustomException;
 import com.mooko.dev.exception.custom.ErrorCode;
 import com.mooko.dev.service.*;
-import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
-import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cglib.core.Local;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
@@ -322,16 +321,15 @@ public class AggregationFacade {
      */
 
     // showUserCalendar
-    public CalendarDto showCalendar(User tmpUser, String startDate, String endDate){
+    public CalendarResDto showCalendar(User tmpUser, CalendarReqDto calendarReqDto){
         User user = userService.findUser(tmpUser.getId());
 
-        LocalDate startLocalDate = LocalDate.parse(startDate);
-        LocalDate endLocalDate = LocalDate.parse(endDate);
+        LocalDate startLocalDate = LocalDate.parse(calendarReqDto.getStartDate());
+        LocalDate endLocalDate = LocalDate.parse(calendarReqDto.getEndDate());
 
         List<ThumbnailDto> thumbnailInfoList = new ArrayList<>();
 
-        Boolean buttonStatus = true;
-
+        ButtonStatus buttonStatus = ButtonStatus.ACTIVE;
         while (!startLocalDate.isAfter(endLocalDate)) {
             startLocalDate = startLocalDate.plusDays(1);
 
@@ -342,9 +340,7 @@ public class AggregationFacade {
             Optional<Day> currentDay = dayService.findDayIdOptinal(user,year,month,day);
             DayPhoto dayPhoto = null;
             if (currentDay.isPresent()){
-                System.out.println(dayPhoto);
                 dayPhoto = dayPhotoService.findThumnail(currentDay.get());
-                System.out.println(dayPhoto);
             }
 
             if (dayPhoto!=null){
@@ -354,7 +350,9 @@ public class AggregationFacade {
                         .build();
                 thumbnailInfoList.add(thumbnailDto);
             } else {
-                buttonStatus=false;
+                if (Integer.toString(year)==calendarReqDto.getYear()&&Integer.toString(month)==calendarReqDto.getMonth()){
+                    buttonStatus = ButtonStatus.INACTIVE;
+                }
                 ThumbnailDto thumbnailDto = ThumbnailDto.builder()
                         .thumbnailUrl(null)
                         .date(startLocalDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
@@ -363,7 +361,17 @@ public class AggregationFacade {
             }
         }
 
-        return CalendarDto.builder()
+        String title = calendarReqDto.getYear()+"년 "+calendarReqDto.getMonth()+"월";
+
+        if (buttonStatus!=ButtonStatus.INACTIVE){
+            if(findBarcodeByTitle(user,title)!=null){
+                buttonStatus=ButtonStatus.ACTIVE_WITH_MODAL;
+            }else{
+                buttonStatus=ButtonStatus.ACTIVE;
+            }
+        }
+
+        return CalendarResDto.builder()
                 .thumbnailInfoList(thumbnailInfoList)
                 .buttonStatus(buttonStatus)
                 .build();
@@ -471,7 +479,8 @@ public class AggregationFacade {
 
         String barcodeTitle = barcodeDateDto.getYear()+"년 "+barcodeDateDto.getMonth()+"월";
 
-        Barcode pastBarcode = barcodeService.findBarcodeByTitle(barcodeTitle);
+        Barcode pastBarcode = findBarcodeByTitle(user, barcodeTitle);
+
         UserBarcode userBarcode = userBarcodeService.findUserBarcodeByBarcode(pastBarcode);
 
         if (pastBarcode!=null) {
@@ -510,6 +519,12 @@ public class AggregationFacade {
                 null);
         userBarcodeService.makeUserDayBarcode(user, currentBarcode);
         return currentBarcode.getId();
+    }
+
+    private Barcode findBarcodeByTitle(User user, String title){
+        List<UserBarcode> userBarcodeList = userBarcodeService.findUserBarcodeList(user);
+        Barcode barcode = barcodeService.findBarcodeByTitle(userBarcodeList, title);
+        return barcode;
     }
 
     /**

@@ -3,20 +3,14 @@ package com.mooko.dev.controller;
 import com.mooko.dev.domain.PrincipalDetails;
 import com.mooko.dev.domain.User;
 import com.mooko.dev.dto.day.req.BarcodeDateDto;
+import com.mooko.dev.dto.day.req.CalendarReqDto;
 import com.mooko.dev.dto.day.req.DayPhotoDto;
-import com.mooko.dev.dto.day.res.CalendarDto;
+import com.mooko.dev.dto.day.res.CalendarResDto;
 import com.mooko.dev.dto.day.res.DayDto;
-import com.mooko.dev.dto.day.res.ThumbnailDto;
 import com.mooko.dev.dto.event.res.BarcodeIdDto;
 import com.mooko.dev.facade.AggregationFacade;
-import java.io.File;
 import java.io.IOException;
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -34,15 +28,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class DayController {
     private final AggregationFacade aggregationFacade;
 
-    @GetMapping("/calender/{startDate}/{endDate}")
-    public ResponseEntity<CalendarDto> showCalendar(
+    @GetMapping("/calender")
+    public ResponseEntity<CalendarResDto> showCalendar(
             @AuthenticationPrincipal PrincipalDetails principalDetails,
-            @PathVariable String startDate,
-            @PathVariable String endDate){
+            @RequestBody CalendarReqDto calendarReqDto){
 
         User user = principalDetails.getUser();
 
-        CalendarDto thumbnailInfoList = aggregationFacade.showCalendar(user,startDate,endDate);
+        CalendarResDto thumbnailInfoList = aggregationFacade.showCalendar(user,calendarReqDto);
         return ResponseEntity.ok(thumbnailInfoList);
     }
 
