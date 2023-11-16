@@ -63,7 +63,8 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         response.addCookie(refreshCookie);
 //        response.sendRedirect("/profile");
 
-        response.sendRedirect("http://localhost:3000/profile");
+//        response.sendRedirect("http://localhost:3000/profile");
+        response.sendRedirect("https://moodbarcode.com/profile");
 
     }
 }
