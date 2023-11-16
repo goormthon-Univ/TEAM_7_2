@@ -134,10 +134,14 @@ public class AggregationFacade {
     public void updateEventName(User tmpUser, UpdateEventNameDto updateEventNameDto, Long eventId) {
         User user = userService.findUser(tmpUser.getId());
         Event event = eventService.findEvent(eventId);
+
+        if(updateEventNameDto.getEventName()==null||updateEventNameDto.getEventName()==""){throw new CustomException(ErrorCode.EVENT_TITLE_EMPTY);}
+
         checkUserRoomMaker(user, event);
         eventService.updateEventName(updateEventNameDto.getEventName(), event);
     }
 
+    
 
     //updateEventDate
     public void updateEventDate(User tmpUser, UpdateEventDateDto updateEventDateDto, Long eventId) {
