@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class DayController {
     private final AggregationFacade aggregationFacade;
 
+    //2.일상캘린더
     @GetMapping("/calender")
     public ResponseEntity<CalendarResDto> showCalendar(
             @AuthenticationPrincipal PrincipalDetails principalDetails,
@@ -39,6 +40,7 @@ public class DayController {
         return ResponseEntity.ok(thumbnailInfoList);
     }
 
+    //2-A. 일상게시판
     @GetMapping("{date}")
     public ResponseEntity<DayDto> showDay(
             @AuthenticationPrincipal PrincipalDetails principalDetails,
@@ -49,6 +51,7 @@ public class DayController {
         return ResponseEntity.ok(dayDto);
     }
 
+    //2-B. 일상 등록/수정
     @PostMapping("{date}")
     public ResponseEntity<Void> updateDay(
             @AuthenticationPrincipal PrincipalDetails principalDetails,
@@ -62,6 +65,7 @@ public class DayController {
 
     }
 
+    //2-C. 일상 바코드 새성
     @PostMapping("/new-barcode")
     public ResponseEntity<BarcodeIdDto> makeNewBarcode(
             @AuthenticationPrincipal PrincipalDetails principalDetails,

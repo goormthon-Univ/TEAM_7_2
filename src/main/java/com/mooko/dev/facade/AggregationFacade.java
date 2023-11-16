@@ -17,7 +17,6 @@ import com.mooko.dev.dto.event.req.UpdateEventDateDto;
 import com.mooko.dev.dto.event.req.UpdateEventNameDto;
 import com.mooko.dev.dto.event.res.EventInfoDto;
 import com.mooko.dev.dto.event.res.EventPhotoResDto;
-import com.mooko.dev.dto.event.res.MyEventDto;
 import com.mooko.dev.dto.event.res.UserInfoDto;
 import com.mooko.dev.dto.event.socket.UserEventCheckStatusDto;
 import com.mooko.dev.dto.user.req.UserNewInfoDto;
@@ -55,27 +54,18 @@ public class AggregationFacade {
     private final DayService dayService;
     private final DayPhotoService dayPhotoService;
 
-    private final int MIN_PHOTO_COUNT = 30;
+    private final int MIN_PHOTO_COUNT = 2;
     private final int MAX_PHOTO_COUNT = 130;
 
     /**
      * EventController
      */
 
-    //showMyEvent
-    public MyEventDto showMyEvent(User tmpUser){
-        User user = userService.findUser(tmpUser.getId());
-        return MyEventDto.builder()
-                .isExistEvent(checkUserAlreadyInEvent(user))
-                .eventId(user.getEvent().getId())
-                .build();
-    }
-
     //makeNewEvent
     public void makeNewEvent(User tempUser, NewEventDto newEventDto) {
         User user = userService.findUser(tempUser.getId());
         if(checkUserAlreadyInEvent(user)){throw new CustomException(ErrorCode.USER_ALREADY_HAS_EVENT);}
-        if(newEventDto.getTitle()==null&&newEventDto.getTitle()==""){throw new CustomException(ErrorCode.EVENT_TITLE_EMPTY);}
+        if(newEventDto.getTitle()==null||newEventDto.getTitle()==""){throw new CustomException(ErrorCode.EVENT_TITLE_EMPTY);}
         Event event = eventService.makeNewEvent(newEventDto, user);
         userService.addEvent(user, event);
     }
@@ -144,10 +134,14 @@ public class AggregationFacade {
     public void updateEventName(User tmpUser, UpdateEventNameDto updateEventNameDto, Long eventId) {
         User user = userService.findUser(tmpUser.getId());
         Event event = eventService.findEvent(eventId);
+
+        if(updateEventNameDto.getEventName()==null||updateEventNameDto.getEventName()==""){throw new CustomException(ErrorCode.EVENT_TITLE_EMPTY);}
+
         checkUserRoomMaker(user, event);
         eventService.updateEventName(updateEventNameDto.getEventName(), event);
     }
 
+    
 
     //updateEventDate
     public void updateEventDate(User tmpUser, UpdateEventDateDto updateEventDateDto, Long eventId) {
@@ -254,7 +248,7 @@ public class AggregationFacade {
 
         return EventPhotoResDto
                 .builder()
-                .eventId(eventId)
+                .eventId(eventId.toString())
                 .imageUrlList(eventPhotoUrlList)
                 .build();
     }
@@ -490,7 +484,10 @@ public class AggregationFacade {
 
         Barcode pastBarcode = findBarcodeByTitle(user, barcodeTitle);
 
-        UserBarcode userBarcode = userBarcodeService.findUserBarcodeByBarcode(pastBarcode);
+        UserBarcode userBarcode = userBarcodeService.findUserBarcodeByBarcode(pastBarcode)
+                .stream()
+                .findFirst()
+                .get();
 
         if (pastBarcode!=null) {
             s3Service.deleteFromS3(pastBarcode.getBarcodeUrl());
@@ -549,17 +546,10 @@ public class AggregationFacade {
     //showUserEventStatus
     public UserEventStatusDto showUserEventStatus(User tmpUser) {
         User user = userService.findUser(tmpUser.getId());
-
-        return Optional.ofNullable(user.getEvent())
-                .filter(Event::getActiveStatus)
-                .map(event -> UserEventStatusDto.builder()
-                        .isExistEvent(true)
-                        .eventId(event.getId().toString())
-                        .build())
-                .orElseGet(() -> UserEventStatusDto.builder()
-                        .isExistEvent(false)
-                        .eventId(null)
-                        .build());
+        return UserEventStatusDto.builder()
+                .isExistEvent(checkUserAlreadyInEvent(user))
+                .eventId(user.getEvent().getId().toString())
+                .build();
     }
 
     //test
@@ -574,7 +564,8 @@ public class AggregationFacade {
 
         List<UserBarcode> userBarcodeList = userBarcodeService.findUserBarcodeList(user);
 
-        String recentBarcodeImg = userBarcodeList.stream()
+        String recentBarcodeImg = userBarcodeService.findUserBarcodeList(user)
+                .stream()
                 .map(UserBarcode::getBarcode)
                 .sorted(Comparator.comparing(Barcode::getCreatedAt).reversed())
                 .map(Barcode::getBarcodeUrl)
@@ -606,6 +597,10 @@ public class AggregationFacade {
     private String USER_DEFAULT_PROFILE_IMAGE;
     public void updateUserInfo(User tmpUser, UserNewInfoDto userNewInfoDto){
         User user = userService.findUser(tmpUser.getId());
+
+        if(userNewInfoDto.getNickname()==null){
+            throw new CustomException(ErrorCode.NICKNAME_EMPTY);
+        }
 
         String fileName = s3Service.makefileName();
         String newProfileImgUrl = s3Service.putFileToS3(userNewInfoDto.getProfileImage(), fileName, s3Config.getProfileImgDir());
@@ -640,49 +635,78 @@ public class AggregationFacade {
     public TicketDto showTicketInfo(User tmpUser, Long barcodeId){
         User user = userService.findUser(tmpUser.getId());
         Barcode barcode = barcodeService.findBarcode(barcodeId);
-        Event event = eventService.findEventByBarcode(barcode);
+        User ownerUser = userBarcodeService.findUserBarcodeByBarcode(barcode).stream()
+                .map(UserBarcode::getUser)
+                .filter(currentUser -> currentUser.equals(user))
+                .findFirst()
+                .get();
+
+        if(user!=ownerUser){throw new CustomException(ErrorCode.NOT_OWNER_ACCESS);}
+
+        if (barcode.getType()==BarcodeType.DAY){
+            return createDayTicket(user, barcode);
+        } else {
+            return createEventTicket(user, barcode);}
+    }
+
+    private TicketDto createDayTicket(User user, Barcode barcode){
+        List<ImageInfoDto> imageInfoList = new ArrayList<>();
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
         String createdAt = barcode.getCreatedAt().format(formatter);
 
-        int memberCnt = 0;
-        List<ImageInfoDto> imageInfoList = new ArrayList<>();;
+        LocalDate startLocalDate = LocalDate.parse(barcode.getStartDate());
+        LocalDate endLocalDate = LocalDate.parse(barcode.getEndDate());
 
-        if (barcode.getType()==BarcodeType.DAY){
-            LocalDate startLocalDate = LocalDate.parse(barcode.getStartDate());
-            LocalDate endLocalDate = LocalDate.parse(barcode.getEndDate());
-            while (!startLocalDate.isAfter(endLocalDate)) {
-                startLocalDate = startLocalDate.plusDays(1);
+        while (!startLocalDate.isAfter(endLocalDate)) {
+            startLocalDate = startLocalDate.plusDays(1);
 
-                int year = startLocalDate.getYear();
-                int month = startLocalDate.getMonthValue();
-                int day = startLocalDate.getDayOfMonth();
+            int year = startLocalDate.getYear();
+            int month = startLocalDate.getMonthValue();
+            int day = startLocalDate.getDayOfMonth();
 
-                Day currentDay = dayService.findDayId(user, year, month, day);
+            Day currentDay = dayService.findDayId(user, year, month, day);
 
-                List<String> dayPhotoUrlList = dayPhotoService.findDayPhotoUrlList(currentDay);
+            List<String> dayPhotoUrlList = dayPhotoService.findDayPhotoUrlList(currentDay);
 
-                ImageInfoDto imageInfoDto = ImageInfoDto
-                        .builder()
-                        .date(startLocalDate.toString())
-                        .imageList(dayPhotoUrlList)
-                        .build();
-                imageInfoList.add(imageInfoDto);
-            }
-
-        } else {
-            memberCnt = event.getUsers().size()-1;
-
-            List<String> eventPhotoUrlList = eventPhotoService.findAllEventPhotoList(event);
             ImageInfoDto imageInfoDto = ImageInfoDto
                     .builder()
-                    .date(null)
-                    .imageList(eventPhotoUrlList)
+                    .date(startLocalDate.toString())
+                    .imageList(dayPhotoUrlList)
                     .build();
             imageInfoList.add(imageInfoDto);
         }
+            return TicketDto
+                    .builder()
+                    .nickname(user.getNickname())
+                    .title(barcode.getTitle())
+                    .barcodeUrl(barcode.getBarcodeUrl())
+                    .startDate(barcode.getStartDate())
+                    .endDate(barcode.getEndDate())
+                    .createdAt(createdAt)
+                    .memberCnt(0)
+                    .imageInfoList(imageInfoList)
+                    .build();
+    }
 
-        TicketDto ticketDto = TicketDto
+    private TicketDto createEventTicket(User user, Barcode barcode){
+        List<ImageInfoDto> imageInfoList = new ArrayList<>();
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
+        String createdAt = barcode.getCreatedAt().format(formatter);
+
+        Event event = eventService.findEventByBarcode(barcode);
+        int memberCnt = event.getUsers().size()-1;
+
+        List<String> eventPhotoUrlList = eventPhotoService.findAllEventPhotoList(event);
+        ImageInfoDto imageInfoDto = ImageInfoDto
+                .builder()
+                .date(null)
+                .imageList(eventPhotoUrlList)
+                .build();
+        imageInfoList.add(imageInfoDto);
+
+        return TicketDto
                 .builder()
                 .nickname(user.getNickname())
                 .title(barcode.getTitle())
@@ -693,14 +717,16 @@ public class AggregationFacade {
                 .memberCnt(memberCnt)
                 .imageInfoList(imageInfoList)
                 .build();
-        return ticketDto;
     }
 
     // showTicketInfo(quest-ticket)
     public TicketDto showTicketInfoGuest(Long barcodeId){
         Barcode barcode = barcodeService.findBarcode(barcodeId);
-        UserBarcode userBarcode = userBarcodeService.findUserBarcodeByBarcode(barcode);
-        User user = userBarcode.getUser();
+        User user = userBarcodeService.findUserBarcodeByBarcode(barcode)
+                .stream()
+                .findFirst()
+                .get()
+                .getUser();
         return showTicketInfo(user, barcodeId);
     }
 }

@@ -45,9 +45,8 @@ public class UserBarcodeService {
         userBarcodeRepository.delete(userBarcode);
     }
 
-    public UserBarcode findUserBarcodeByBarcode(Barcode barcode){
-        UserBarcode userBarcode = userBarcodeRepository.findByBarcode(barcode);
+    public List<UserBarcode> findUserBarcodeByBarcode(Barcode barcode){
+        List<UserBarcode> userBarcode = userBarcodeRepository.findByBarcode(barcode);
         return userBarcode;
     }
-
 }
