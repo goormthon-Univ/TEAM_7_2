@@ -13,6 +13,6 @@ import lombok.Setter;
 @Setter
 @Builder
 public class EventPhotoResDto {
-    private Long eventId;
+    private String eventId;
     private List<String> imageUrlList;
 }

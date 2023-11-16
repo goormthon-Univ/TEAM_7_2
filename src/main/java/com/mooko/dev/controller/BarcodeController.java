@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class BarcodeController {
     private final AggregationFacade aggregationFacade;
 
+    //4.무드클라우드
     @GetMapping("/list")
     public ResponseEntity<List<BarcodeInfoDto>> showBarcodeList(
             @AuthenticationPrincipal PrincipalDetails principalDetails){
@@ -29,6 +30,7 @@ public class BarcodeController {
         return ResponseEntity.ok(barcodeList);
     }
 
+    //4-A 바코드티켓(MY)
     @GetMapping("/{barcodeId}/my-ticket")
     public ResponseEntity<TicketDto> showMyTicket(
             @AuthenticationPrincipal PrincipalDetails principalDetails,
@@ -38,6 +40,7 @@ public class BarcodeController {
         return ResponseEntity.ok(ticketDto);
     }
 
+    //4-B 바코드티켓(GUEST)
     @GetMapping("/{barcodeId}/guest-ticket")
     public ResponseEntity<TicketDto> showGuestTicket(
             @PathVariable Long barcodeId){
