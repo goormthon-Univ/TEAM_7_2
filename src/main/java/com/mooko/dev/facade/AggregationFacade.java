@@ -17,6 +17,7 @@ import com.mooko.dev.dto.event.req.UpdateEventDateDto;
 import com.mooko.dev.dto.event.req.UpdateEventNameDto;
 import com.mooko.dev.dto.event.res.EventInfoDto;
 import com.mooko.dev.dto.event.res.EventPhotoResDto;
+import com.mooko.dev.dto.event.res.MyEventDto;
 import com.mooko.dev.dto.event.res.UserInfoDto;
 import com.mooko.dev.dto.event.socket.UserEventCheckStatusDto;
 import com.mooko.dev.dto.user.req.UserNewInfoDto;
@@ -54,27 +55,35 @@ public class AggregationFacade {
     private final DayService dayService;
     private final DayPhotoService dayPhotoService;
 
-    private final int MINIMUM_EVENT_PHOTO_COUNT = 2;
-    private final int MAX_EVENT_PHOTO_COUNT = 130;
+    private final int MIN_PHOTO_COUNT = 30;
+    private final int MAX_PHOTO_COUNT = 130;
 
     /**
      * EventController
      */
 
+    //showMyEvent
+    public MyEventDto showMyEvent(User tmpUser){
+        User user = userService.findUser(tmpUser.getId());
+        return MyEventDto.builder()
+                .isExistEvent(checkUserAlreadyInEvent(user))
+                .eventId(user.getEvent().getId())
+                .build();
+    }
+
     //makeNewEvent
     public void makeNewEvent(User tempUser, NewEventDto newEventDto) {
         User user = userService.findUser(tempUser.getId());
-        checkUserAlreadyInEvent(user);
+        if(checkUserAlreadyInEvent(user)){throw new CustomException(ErrorCode.USER_ALREADY_HAS_EVENT);}
+        if(newEventDto.getTitle()==null&&newEventDto.getTitle()==""){throw new CustomException(ErrorCode.EVENT_TITLE_EMPTY);}
         Event event = eventService.makeNewEvent(newEventDto, user);
         userService.addEvent(user, event);
     }
 
-    private void checkUserAlreadyInEvent(User user) {
-        Optional.ofNullable(user.getEvent())
+    private boolean checkUserAlreadyInEvent(User user) {
+        return Optional.ofNullable(user.getEvent())
                 .filter(Event::getActiveStatus)
-                .ifPresent(event -> {
-                    throw new CustomException(ErrorCode.USER_ALREADY_HAS_EVENT);
-                });
+                .isPresent();
     }
 
 
@@ -208,11 +217,11 @@ public class AggregationFacade {
         List<String> eventPhotoList = eventPhotoService.findAllEventPhotoList(event);
         int totalSize = eventPhotoList.size() + additionalCount;
 
-        if (checkMinimum && totalSize < MINIMUM_EVENT_PHOTO_COUNT) {
+        if (checkMinimum && totalSize < MIN_PHOTO_COUNT) {
             throw new CustomException(ErrorCode.EVENT_PHOTO_IS_LESS_THAN);
         }
 
-        if (totalSize > MAX_EVENT_PHOTO_COUNT) {
+        if (totalSize > MAX_PHOTO_COUNT) {
             throw new CustomException(ErrorCode.EVENT_PHOTO_EXCEED);
         }
     }
@@ -494,6 +503,12 @@ public class AggregationFacade {
         for (Day day : dayList) {
             List<String> photosForDay = dayPhotoService.findDayPhotoUrlList(day);
             allDayPhotos.addAll(photosForDay);
+        }
+
+        if (dayList.size()<MIN_PHOTO_COUNT){
+            throw new CustomException(ErrorCode.DAY_PHOTO_IS_LESS_THAN);
+        } else if (dayList.size()>MAX_PHOTO_COUNT){
+            throw new CustomException(ErrorCode.DAY_PHOTO_EXCEED);
         }
 
         String barcodeFileName = s3Service.makefileName();
