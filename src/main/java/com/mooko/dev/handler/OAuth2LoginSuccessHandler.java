@@ -59,7 +59,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 //        accessCookie.setDomain("localhost");  // 도메인을 localhost로 설정
         accessCookie.setPath("/");
         refreshCookie.setPath("/");
-        refreshCookie.setSecure(true);t
+        refreshCookie.setSecure(true);
         response.addCookie(accessCookie);
         response.addCookie(refreshCookie);
 //        response.sendRedirect("/profile");
