@@ -9,7 +9,9 @@ import com.mooko.dev.dto.event.req.UpdateEventNameDto;
 import com.mooko.dev.dto.event.res.BarcodeIdDto;
 import com.mooko.dev.dto.event.res.EventInfoDto;
 import com.mooko.dev.dto.event.res.EventPhotoResDto;
+import com.mooko.dev.dto.event.res.MyEventDto;
 import com.mooko.dev.facade.AggregationFacade;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,11 +27,22 @@ public class EventController {
 
     private final AggregationFacade aggregationFacade;
 
+    // 3. 나의 이벤트
+    @GetMapping("/my-event")
+    public ResponseEntity<MyEventDto> showMyEvent(
+            @AuthenticationPrincipal PrincipalDetails principalDetails
+    ){
+        User user = principalDetails.getUser();
+        MyEventDto myEventDto = aggregationFacade.showMyEvent(user);
+        return ResponseEntity.ok(myEventDto);
+    }
+
     //3-A. 이벤트생성
     @PostMapping("/new-event")
     public ResponseEntity<Void> makeNewEvent(
             @AuthenticationPrincipal PrincipalDetails principalDetails,
-            @RequestBody NewEventDto newEventDto) {
+            @RequestBody NewEventDto newEventDto
+    ) {
         User user = principalDetails.getUser();
         aggregationFacade.makeNewEvent(user, newEventDto);
         return ResponseEntity.status(HttpStatus.OK).build();
