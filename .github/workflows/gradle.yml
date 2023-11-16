@@ -11,12 +11,8 @@ on:
   push:
     branches: [ "main" ]
 
-permissions:
-  contents: read
-
 jobs:
-  build:
-
+  ci:
     runs-on: ubuntu-latest
 
     steps:
@@ -26,19 +22,48 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
+    
+    - name: make application-dev.yml
+      run: |
+        cd ./src/main/resources
+        touch ./application-dev.yml
+        echo "${{ secrets.PROPERTIES_DEV }}" > ./application-dev.yml
+      shell: bash
+        
     - name: Run chmod to make gradlew executable
       run: chmod +x ./gradlew
+      
     - name: Build with Gradle
-      uses: gradle/gradle-build-action@bd5760595778326ba7f1441bcf7e88b49de61a25 # v2.6.0
+      uses: ./gradlew build # v2.6.0
+
+    - name: Login Docker Hub
+      uses: docker/login-action@v2
       with:
-        arguments: build
-    - name: executing remote ssh commands using ssh key
-      uses: appleboy/ssh-action@v1.0.0
-      with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.USERNAME }}
-        key: ${{ secrets.PRIVATE_KEY }}
-        port: ${{ secrets.PORT }}
-        script: |
-          whoami
-          ls -al
+        username: ${{ secrets.DOCERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+    - name: Docker build & push to hub
+      run: |
+          docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p $ {{ DOCKERHUB_PASSWORD }}
+          docker build -f Dockerfile.dev -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_PROD_REPONAME }}:latest .
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_PROD_REPONAME }}:latest
+  
+  cd:
+    needs: [ci]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Docker Image Pull and Compose UP
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.HOST }}
+          username : ${{ secrets.USERNAME }}
+          key : ${{ secrets.PRIVATE_KEY }}
+          script: |
+              sudo docker rm -f $(docker ps -qa)
+              sudo docker pull ${{ secrets.DOCKER_USERNAME }}/${{ DOCKERHUB_PROD_REPONAME }}
+              docker-compose up -d 
+              docker image prune -f
+              
+      
+    
