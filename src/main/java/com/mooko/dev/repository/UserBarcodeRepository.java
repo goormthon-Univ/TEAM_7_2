@@ -12,5 +12,5 @@ import org.springframework.stereotype.Repository;
 public interface UserBarcodeRepository extends JpaRepository<UserBarcode, Long> {
     List<UserBarcode> findByUser(User user);
 
-    UserBarcode findByBarcode(Barcode barcode);
+    List<UserBarcode> findByBarcode(Barcode barcode);
 }
