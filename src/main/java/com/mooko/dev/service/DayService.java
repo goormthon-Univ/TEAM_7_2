@@ -24,6 +24,7 @@ public class DayService {
         return currentDay.orElse(null);
     }
 
+
     public Optional<Day> findDayIdOptinal(User user, int year, int month, int day){
         Optional<Day> currentDay = dayRepository.findByUserAndYearAndMonthAndDay(user,year,month,day);
         return currentDay;
