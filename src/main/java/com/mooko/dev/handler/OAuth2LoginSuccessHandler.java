@@ -59,11 +59,13 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 //        accessCookie.setDomain("localhost");  // 도메인을 localhost로 설정
         accessCookie.setPath("/");
         refreshCookie.setPath("/");
+        refreshCookie.setSecure(true);
         response.addCookie(accessCookie);
         response.addCookie(refreshCookie);
 //        response.sendRedirect("/profile");
 
-        response.sendRedirect("http://localhost:3000/profile");
+//        response.sendRedirect("http://localhost:3000/profile");
+        response.sendRedirect("https://moodbarcode.com/substart");
 
     }
 }
