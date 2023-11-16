@@ -36,7 +36,7 @@ jobs:
       run: chmod +x gradlew
       
     - name: Build with Gradle
-      uses: ./gradlew build # v2.6.0
+      run: ./gradlew build # v2.6.0
 
     - name: Login Docker Hub
       uses: docker/login-action@v2
