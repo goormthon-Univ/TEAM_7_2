@@ -1,6 +1,5 @@
-package com.mooko.dev.dto.day.res;
+package com.mooko.dev.dto.day.req;
 
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,7 +11,9 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder
-public class CalendarDto {
-    private List<ThumbnailDto> thumbnailInfoList;
-    private Boolean buttonStatus;
+public class CalendarReqDto {
+    private String startDate;
+    private String endDate;
+    private String year;
+    private String month;
 }

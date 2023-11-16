@@ -2,7 +2,10 @@ package com.mooko.dev.service;
 
 import com.mooko.dev.domain.Barcode;
 import com.mooko.dev.domain.BarcodeType;
+import com.mooko.dev.domain.DayPhoto;
 import com.mooko.dev.domain.Event;
+import com.mooko.dev.domain.User;
+import com.mooko.dev.domain.UserBarcode;
 import com.mooko.dev.exception.custom.CustomException;
 import com.mooko.dev.repository.BarcodeRepository;
 import java.util.Optional;
@@ -122,13 +125,12 @@ public class BarcodeService {
         return barcode;
     }
 
-    public Barcode findBarcodeByTitle(String title){
-        Optional<Barcode> barcode = barcodeRepository.findByTitle(title);
-        if (barcode.isPresent()){
-            return barcode.get();
-        } else {
-            return null;
-        }
+    public Barcode findBarcodeByTitle(List<UserBarcode> userBarcodeList, String title) {
+        return userBarcodeList.stream()
+                .map(UserBarcode::getBarcode)
+                .filter(barcode -> title.equals(barcode.getTitle()))
+                .findFirst()
+                .orElse(null);
     }
 
     public void deleteBarcode(Barcode barcode){
