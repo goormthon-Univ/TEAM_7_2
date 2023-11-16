@@ -28,7 +28,7 @@ spring:
             client-name: kakao
             authorization-grant-type: authorization_code
             client-authentication-method: client_secret_post
-            redirect-uri: http://localhost:8080/login/oauth2/code/kakao
+            redirect-uri: https://moodbarcode.com/login/oauth2/code/kakao
 
         provider:
           kakao:
@@ -47,11 +47,6 @@ jwt:
   refresh:
     expiration: 1209600000
     header: ReAuthorization
-
-redirect:
-  url:
-    userInfo: http://localhost:3000/userInfo
-    main: http://localhost:3000/
 
 
 cloud:
