@@ -19,7 +19,6 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addConverter(new MultipartFileToFileConverter());
     }
 
-
     @Bean
     public AntPathMatcher antPathMatcher() {
         return new AntPathMatcher();
