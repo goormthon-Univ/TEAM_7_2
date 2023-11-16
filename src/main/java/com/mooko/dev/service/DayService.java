@@ -21,11 +21,7 @@ public class DayService {
 
     public Day findDayId(User user, int year, int month, int day){
         Optional<Day> currentDay = dayRepository.findByUserAndYearAndMonthAndDay(user,year,month,day);
-        if (currentDay.isPresent()){
-            return currentDay.get();
-        } else {
-            return null;
-        }
+        return currentDay.orElse(null);
     }
 
     public Optional<Day> findDayIdOptinal(User user, int year, int month, int day){
