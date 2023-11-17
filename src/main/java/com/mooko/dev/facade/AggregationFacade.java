@@ -113,7 +113,7 @@ public class AggregationFacade {
 
         return EventInfoDto.builder()
                 .profileImgUrlList(profileImageUrlList)
-                .isRoomMaker(isRoomMaker)
+                .roomMaker(isRoomMaker)
                 .eventName(event.getTitle())
                 .startDate(event.getStartDate())
                 .endDate(event.getEndDate())
@@ -564,13 +564,13 @@ public class AggregationFacade {
         boolean isExistEvent = checkUserAlreadyInEvent(user);
 
         if(isExistEvent){
-           return  UserEventStatusDto.builder()
-                    .isExistEvent(true)
+           return UserEventStatusDto.builder()
+                    .existEvent(isExistEvent)
                     .eventId(user.getEvent().getId().toString())
                     .build();
         }
         return UserEventStatusDto.builder()
-                .isExistEvent(checkUserAlreadyInEvent(user))
+                .existEvent(isExistEvent)
                 .eventId(null)
                 .build();
     }
