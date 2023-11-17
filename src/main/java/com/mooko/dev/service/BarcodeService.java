@@ -8,6 +8,9 @@ import com.mooko.dev.domain.User;
 import com.mooko.dev.domain.UserBarcode;
 import com.mooko.dev.exception.custom.CustomException;
 import com.mooko.dev.repository.BarcodeRepository;
+
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +28,9 @@ import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -39,37 +45,57 @@ public class BarcodeService {
 
     private final BarcodeRepository barcodeRepository;
 
-    public BufferedImage resizeImage(BufferedImage original, int targetWidth, int targetHeight) {
-        BufferedImage resized = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_RGB);
-        Graphics2D g = resized.createGraphics();
-        g.drawImage(original, 0, 0, targetWidth, targetHeight, null);
-        g.dispose();
-        return resized;
+    public BufferedImage resizeImage(BufferedImage originalImage, int targetWidth, int targetHeight) {
+        AffineTransform transform = new AffineTransform();
+        transform.scale((double) targetWidth / originalImage.getWidth(),
+                (double) targetHeight / originalImage.getHeight());
+
+        AffineTransformOp scaleOp = new AffineTransformOp(transform, AffineTransformOp.TYPE_BILINEAR);
+        return scaleOp.filter(originalImage, null);
     }
 
 
 
     public BufferedImage combineImagesHorizontally(List<String> imageURLs, int totalWidth, int totalHeight) throws IOException {
         int singleImageWidth = totalWidth / imageURLs.size();
-        List<BufferedImage> resizedImages = new ArrayList<>();
+        ForkJoinPool customThreadPool = new ForkJoinPool(Runtime.getRuntime().availableProcessors());
 
-        for (String imageURL : imageURLs) {
-            BufferedImage original = ImageIO.read(new URL(imageURL));
-            BufferedImage resized = resizeImage(original, singleImageWidth, totalHeight);
-            resizedImages.add(resized);
+        try {
+            List<BufferedImage> resizedImages = customThreadPool.submit(
+                    () -> imageURLs.parallelStream().map(imageURL -> {
+                        try {
+                            BufferedImage original = ImageIO.read(new URL(imageURL));
+                            return resizeImage(original, singleImageWidth, totalHeight);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            return null;
+                        }
+                    }).collect(Collectors.toList())
+            ).get();
+
+            BufferedImage combined = new BufferedImage(totalWidth, totalHeight, BufferedImage.TYPE_INT_RGB);
+            Graphics2D g = combined.createGraphics();
+
+            int x = 0;
+            for (BufferedImage image : resizedImages) {
+                g.drawImage(image, x, 0, null);
+                x += singleImageWidth;
+            }
+            g.dispose();
+
+            return combined;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            customThreadPool.shutdown();
+            try {
+                customThreadPool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt(); // 인터럽트 상태 복원
+                e.printStackTrace();
+            }
         }
-
-        BufferedImage combined = new BufferedImage(totalWidth, totalHeight, BufferedImage.TYPE_INT_RGB);
-        Graphics2D g = combined.createGraphics();
-
-        int x = 0;
-        for (BufferedImage image : resizedImages) {
-            g.drawImage(image, x, 0, null);
-            x += singleImageWidth;
-        }
-        g.dispose();
-
-        return combined;
     }
 
 
