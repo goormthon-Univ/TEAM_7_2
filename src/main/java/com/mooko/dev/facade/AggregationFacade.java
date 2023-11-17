@@ -34,7 +34,9 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
@@ -68,9 +70,10 @@ public class AggregationFacade {
         if(checkUserAlreadyInEvent(user)){throw new CustomException(ErrorCode.USER_ALREADY_HAS_EVENT);}
         if(newEventDto.getTitle()==null|| newEventDto.getTitle().equals("")){throw new CustomException(ErrorCode.EVENT_TITLE_EMPTY);}
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        LocalDate startDate = LocalDate.parse(newEventDto.getStartDate(), formatter);
-        LocalDate endDate = LocalDate.parse(newEventDto.getEndDate(), formatter);
+        LocalDate startDate = Instant.parse(newEventDto.getStartDate()).atZone(ZoneId.of("UTC")).toLocalDate();
+        LocalDate endDate = Instant.parse(newEventDto.getEndDate()).atZone(ZoneId.of("UTC")).toLocalDate();
 
+        // 시작 날짜와 종료 날짜 비교
         if (startDate.isAfter(endDate)) {
             throw new CustomException(ErrorCode.START_DATE_EXCEED_END_DATE);
         }
