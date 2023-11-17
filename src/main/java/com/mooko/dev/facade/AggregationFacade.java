@@ -610,7 +610,7 @@ public class AggregationFacade {
     public void updateUserInfo(User tmpUser, UserNewInfoDto userNewInfoDto){
         User user = userService.findUser(tmpUser.getId());
 
-        if(userNewInfoDto.getNickname()==null){
+        if(userNewInfoDto.getNickname()==null||userNewInfoDto.getNickname().equals("")){
             throw new CustomException(ErrorCode.NICKNAME_EMPTY);
         }
 
