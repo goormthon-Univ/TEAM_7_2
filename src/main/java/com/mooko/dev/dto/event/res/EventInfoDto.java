@@ -11,7 +11,7 @@ import java.util.List;
 @Builder
 public class EventInfoDto {
     private List<String> profileImgUrlList;
-    private boolean isRoomMaker;
+    private boolean roomMaker;
     private String eventName;
     private String startDate;
     private String endDate;
