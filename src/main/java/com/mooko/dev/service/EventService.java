@@ -25,12 +25,12 @@ public class EventService {
     }
 
     @Transactional
-    public Event makeNewEvent(NewEventDto newEventDto, User user) {
+    public Event makeNewEvent(User user,String title, String startDate, String endDate) {
         Event event = Event.builder()
-                .title(newEventDto.getTitle())
+                .title(title)
                 .activeStatus(true)
-                .startDate(newEventDto.getStartDate())
-                .endDate(newEventDto.getEndDate())
+                .startDate(startDate)
+                .endDate(endDate)
                 .roomMaker(user)
                 .createdAt(LocalDateTime.now())
                 .build();
