@@ -160,6 +160,14 @@ public class AggregationFacade {
         User user = userService.findUser(tmpUser.getId());
         Event event = eventService.findEvent(eventId);
         checkUserRoomMaker(user, event);
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate startDate = Instant.parse(updateEventDateDto.getStartDate()).atZone(ZoneId.of("UTC")).toLocalDate();
+        LocalDate endDate = Instant.parse(updateEventDateDto.getEndDate()).atZone(ZoneId.of("UTC")).toLocalDate();
+
+        if (startDate.isAfter(endDate)) {
+            throw new CustomException(ErrorCode.START_DATE_EXCEED_END_DATE);
+        }
         eventService.updateEventDate(updateEventDateDto, event);
     }
 
