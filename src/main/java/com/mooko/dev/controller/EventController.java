@@ -109,15 +109,17 @@ public class EventController {
 
     //3-6. 이벤트 사진 리스트 삭제
     @DeleteMapping("/{eventId}/{userId}/image-list")
-    public ResponseEntity<Void> deleteUserEventPhoto(
+    public ResponseEntity<EventInfoDto> deleteUserEventPhoto(
             @AuthenticationPrincipal PrincipalDetails principalDetails,
             @PathVariable Long userId,
             @PathVariable Long eventId
     )
     {
         User user = principalDetails.getUser();
-        aggregationFacade.deleteUserEventPhoto(user, eventId, userId);
-        return ResponseEntity.status(HttpStatus.OK).build();
+        EventInfoDto eventInfoDto = aggregationFacade.deleteUserEventPhoto(user, eventId, userId);
+
+
+        return ResponseEntity.ok(eventInfoDto);
     }
 
     //3-7. 이벤트 나가기
