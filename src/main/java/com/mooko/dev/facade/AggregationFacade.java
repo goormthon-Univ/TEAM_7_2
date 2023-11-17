@@ -445,6 +445,11 @@ public class AggregationFacade {
 
         dayService.updateMemo(currentDay, dayPhotoDto.getMemo());
 
+        List<DayPhoto> dayPhotoList = dayPhotoService.findDayPhotoList(currentDay);
+        if (dayPhotoList!=null) {
+            deleteExistingDayPhotos(dayPhotoList);
+        }
+
         // Thumbnail
         updateThumbnail(dayPhotoDto.getThumbnail(), currentDay);
 
@@ -459,11 +464,6 @@ public class AggregationFacade {
             newThumbnailUrl = s3Service.putFileToS3(thumbnail, fileName, s3Config.getDayImageDir());
         }
 
-        DayPhoto dayThumbnail = dayPhotoService.findThumbnail(day);
-        if (dayThumbnail!=null) {
-            s3Service.deleteFromS3(dayThumbnail.getUrl());
-            dayPhotoService.deleteThumbnail(dayThumbnail);
-        }
         if(newThumbnailUrl!=null){ dayPhotoService.makeNewThumbnail(day,newThumbnailUrl,true);}
     }
 
@@ -475,11 +475,6 @@ public class AggregationFacade {
                         String fileName = s3Service.makefileName();
                         return s3Service.putFileToS3(newPhoto, fileName, s3Config.getDayImageDir());
                     }).collect(Collectors.toList());
-        }
-
-        List<DayPhoto> dayPhotoList = dayPhotoService.findDayPhotoList(day);
-        if (dayPhotoList!=null) {
-            deleteExistingDayPhotos(dayPhotoList);
         }
 
         if(newDayPhotoList!=null){dayPhotoService.makeNewDayPhoto(day,newDayPhotoUrlList,false);}
