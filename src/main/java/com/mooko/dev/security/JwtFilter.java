@@ -54,7 +54,10 @@ public class JwtFilter extends OncePerRequestFilter {
     private boolean isPathExcluded(String path) {
         return antPathMatcher.match(NO_CHECK_URL_LOGIN, path)
                 || antPathMatcher.match(NO_CHECK_URL_REDIRECT, path)
-                || antPathMatcher.match(NO_CHECK_URL_HANDSHAKING, path);
+                || antPathMatcher.match(NO_CHECK_URL_HANDSHAKING_BUTTON, path)
+                || antPathMatcher.match(NO_CHECK_URL_HANDSHAKING_FOR_CHECK, path)
+                || antPathMatcher.match(NO_CHECK_URL_HANDSHAKING_LEAVE, path);
+
     }
 
     private void processTokenAuthentication(HttpServletRequest request, HttpServletResponse response) {
