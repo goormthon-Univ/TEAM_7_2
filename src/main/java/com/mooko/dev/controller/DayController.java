@@ -29,14 +29,14 @@ public class DayController {
     private final AggregationFacade aggregationFacade;
 
     //2.일상캘린더
-    @GetMapping("/calender")
+    @GetMapping("/calender{startDate}/{endDate}/{year}/{month}")
     public ResponseEntity<CalendarResDto> showCalendar(
             @AuthenticationPrincipal PrincipalDetails principalDetails,
-            @RequestBody CalendarReqDto calendarReqDto){
+            @PathVariable String startDate, String endDate, String year, String month){
 
         User user = principalDetails.getUser();
 
-        CalendarResDto thumbnailInfoList = aggregationFacade.showCalendar(user,calendarReqDto);
+        CalendarResDto thumbnailInfoList = aggregationFacade.showCalendar(user,startDate, endDate, year, month);
         return ResponseEntity.ok(thumbnailInfoList);
     }
 
