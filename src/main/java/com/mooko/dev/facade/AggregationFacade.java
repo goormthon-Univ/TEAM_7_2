@@ -28,6 +28,7 @@ import com.mooko.dev.exception.custom.CustomException;
 import com.mooko.dev.exception.custom.ErrorCode;
 import com.mooko.dev.service.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -45,6 +46,7 @@ import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AggregationFacade {
     private final EventService eventService;
     private final UserService userService;
@@ -354,7 +356,7 @@ public class AggregationFacade {
     private void checkEventButtonStatus(Event event) {
         boolean allUsersChecked = event.getUsers().stream()
                 .allMatch(User::getCheckStatus);
-
+        log.info("바코드 생성버튼 상태입니다 id = {}, status = {} ", event.getId(), allUsersChecked);
         eventPublisher.publishEvent(
                 ButtonEvent.builder()
                         .buttonStatus(allUsersChecked)
