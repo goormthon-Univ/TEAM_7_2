@@ -170,7 +170,7 @@ public class AggregationFacade {
         if (startDate.isAfter(endDate)) {
             throw new CustomException(ErrorCode.START_DATE_EXCEED_END_DATE);
         }
-        eventService.updateEventDate(updateEventDateDto, event);
+        eventService.updateEventDate(event, startDate.toString(), endDate.toString());
     }
 
     //makeNewEventBarcode
