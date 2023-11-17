@@ -1,17 +1,23 @@
 package com.mooko.dev.handler;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mooko.dev.exception.custom.ErrorCode;
 import io.swagger.v3.core.util.Json;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 
@@ -37,12 +43,14 @@ public class OAuth2LoginFailureHandler implements AuthenticationFailureHandler {
             }*/
     }
 
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Getter
+    @Service
+    @Builder
     public static class ErrorResponse {
+        @JsonProperty
         private String code;
-
-        public ErrorResponse(String code) {
-            this.code = code;
-        }
     }
 
 }
