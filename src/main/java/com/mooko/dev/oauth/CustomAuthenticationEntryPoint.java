@@ -21,6 +21,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException {
         log.info("request.getRequestURI() = {} ", request.getRequestURI());
+        log.info("authException = {}", authException.getClass().toString());
 
 
         OAuth2LoginFailureHandler.ErrorResponse errorResponse = new OAuth2LoginFailureHandler.ErrorResponse(ErrorCode.UNAUTHORIZED_USER.getCode());
@@ -31,7 +32,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         response.getWriter().write(json);
 
 
-        log.error("error = {}", authException.getMessage());
+        log.error("error = {}", (Object) authException.getStackTrace());
     }
 
 }
