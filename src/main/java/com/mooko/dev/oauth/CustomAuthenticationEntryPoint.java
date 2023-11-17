@@ -21,20 +21,15 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException {
         log.info("request.getRequestURI() = {} ", request.getRequestURI());
-        Throwable cause = authException.getCause();
 
-        if (cause instanceof TokenExpiredException || cause instanceof SignatureVerificationException) {
-            OAuth2LoginFailureHandler.ErrorResponse errorResponse = new OAuth2LoginFailureHandler.ErrorResponse(ErrorCode.UNAUTHORIZED_USER.getCode());
-            String json = new ObjectMapper().writeValueAsString(errorResponse);
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.setContentType("application/json");
-            response.setCharacterEncoding("UTF-8");
-            response.getWriter().write(json);
-        }
 
+        OAuth2LoginFailureHandler.ErrorResponse errorResponse = new OAuth2LoginFailureHandler.ErrorResponse(ErrorCode.UNAUTHORIZED_USER.getCode());
+        String json = new ObjectMapper().writeValueAsString(errorResponse);
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
-        response.setContentType("application/json;charset=UTF-8");
+        response.getWriter().write(json);
+
 
         log.error("error = {}", authException.getMessage());
     }
