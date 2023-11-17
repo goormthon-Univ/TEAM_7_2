@@ -67,6 +67,13 @@ public class AggregationFacade {
         User user = userService.findUser(tempUser.getId());
         if(checkUserAlreadyInEvent(user)){throw new CustomException(ErrorCode.USER_ALREADY_HAS_EVENT);}
         if(newEventDto.getTitle()==null|| newEventDto.getTitle().equals("")){throw new CustomException(ErrorCode.EVENT_TITLE_EMPTY);}
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate startDate = LocalDate.parse(newEventDto.getStartDate(), formatter);
+        LocalDate endDate = LocalDate.parse(newEventDto.getEndDate(), formatter);
+
+        if (startDate.isAfter(endDate)) {
+            throw new CustomException(ErrorCode.START_DATE_EXCEED_END_DATE);
+        }
         Event event = eventService.makeNewEvent(newEventDto, user);
         userService.addEvent(user, event);
         return event.getId();
