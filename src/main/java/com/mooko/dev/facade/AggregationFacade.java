@@ -245,7 +245,7 @@ public class AggregationFacade {
 
 
     //deleteUserEventPhoto
-    public void deleteUserEventPhoto(User tmpUser, Long eventId, Long tmpUserId) {
+    public EventInfoDto deleteUserEventPhoto(User tmpUser, Long eventId, Long tmpUserId) {
         User user = userService.findUser(tmpUser.getId());
         Event event = eventService.findEvent(eventId);
 
@@ -256,6 +256,29 @@ public class AggregationFacade {
             throw new CustomException(ErrorCode.USER_NOT_MATCH);
         }
         deleteExistingPhotoOrEventUser(user, event, false, false);
+
+
+        List<String> profileImageUrlList = event.getUsers().stream()
+                .map(User::getProfileUrl)
+                .collect(Collectors.toList());
+
+        boolean isRoomMaker = user.equals(event.getRoomMaker());
+
+        List<UserInfoDto> userInfoList = event.getUsers().stream()
+                .map(eventUser -> createUserInfoDto(eventUser, event))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        return EventInfoDto.builder()
+                .profileImgUrlList(profileImageUrlList)
+                .roomMaker(isRoomMaker)
+                .eventName(event.getTitle())
+                .startDate(event.getStartDate())
+                .endDate(event.getEndDate())
+                .loginUserId(user.getId().toString())
+                .userCount(event.getUsers().size())
+                .userInfo(userInfoList)
+                .build();
 
     }
 
