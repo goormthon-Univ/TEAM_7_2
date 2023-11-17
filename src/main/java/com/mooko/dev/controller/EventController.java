@@ -118,7 +118,6 @@ public class EventController {
         User user = principalDetails.getUser();
         EventInfoDto eventInfoDto = aggregationFacade.deleteUserEventPhoto(user, eventId, userId);
 
-
         return ResponseEntity.ok(eventInfoDto);
     }
 
