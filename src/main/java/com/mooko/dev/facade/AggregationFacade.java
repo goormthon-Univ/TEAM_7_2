@@ -363,7 +363,7 @@ public class AggregationFacade {
             Optional<Day> currentDay = dayService.findDayIdOptinal(user,year,month,day);
             DayPhoto dayPhoto = null;
             if (currentDay.isPresent()){
-                dayPhoto = dayPhotoService.findThumnail(currentDay.get());
+                dayPhoto = dayPhotoService.findThumbnail(currentDay.get());
             }
 
             if (dayPhoto!=null){
@@ -459,7 +459,7 @@ public class AggregationFacade {
             newThumbnailUrl = s3Service.putFileToS3(thumbnail, fileName, s3Config.getDayImageDir());
         }
 
-        DayPhoto dayThumbnail = dayPhotoService.findThumnail(day);
+        DayPhoto dayThumbnail = dayPhotoService.findThumbnail(day);
         if (dayThumbnail!=null) {
             s3Service.deleteFromS3(dayThumbnail.getUrl());
             dayPhotoService.deleteThumbnail(dayThumbnail);
