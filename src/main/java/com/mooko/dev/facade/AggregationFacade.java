@@ -519,12 +519,11 @@ public class AggregationFacade {
 
         Barcode pastBarcode = findBarcodeByTitle(user, barcodeTitle);
 
-        UserBarcode userBarcode = userBarcodeService.findUserBarcodeByBarcode(pastBarcode)
-                .stream()
-                .findFirst()
-                .orElseGet(null);
-
         if (pastBarcode!=null) {
+            UserBarcode userBarcode = userBarcodeService.findUserBarcodeByBarcode(pastBarcode)
+                    .stream()
+                    .findFirst()
+                    .orElseGet(null);
             s3Service.deleteFromS3(pastBarcode.getBarcodeUrl());
             userBarcodeService.deleteUserBarcode(userBarcode);
             barcodeService.deleteBarcode(pastBarcode);
