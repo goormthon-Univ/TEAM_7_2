@@ -213,20 +213,22 @@ public class AggregationFacade {
         if (!event.getActiveStatus()) {
             throw new CustomException(ErrorCode.INVALID_REQUEST);
         }
-        checkEventPhotoCount(event, newPhotoList.size(), false);
+
         List<EventPhoto> userEventPhotoList = eventPhotoService.findUserEventPhotoList(user, event);
         userEventPhotoList.forEach(eventPhoto -> s3Service.deleteFromS3(eventPhoto.getUrl()));
         eventPhotoService.deleteEventPhoto(userEventPhotoList);
-
-        List<String> newPhotoUrlList = newPhotoList.parallelStream()
-                .map(newPhoto -> {
-                    String fileName = s3Service.makefileName();
-                    return s3Service.putFileToS3(newPhoto, fileName, s3Config.getEventImageDir());
-                }).collect(Collectors.toList());
-
-
         deleteExistingPhotoOrEventUser(user, event, false, false);
-        eventPhotoService.makeNewEventPhoto(user, event, newPhotoUrlList);
+
+        if(!newPhotoList.isEmpty()){
+            checkEventPhotoCount(event, newPhotoList.size(), false);
+            List<String> newPhotoUrlList = newPhotoList.parallelStream()
+                    .map(newPhoto -> {
+                        String fileName = s3Service.makefileName();
+                        return s3Service.putFileToS3(newPhoto, fileName, s3Config.getEventImageDir());
+                    }).toList();
+            eventPhotoService.makeNewEventPhoto(user, event, newPhotoUrlList);
+        }
+
     }
 
     public void checkEventPhotoCount(Event event, int additionalCount, boolean checkMinimum) {
