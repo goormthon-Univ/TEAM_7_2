@@ -77,7 +77,7 @@ public class AggregationFacade {
         if (startDate.isAfter(endDate)) {
             throw new CustomException(ErrorCode.START_DATE_EXCEED_END_DATE);
         }
-        Event event = eventService.makeNewEvent(newEventDto, user);
+        Event event = eventService.makeNewEvent(user,newEventDto.getTitle(),startDate.toString(), endDate.toString());
         userService.addEvent(user, event);
         return event.getId();
     }
@@ -115,7 +115,7 @@ public class AggregationFacade {
 
         return EventInfoDto.builder()
                 .profileImgUrlList(profileImageUrlList)
-                .isRoomMaker(isRoomMaker)
+                .roomMaker(isRoomMaker)
                 .eventName(event.getTitle())
                 .startDate(event.getStartDate())
                 .endDate(event.getEndDate())
@@ -162,6 +162,14 @@ public class AggregationFacade {
         User user = userService.findUser(tmpUser.getId());
         Event event = eventService.findEvent(eventId);
         checkUserRoomMaker(user, event);
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate startDate = Instant.parse(updateEventDateDto.getStartDate()).atZone(ZoneId.of("UTC")).toLocalDate();
+        LocalDate endDate = Instant.parse(updateEventDateDto.getEndDate()).atZone(ZoneId.of("UTC")).toLocalDate();
+
+        if (startDate.isAfter(endDate)) {
+            throw new CustomException(ErrorCode.START_DATE_EXCEED_END_DATE);
+        }
         eventService.updateEventDate(updateEventDateDto, event);
     }
 
@@ -558,13 +566,13 @@ public class AggregationFacade {
         boolean isExistEvent = checkUserAlreadyInEvent(user);
 
         if(isExistEvent){
-           return  UserEventStatusDto.builder()
-                    .isExistEvent(true)
+           return UserEventStatusDto.builder()
+                    .existEvent(isExistEvent)
                     .eventId(user.getEvent().getId().toString())
                     .build();
         }
         return UserEventStatusDto.builder()
-                .isExistEvent(checkUserAlreadyInEvent(user))
+                .existEvent(isExistEvent)
                 .eventId(null)
                 .build();
     }

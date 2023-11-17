@@ -1,5 +1,7 @@
 package com.mooko.dev.controller;
 
+import static java.awt.SystemColor.info;
+
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.mooko.dev.domain.PrincipalDetails;

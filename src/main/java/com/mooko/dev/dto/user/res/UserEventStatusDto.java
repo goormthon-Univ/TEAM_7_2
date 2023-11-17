@@ -9,6 +9,6 @@ import lombok.*;
 @Builder
 public class UserEventStatusDto {
 
-    private boolean isExistEvent;
+    private boolean existEvent;
     private String eventId;
 }
