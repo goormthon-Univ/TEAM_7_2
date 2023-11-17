@@ -29,7 +29,10 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private static final String NO_CHECK_URL_LOGIN = "/oauth2/authorization/kakao";
     private static final String NO_CHECK_URL_REDIRECT = "/login/oauth2/code/kakao";
-    private static final String NO_CHECK_URL_HANDSHAKING = "/ws-check/info";
+    private static final String NO_CHECK_URL_HANDSHAKING_FOR_CHECK = "/ws-check/**";
+    private static final String NO_CHECK_URL_HANDSHAKING_BUTTON = "/ws-button/**";
+    private static final String NO_CHECK_URL_HANDSHAKING_LEAVE = "/ws-leave-event/**";
+
 
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
