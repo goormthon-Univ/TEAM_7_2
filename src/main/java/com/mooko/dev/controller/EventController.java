@@ -7,6 +7,7 @@ import com.mooko.dev.dto.event.req.NewEventDto;
 import com.mooko.dev.dto.event.req.UpdateEventDateDto;
 import com.mooko.dev.dto.event.req.UpdateEventNameDto;
 import com.mooko.dev.dto.event.res.BarcodeIdDto;
+import com.mooko.dev.dto.event.res.EventIdDto;
 import com.mooko.dev.dto.event.res.EventInfoDto;
 import com.mooko.dev.dto.event.res.EventPhotoResDto;
 import com.mooko.dev.facade.AggregationFacade;
@@ -27,13 +28,13 @@ public class EventController {
 
     //3-A. 이벤트생성
     @PostMapping("/new-event")
-    public ResponseEntity<Void> makeNewEvent(
+    public ResponseEntity<EventIdDto> makeNewEvent(
             @AuthenticationPrincipal PrincipalDetails principalDetails,
             @RequestBody NewEventDto newEventDto
     ) {
         User user = principalDetails.getUser();
-        aggregationFacade.makeNewEvent(user, newEventDto);
-        return ResponseEntity.status(HttpStatus.OK).build();
+        Long eventId = aggregationFacade.makeNewEvent(user, newEventDto);
+        return ResponseEntity.ok(EventIdDto.builder().eventId(eventId.toString()).build());
     }
 
     //3-C. 이벤트 바코드 생성

@@ -63,12 +63,13 @@ public class AggregationFacade {
      */
 
     //makeNewEvent
-    public void makeNewEvent(User tempUser, NewEventDto newEventDto) {
+    public Long makeNewEvent(User tempUser, NewEventDto newEventDto) {
         User user = userService.findUser(tempUser.getId());
         if(checkUserAlreadyInEvent(user)){throw new CustomException(ErrorCode.USER_ALREADY_HAS_EVENT);}
         if(newEventDto.getTitle()==null|| newEventDto.getTitle().equals("")){throw new CustomException(ErrorCode.EVENT_TITLE_EMPTY);}
         Event event = eventService.makeNewEvent(newEventDto, user);
         userService.addEvent(user, event);
+        return event.getId();
     }
 
     private boolean checkUserAlreadyInEvent(User user) {
