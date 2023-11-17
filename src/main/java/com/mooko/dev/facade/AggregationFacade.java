@@ -39,6 +39,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -65,7 +66,7 @@ public class AggregationFacade {
     public void makeNewEvent(User tempUser, NewEventDto newEventDto) {
         User user = userService.findUser(tempUser.getId());
         if(checkUserAlreadyInEvent(user)){throw new CustomException(ErrorCode.USER_ALREADY_HAS_EVENT);}
-        if(newEventDto.getTitle()==null||newEventDto.getTitle()==""){throw new CustomException(ErrorCode.EVENT_TITLE_EMPTY);}
+        if(newEventDto.getTitle()==null|| newEventDto.getTitle().equals("")){throw new CustomException(ErrorCode.EVENT_TITLE_EMPTY);}
         Event event = eventService.makeNewEvent(newEventDto, user);
         userService.addEvent(user, event);
     }
@@ -135,7 +136,7 @@ public class AggregationFacade {
         User user = userService.findUser(tmpUser.getId());
         Event event = eventService.findEvent(eventId);
 
-        if(updateEventNameDto.getEventName()==null||updateEventNameDto.getEventName()==""){throw new CustomException(ErrorCode.EVENT_TITLE_EMPTY);}
+        if(updateEventNameDto.getEventName()==null|| updateEventNameDto.getEventName().equals("")){throw new CustomException(ErrorCode.EVENT_TITLE_EMPTY);}
 
         checkUserRoomMaker(user, event);
         eventService.updateEventName(updateEventNameDto.getEventName(), event);
@@ -273,9 +274,7 @@ public class AggregationFacade {
     private void deleteExistingPhotoOrEventUser(User user, Event event, boolean isLeaveEvent, boolean isDeleteEvent) {
         List<EventPhoto> eventPhotoList = eventPhotoService.findUserEventPhotoList(user, event);
         if (!eventPhotoList.isEmpty()) {
-            eventPhotoList.forEach(eventPhoto -> {
-                s3Service.deleteFromS3(eventPhoto.getUrl());
-            });
+            eventPhotoList.forEach(eventPhoto -> s3Service.deleteFromS3(eventPhoto.getUrl()));
             eventPhotoService.deleteEventPhoto(eventPhotoList);
             if (isLeaveEvent) {
                 eventService.deleteEventUser(user, event);
@@ -353,7 +352,7 @@ public class AggregationFacade {
                         .build();
                 thumbnailInfoList.add(thumbnailDto);
             } else {
-                if (Integer.toString(year)==calendarReqDto.getYear()&&Integer.toString(month)==calendarReqDto.getMonth()){
+                if (Integer.toString(year).equals(calendarReqDto.getYear()) && Integer.toString(month).equals(calendarReqDto.getMonth())){
                     buttonStatus = ButtonStatus.INACTIVE;
                 }
                 ThumbnailDto thumbnailDto = ThumbnailDto.builder()
@@ -411,8 +410,7 @@ public class AggregationFacade {
     public void updateDay(User tmpUser, String date, DayPhotoDto dayPhotoDto){
         User user = userService.findUser(tmpUser.getId());
 
-        List<File> newDayPhotoList = Arrays.asList(dayPhotoDto.getPhoto1(),dayPhotoDto.getPhoto2(), dayPhotoDto.getPhoto3())
-                .stream()
+        List<File> newDayPhotoList = Stream.of(dayPhotoDto.getPhoto1(),dayPhotoDto.getPhoto2(), dayPhotoDto.getPhoto3())
                 .filter(photo -> photo != null && photo.length() > 0)
                 .collect(Collectors.toList());
 
@@ -467,9 +465,7 @@ public class AggregationFacade {
     }
 
     private void deleteExistingDayPhotos(List<DayPhoto> dayPhotoList) {
-        dayPhotoList.forEach(eventPhoto -> {
-            s3Service.deleteFromS3(eventPhoto.getUrl());
-        });
+        dayPhotoList.forEach(eventPhoto -> s3Service.deleteFromS3(eventPhoto.getUrl()));
         dayPhotoService.deleteDayPhotos(dayPhotoList);
     }
 
@@ -546,9 +542,17 @@ public class AggregationFacade {
     //showUserEventStatus
     public UserEventStatusDto showUserEventStatus(User tmpUser) {
         User user = userService.findUser(tmpUser.getId());
+        boolean isExistEvent = checkUserAlreadyInEvent(user);
+
+        if(isExistEvent){
+           return  UserEventStatusDto.builder()
+                    .isExistEvent(true)
+                    .eventId(user.getEvent().getId().toString())
+                    .build();
+        }
         return UserEventStatusDto.builder()
                 .isExistEvent(checkUserAlreadyInEvent(user))
-                .eventId(user.getEvent().getId().toString())
+                .eventId(null)
                 .build();
     }
 
