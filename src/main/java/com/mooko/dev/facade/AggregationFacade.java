@@ -219,7 +219,7 @@ public class AggregationFacade {
         eventPhotoService.deleteEventPhoto(userEventPhotoList);
         deleteExistingPhotoOrEventUser(user, event, false, false);
 
-        if(!newPhotoList.isEmpty()){
+        if(newPhotoList != null){
             checkEventPhotoCount(event, newPhotoList.size(), false);
             List<String> newPhotoUrlList = newPhotoList.parallelStream()
                     .map(newPhoto -> {
