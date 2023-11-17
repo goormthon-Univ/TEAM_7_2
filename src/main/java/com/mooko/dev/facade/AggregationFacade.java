@@ -93,7 +93,9 @@ public class AggregationFacade {
     public EventInfoDto showEventPage(User tmpUser, Long eventId) {
         User user = userService.findUser(tmpUser.getId());
         Event event = eventService.findEvent(eventId);
-
+        if (!user.getEvent().getId().equals(event.getId())) {
+            throw new CustomException(ErrorCode.USER_ALREADY_HAS_EVENT);
+        }
         // 이벤트에 사용자 등록 여부 확인 및 등록
         if (event.getUsers().stream().noneMatch(existingUser -> existingUser.equals(user))) {
             eventService.addEventUser(user, event);
