@@ -367,11 +367,11 @@ public class AggregationFacade {
      */
 
     // showUserCalendar
-    public CalendarResDto showCalendar(User tmpUser, CalendarReqDto calendarReqDto){
+    public CalendarResDto showCalendar(User tmpUser, String startDate, String endDate, String currentYear, String currentMonth){
         User user = userService.findUser(tmpUser.getId());
 
-        LocalDate startLocalDate = LocalDate.parse(calendarReqDto.getStartDate());
-        LocalDate endLocalDate = LocalDate.parse(calendarReqDto.getEndDate());
+        LocalDate startLocalDate = LocalDate.parse(startDate);
+        LocalDate endLocalDate = LocalDate.parse(endDate);
 
         List<ThumbnailDto> thumbnailInfoList = new ArrayList<>();
 
@@ -396,7 +396,7 @@ public class AggregationFacade {
                         .build();
                 thumbnailInfoList.add(thumbnailDto);
             } else {
-                if (Integer.toString(year).equals(calendarReqDto.getYear()) && Integer.toString(month).equals(calendarReqDto.getMonth())){
+                if (Integer.toString(year).equals(currentYear) && Integer.toString(month).equals(currentMonth)){
                     buttonStatus = ButtonStatus.INACTIVE;
                 }
                 ThumbnailDto thumbnailDto = ThumbnailDto.builder()
@@ -407,7 +407,7 @@ public class AggregationFacade {
             }
         }
 
-        String title = calendarReqDto.getYear()+"년 "+calendarReqDto.getMonth()+"월";
+        String title = currentYear+"년 "+currentMonth+"월";
 
         if (buttonStatus!=ButtonStatus.INACTIVE){
             if(findBarcodeByTitle(user,title)!=null){
