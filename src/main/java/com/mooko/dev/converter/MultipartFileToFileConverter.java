@@ -21,7 +21,7 @@ public class MultipartFileToFileConverter implements Converter<MultipartFile, Fi
             return tempFile;
 
         } catch (IOException e) {
-            throw new CustomException(ErrorCode.INVALID_REQUEST);
+            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
     }
 }
