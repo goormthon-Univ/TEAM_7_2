@@ -47,7 +47,6 @@ public class UserController {
         User user = principalDetails.getUser();
 
         UserEventStatusDto userEventStatusDto = aggregationFacade.showUserEventStatus(user);
-        System.out.println(userEventStatusDto.getEventId());
         return ResponseEntity.ok(userEventStatusDto);
     }
 
