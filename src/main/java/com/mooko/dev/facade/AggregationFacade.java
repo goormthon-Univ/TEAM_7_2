@@ -174,7 +174,7 @@ public class AggregationFacade {
     }
 
     //makeNewEventBarcode
-    public Long makeNewEventBarcode(User tmpUser, Long eventId) throws IOException {
+    public Long makeNewEventBarcode(User tmpUser, Long eventId) throws IOException, InterruptedException {
         User user = userService.findUser(tmpUser.getId());
         Event event = eventService.findEvent(eventId);
         checkUserRoomMaker(user, event);
@@ -509,7 +509,7 @@ public class AggregationFacade {
     }
 
     // makeNewDayBarcode
-    public Long makeNewDayBarcode(User tmpUser, BarcodeDateDto barcodeDateDto) throws IOException {
+    public Long makeNewDayBarcode(User tmpUser, BarcodeDateDto barcodeDateDto) throws IOException, InterruptedException {
         User user = userService.findUser(tmpUser.getId());
 
         int intYear = Integer.parseInt(barcodeDateDto.getYear());

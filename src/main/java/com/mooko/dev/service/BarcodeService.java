@@ -46,26 +46,27 @@ public class BarcodeService {
     private final BarcodeRepository barcodeRepository;
 
     public BufferedImage resizeImage(BufferedImage originalImage, int targetWidth, int targetHeight) {
-        AffineTransform transform = new AffineTransform();
-        transform.scale((double) targetWidth / originalImage.getWidth(),
-                (double) targetHeight / originalImage.getHeight());
-
-        AffineTransformOp scaleOp = new AffineTransformOp(transform, AffineTransformOp.TYPE_BILINEAR);
-        return scaleOp.filter(originalImage, null);
+        BufferedImage resizedImage = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g = resizedImage.createGraphics();
+        g.drawImage(originalImage, 0, 0, targetWidth, targetHeight, null);
+        g.dispose();
+        return resizedImage;
     }
 
 
 
-    public BufferedImage combineImagesHorizontally(List<String> imageURLs, int totalWidth, int totalHeight) throws IOException {
-        int singleImageWidth = totalWidth / imageURLs.size();
-        ForkJoinPool customThreadPool = new ForkJoinPool(Runtime.getRuntime().availableProcessors());
+    public BufferedImage combineImagesHorizontally(List<String> imageURLs, int totalWidth, int totalHeight) throws IOException, InterruptedException {
+        int baseImageWidth = totalWidth / imageURLs.size();
+        int remainingWidth = totalWidth - (baseImageWidth * imageURLs.size());
 
+        ForkJoinPool customThreadPool = new ForkJoinPool();
         try {
-            List<BufferedImage> resizedImages = customThreadPool.submit(
-                    () -> imageURLs.parallelStream().map(imageURL -> {
+            List<BufferedImage> resizedImages = customThreadPool.submit(() ->
+                    imageURLs.parallelStream().map(imageURL -> {
                         try {
                             BufferedImage original = ImageIO.read(new URL(imageURL));
-                            return resizeImage(original, singleImageWidth, totalHeight);
+                            int width = baseImageWidth + (imageURLs.indexOf(imageURL) == imageURLs.size() - 1 ? remainingWidth : 0);
+                            return resizeImage(original, width, totalHeight);
                         } catch (IOException e) {
                             e.printStackTrace();
                             return null;
@@ -77,23 +78,22 @@ public class BarcodeService {
             Graphics2D g = combined.createGraphics();
 
             int x = 0;
-            for (BufferedImage image : resizedImages) {
-                g.drawImage(image, x, 0, null);
-                x += singleImageWidth;
+            for (BufferedImage resizedImage : resizedImages) {
+                if (resizedImage != null) {
+                    g.drawImage(resizedImage, x, 0, null);
+                    x += resizedImage.getWidth();
+                }
             }
             g.dispose();
 
             return combined;
         } catch (Exception e) {
             e.printStackTrace();
-            return null;
+            throw new IOException("An error occurred while combining images.", e);
         } finally {
             customThreadPool.shutdown();
-            try {
-                customThreadPool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt(); // 인터럽트 상태 복원
-                e.printStackTrace();
+            if (!customThreadPool.awaitTermination(60, TimeUnit.SECONDS)) {
+                customThreadPool.shutdownNow();
             }
         }
     }
@@ -109,7 +109,7 @@ public class BarcodeService {
      *
      *
      */
-    public File makeNewBarcode(List<String> imageURLs) throws IOException {
+    public File makeNewBarcode(List<String> imageURLs) throws IOException, InterruptedException {
         log.info("imageURLs size = {}", imageURLs.size());
 
         // 바코드 생성 테스트할때는 주석으로
@@ -147,8 +147,7 @@ public class BarcodeService {
     }
 
     public Barcode findBarcode(Long id){
-        Barcode barcode = barcodeRepository.findById(id).orElseThrow(() -> new CustomException(ErrorCode.BARCODE_NOT_FOUND));
-        return barcode;
+        return barcodeRepository.findById(id).orElseThrow(() -> new CustomException(ErrorCode.BARCODE_NOT_FOUND));
     }
 
     public Barcode findBarcodeByTitle(List<UserBarcode> userBarcodeList, String title) {
