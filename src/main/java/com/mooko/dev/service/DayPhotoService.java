@@ -2,9 +2,8 @@ package com.mooko.dev.service;
 
 import com.mooko.dev.domain.Day;
 import com.mooko.dev.domain.DayPhoto;
-import com.mooko.dev.domain.EventPhoto;
 import com.mooko.dev.repository.DayPhotoRepository;
-import com.mooko.dev.repository.DayRepository;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,19 +18,14 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class DayPhotoService {
     private final DayPhotoRepository dayPhotoRepository;
-    public DayPhoto findThumnail(Day day){
+    public DayPhoto findThumbnail(Day day){
         Optional<DayPhoto> dayPhoto = dayPhotoRepository.findByDayAndThumbnailTrue(day);
-        if (dayPhoto.isPresent()){
-            return dayPhoto.get();
-        }else{
-            return null;
-        }
+        return dayPhoto.orElse(null);
     }
 
     public List<DayPhoto> findDayPhotoList(Day day){
 
-        List<DayPhoto> DayPhotos = dayPhotoRepository.findByDayAndThumbnailFalse(day);
-        return DayPhotos;
+        return dayPhotoRepository.findByDay(day);
     }
 
     @Transactional
