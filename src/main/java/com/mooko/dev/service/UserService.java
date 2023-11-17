@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -47,5 +49,9 @@ public class UserService {
         user.updateUserInfo(newProfileImgUrl,nickname, birth,
                 gender, modalActive);
         userRepository.save(user);
+    }
+
+    public List<User> findUserByEvent(Event event) {
+        return userRepository.findByEvent(event);
     }
 }

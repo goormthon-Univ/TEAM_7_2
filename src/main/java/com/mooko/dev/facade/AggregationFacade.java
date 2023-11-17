@@ -324,14 +324,16 @@ public class AggregationFacade {
         if (!eventPhotoList.isEmpty()) {
             eventPhotoList.forEach(eventPhoto -> s3Service.deleteFromS3(eventPhoto.getUrl()));
             eventPhotoService.deleteEventPhoto(eventPhotoList);
-            if (isLeaveEvent) {
-                eventService.deleteEventUser(user, event);
-                userService.deleteEvent(user);
-                if(isDeleteEvent){
-                    eventService.deleteEvent(event);
-                }
+
+        }
+        if (isLeaveEvent) {
+            eventService.deleteEventUser(user, event);
+            userService.deleteEvent(user);
+            if (isDeleteEvent) {
+                eventService.deleteEvent(event);
             }
         }
+
     }
 
 
@@ -354,7 +356,8 @@ public class AggregationFacade {
 
     //바코드 생성버튼 이벤트처리
     private void checkEventButtonStatus(Event event) {
-        boolean allUsersChecked = event.getUsers().stream()
+        List<User> userByEvent = userService.findUserByEvent(event);
+        boolean allUsersChecked = userByEvent.stream()
                 .allMatch(User::getCheckStatus);
         log.info("바코드 생성버튼 상태입니다 id = {}, status = {} ", event.getId(), allUsersChecked);
         eventPublisher.publishEvent(
