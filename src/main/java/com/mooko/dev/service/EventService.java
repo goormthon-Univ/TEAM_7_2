@@ -72,7 +72,7 @@ public class EventService {
         if (event.getUsers().removeIf(u -> u.equals(user))) {
             eventRepository.save(event);
         } else {
-            throw new CustomException(ErrorCode.USER_NOT_FOUND);
+            throw new CustomException(ErrorCode.USER_ALREADY_DELETED);
         }
     }
 
