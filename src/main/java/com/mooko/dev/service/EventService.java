@@ -45,8 +45,8 @@ public class EventService {
     }
 
     @Transactional
-    public void updateEventDate(UpdateEventDateDto updateEventDateDto, Event event) {
-        event.updateEventDate(updateEventDateDto.getStartDate(), updateEventDateDto.getEndDate());
+    public void updateEventDate(Event event, String startDate, String endDate) {
+        event.updateEventDate(startDate, endDate);
         eventRepository.save(event);
     }
 
