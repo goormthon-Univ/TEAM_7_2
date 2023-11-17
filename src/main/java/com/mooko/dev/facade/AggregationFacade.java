@@ -435,9 +435,7 @@ public class AggregationFacade {
 
         Day currentDay = dayService.findDayId(user,year,month,day);
 
-        if (currentDay==null){
-            currentDay = dayService.makeDay(user,year,month,day);
-        }
+        if(currentDay==null){throw new CustomException(ErrorCode.DAY_NOT_FOUND);}
 
         String memo = dayService.findMemo(currentDay);
         List<DayPhoto> dayImageList = dayPhotoService.findDayPhotoList(currentDay);
@@ -464,7 +462,9 @@ public class AggregationFacade {
         int day = currentDate.getDayOfMonth();
 
         Day currentDay = dayService.findDayId(user,year,month,day);
-        if(currentDay==null){throw new CustomException(ErrorCode.DAY_NOT_FOUND);}
+        if (currentDay==null){
+            currentDay = dayService.makeDay(user,year,month,day);
+        }
 
         dayService.updateMemo(currentDay, dayPhotoDto.getMemo());
 
