@@ -141,7 +141,7 @@ public class AggregationFacade {
         eventService.updateEventName(updateEventNameDto.getEventName(), event);
     }
 
-    
+
 
     //updateEventDate
     public void updateEventDate(User tmpUser, UpdateEventDateDto updateEventDateDto, Long eventId) {
