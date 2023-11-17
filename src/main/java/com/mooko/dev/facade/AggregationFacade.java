@@ -522,7 +522,7 @@ public class AggregationFacade {
         UserBarcode userBarcode = userBarcodeService.findUserBarcodeByBarcode(pastBarcode)
                 .stream()
                 .findFirst()
-                .get();
+                .orElseGet(null);
 
         if (pastBarcode!=null) {
             s3Service.deleteFromS3(pastBarcode.getBarcodeUrl());
