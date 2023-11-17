@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
 @Slf4j
 @RestControllerAdvice
@@ -25,5 +26,13 @@ public class ExceptionHandlers {
         log.error("error = {}", e.getStatusCode());
         ErrorDto errorDto = ErrorDto.builder().code(e.getMessage()).build();
         return new ResponseEntity<>(errorDto,e.getStatusCode());
+    }
+
+
+    @ExceptionHandler(NoHandlerFoundException.class)
+    public ResponseEntity<ErrorDto> handleNoHandlerFoundException(NoHandlerFoundException e) {
+        log.error("error = {}", e.getStatusCode());
+        ErrorDto errorDto = ErrorDto.builder().code(e.getMessage()).build();
+        return new ResponseEntity<>(errorDto, e.getStatusCode());
     }
 }
