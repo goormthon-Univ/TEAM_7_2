@@ -38,7 +38,7 @@ public class SecurityConfig {
                         sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(config -> config
                         .requestMatchers("/oauth2/authorization/kakao", "/login/oauth2/code/kakao").permitAll()
-                        .requestMatchers("/ws-check/**", "/ws-button", "/ws-leave-event").permitAll()
+                        .requestMatchers("/ws-check/**", "/ws-button/**", "/ws-leave-event/**").permitAll()
                         .requestMatchers("/api/v1/user/for-test").permitAll()
                         .requestMatchers("/api/v1/barcode/{barcodeId}/guest-ticket").permitAll()
                         .anyRequest().authenticated()
