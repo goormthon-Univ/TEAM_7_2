@@ -55,8 +55,8 @@ public class SecurityConfig {
         http
                 .addFilterBefore(jwtFilter, LogoutFilter.class);
 
-        http
-                .exceptionHandling(config -> config.authenticationEntryPoint(customAuthenticationEntryPoint));
+//        http
+//                .exceptionHandling(config -> config.authenticationEntryPoint(customAuthenticationEntryPoint));
 
         http
                 .addFilter(corsFilter);
