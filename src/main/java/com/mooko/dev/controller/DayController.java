@@ -70,7 +70,7 @@ public class DayController {
     public ResponseEntity<BarcodeIdDto> makeNewBarcode(
             @AuthenticationPrincipal PrincipalDetails principalDetails,
             @RequestBody BarcodeDateDto barcodeDateDto
-    ) throws IOException {
+    ) throws IOException, InterruptedException {
         User user = principalDetails.getUser();
         Long barcodeId = aggregationFacade.makeNewDayBarcode(user, barcodeDateDto);
         return ResponseEntity.ok(BarcodeIdDto.builder().barcodeId(barcodeId.toString()).build());

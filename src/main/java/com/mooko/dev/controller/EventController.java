@@ -42,7 +42,7 @@ public class EventController {
     public ResponseEntity<BarcodeIdDto> makeNewEventBarcode(
             @AuthenticationPrincipal PrincipalDetails principalDetails,
             @PathVariable Long eventId
-    ) throws IOException {
+    ) throws IOException, InterruptedException {
         User user = principalDetails.getUser();
         Long barcodeId = aggregationFacade.makeNewEventBarcode(user, eventId);
         return ResponseEntity.ok(BarcodeIdDto.builder().barcodeId(barcodeId.toString()).build());
