@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
@@ -45,27 +46,24 @@ public class BarcodeService {
 
     private final BarcodeRepository barcodeRepository;
 
-    public BufferedImage resizeImage(BufferedImage originalImage, int targetWidth, int targetHeight) {
-        BufferedImage resizedImage = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_RGB);
-        Graphics2D g = resizedImage.createGraphics();
-        g.drawImage(originalImage, 0, 0, targetWidth, targetHeight, null);
-        g.dispose();
-        return resizedImage;
-    }
+    public BufferedImage combineImagesHorizontally(List<String> imageURLs, int totalWidth, int totalHeight) throws IOException {
+        int imageCount = imageURLs.size();
+        double exactImageWidth = (double) totalWidth / imageCount;
+        int baseImageWidth = (int) exactImageWidth;
+        // 남은 폭을 각 이미지에 분배하기 위한 오프셋을 계산합니다.
+        int extraWidth = totalWidth - baseImageWidth * imageCount;
 
-
-
-    public BufferedImage combineImagesHorizontally(List<String> imageURLs, int totalWidth, int totalHeight) throws IOException, InterruptedException {
-        int baseImageWidth = totalWidth / imageURLs.size();
-        int remainingWidth = totalWidth - (baseImageWidth * imageURLs.size());
-
-        ForkJoinPool customThreadPool = new ForkJoinPool();
+        // 병렬 처리를 위한 스레드 풀을 생성합니다.
+        ForkJoinPool pool = new ForkJoinPool();
         try {
-            List<BufferedImage> resizedImages = customThreadPool.submit(() ->
-                    imageURLs.parallelStream().map(imageURL -> {
+            // 모든 이미지를 병렬로 리사이징합니다.
+            List<BufferedImage> resizedImages = pool.submit(() ->
+                    IntStream.range(0, imageCount).parallel().mapToObj(i -> {
                         try {
-                            BufferedImage original = ImageIO.read(new URL(imageURL));
-                            int width = baseImageWidth + (imageURLs.indexOf(imageURL) == imageURLs.size() - 1 ? remainingWidth : 0);
+                            URL imageUrl = new URL(imageURLs.get(i));
+                            BufferedImage original = ImageIO.read(imageUrl);
+                            // 각 이미지에 추가 폭을 할당합니다.
+                            int width = baseImageWidth + ((i < extraWidth) ? 1 : 0);
                             return resizeImage(original, width, totalHeight);
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -78,10 +76,10 @@ public class BarcodeService {
             Graphics2D g = combined.createGraphics();
 
             int x = 0;
-            for (BufferedImage resizedImage : resizedImages) {
-                if (resizedImage != null) {
-                    g.drawImage(resizedImage, x, 0, null);
-                    x += resizedImage.getWidth();
+            for (BufferedImage image : resizedImages) {
+                if (image != null) {
+                    g.drawImage(image, x, 0, null);
+                    x += image.getWidth();
                 }
             }
             g.dispose();
@@ -91,13 +89,18 @@ public class BarcodeService {
             e.printStackTrace();
             throw new IOException("An error occurred while combining images.", e);
         } finally {
-            customThreadPool.shutdown();
-            if (!customThreadPool.awaitTermination(60, TimeUnit.SECONDS)) {
-                customThreadPool.shutdownNow();
-            }
+            pool.shutdown();
         }
     }
 
+    // 이미지 리사이징 메소드
+    public BufferedImage resizeImage(BufferedImage originalImage, int targetWidth, int targetHeight) {
+        BufferedImage resizedImage = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g = resizedImage.createGraphics();
+        g.drawImage(originalImage, 0, 0, targetWidth, targetHeight, null);
+        g.dispose();
+        return resizedImage;
+    }
 
 
 
