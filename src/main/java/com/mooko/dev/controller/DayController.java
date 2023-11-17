@@ -14,13 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
@@ -29,13 +23,16 @@ public class DayController {
     private final AggregationFacade aggregationFacade;
 
     //2.일상캘린더
-    @GetMapping("/calender{startDate}/{endDate}/{year}/{month}")
+    @GetMapping("/calender")
     public ResponseEntity<CalendarResDto> showCalendar(
             @AuthenticationPrincipal PrincipalDetails principalDetails,
-            @PathVariable String startDate, String endDate, String year, String month){
+            @RequestParam String startDate,
+            @RequestParam String endDate,
+            @RequestParam String year,
+            @RequestParam String month
+            ){
 
         User user = principalDetails.getUser();
-
         CalendarResDto thumbnailInfoList = aggregationFacade.showCalendar(user,startDate, endDate, year, month);
         return ResponseEntity.ok(thumbnailInfoList);
     }
