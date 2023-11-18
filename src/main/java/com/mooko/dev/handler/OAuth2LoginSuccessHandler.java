@@ -60,6 +60,8 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         accessCookie.setPath("/");
         refreshCookie.setPath("/");
         refreshCookie.setSecure(true);
+        refreshCookie.setHttpOnly(true);
+
         response.addCookie(accessCookie);
         response.addCookie(refreshCookie);
 //        response.sendRedirect("/profile");
