@@ -2,14 +2,14 @@
 
 <h1 align="center"><strong><a href="https://moodbarcode.com"> ⭐️ MOOCO ⭐️ </h1>
 
-<h2 align="center">👉 단풍톤 TEAM_7의 백엔드 레포지토리입니다. 👈</a></strong></h2>
+<h3 align="center">👉 단풍톤 TEAM_7의 백엔드 레포지토리입니다. 👈</a></strong></h3>
 
 <br>
 
-<h1 align="center"> 😎 소개 😎 </h1>
+<h3 align="center"> 😎 소개 😎 </h3>
 
 <div align="center">
-🤍무드를 표현하는 새로운 방법, 무코🤍
+무드를 표현하는 새로운 방법, 무코🤍
 
 
 일상의 순간들을 담은 바코드아트를 제공하는 웹서비스입니다.
