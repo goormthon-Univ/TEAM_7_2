@@ -62,7 +62,7 @@ public class DayController {
 
     }
 
-    //2-C. 일상 바코드 새성
+    //2-C. 일상 바코드 생성
     @PostMapping("/new-barcode")
     public ResponseEntity<BarcodeIdDto> makeNewBarcode(
             @AuthenticationPrincipal PrincipalDetails principalDetails,
