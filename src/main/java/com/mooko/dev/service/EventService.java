@@ -8,6 +8,7 @@ import com.mooko.dev.dto.event.req.UpdateEventDateDto;
 import com.mooko.dev.exception.custom.CustomException;
 import com.mooko.dev.exception.custom.ErrorCode;
 import com.mooko.dev.repository.EventRepository;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -83,5 +84,9 @@ public class EventService {
 
     public Event findEventByBarcode(Barcode barcode){
         return eventRepository.findByBarcode(barcode);
+    }
+
+    public List<Event> findEventByRoomaker(User user){
+        return eventRepository.findByRoomMaker(user);
     }
 }
