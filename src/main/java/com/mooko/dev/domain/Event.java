@@ -58,4 +58,5 @@ public class Event {
     public void updateEventPhoto(List<EventPhoto> eventPhotos) {
         this.eventPhoto = eventPhotos;
     }
+
 }

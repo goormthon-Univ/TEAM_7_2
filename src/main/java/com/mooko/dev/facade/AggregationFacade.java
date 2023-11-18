@@ -71,16 +71,17 @@ public class AggregationFacade {
             throw new CustomException(ErrorCode.START_DATE_EXCEED_END_DATE);
         }
         Event event = eventService.makeNewEvent(newEventDto.getTitle(),startDate.toString(), endDate.toString());
-//        userService.addEvent(user, event);
+        userService.addEvent(user, event);
     }
 
     //makeNewEventBarcode
-    public void makeNewEventBarcode(User tmpUser, Long eventId) throws IOException, InterruptedException {
+    public void makeNewEventBarcode(User tmpUser, Long eventId, EventIdDto eventIdDto) throws IOException, InterruptedException {
         User user = userService.findUser(tmpUser.getId());
         Event event = eventService.findEvent(eventId);
         if(!event.getUser().equals(user)){
             throw new CustomException(ErrorCode.NOT_OWNER_ACCESS);
         }
+
         List<String> eventPhotoList = eventPhotoService.findAllEventPhotoList(event);
         checkEventPhotoCount(event, 0, true);
 
@@ -554,24 +555,21 @@ public class AggregationFacade {
     public EventList showEventList(User tmpUser){
         User user = userService.findUser(tmpUser.getId());
         List<Event> eventList = user.getEvent();
-        if(!eventList.isEmpty()){
-            List<EventListDto> eventListDtos = eventList.stream().map(event ->
-                    EventListDto.builder()
-                            .id(event.getId().toString())
-                            .title(event.getTitle())
-                            .imageCount(String.valueOf(event.getEventPhoto().size()))
-                            .build()
-            ).toList();
 
-            return EventList.builder()
-                    .eventListDtoList(eventListDtos)
-                    .build();
-        }
+        List<EventListDto> eventListDtos = eventList.stream()
+                .filter(event -> event.getBarcode() != null)
+                .map(event -> EventListDto.builder()
+                        .id(event.getId().toString())
+                        .title(event.getTitle())
+                        .imageCount(String.valueOf(event.getEventPhoto().size()))
+                        .build())
+                .collect(Collectors.toList()); // 리스트로 수집
+
         return EventList.builder()
-                .eventListDtoList(null)
+                .eventListDtoList(eventListDtos)
                 .build();
-
     }
+
 
     public void updateEventPhoto(Long eventId, List<File> newPhotoList){
         if (newPhotoList == null || newPhotoList.isEmpty()) {
