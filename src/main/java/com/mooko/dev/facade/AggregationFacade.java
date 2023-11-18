@@ -79,7 +79,6 @@ public class AggregationFacade {
     }
 
 
-
     //makeNewEventBarcode
     public void makeNewEventBarcode(User tmpUser, Long eventId, EventIdDto eventIdDto) throws IOException, InterruptedException {
         User user = userService.findUser(tmpUser.getId());
@@ -140,7 +139,6 @@ public class AggregationFacade {
                 .build();
 
     }
-
 
 
 
@@ -359,26 +357,7 @@ public class AggregationFacade {
         return barcode;
     }
 
-    /**
-     * UserController
-     */
 
-    //showUserEventStatus
-//    public UserEventStatusDto showUserEventStatus(User tmpUser) {
-//        User user = userService.findUser(tmpUser.getId());
-//        boolean isExistEvent = checkUserAlreadyInEvent(user);
-//
-//        if(isExistEvent){
-//           return UserEventStatusDto.builder()
-//                    .existEvent(isExistEvent)
-//                    .eventId(user.getEvent().getId().toString())
-//                    .build();
-//        }
-//        return UserEventStatusDto.builder()
-//                .existEvent(isExistEvent)
-//                .eventId(null)
-//                .build();
-//    }
 
     //test
     public User test(Long userId){
