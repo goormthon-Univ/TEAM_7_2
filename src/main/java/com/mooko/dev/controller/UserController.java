@@ -42,13 +42,13 @@ public class UserController {
 
 
     //3. 나의 이벤트
-    @GetMapping("/my-event")
-    public ResponseEntity<UserEventStatusDto> showUserEventStatus(@AuthenticationPrincipal PrincipalDetails principalDetails) {
-        User user = principalDetails.getUser();
-
-        UserEventStatusDto userEventStatusDto = aggregationFacade.showUserEventStatus(user);
-        return ResponseEntity.ok(userEventStatusDto);
-    }
+//    @GetMapping("/my-event")
+//    public ResponseEntity<UserEventStatusDto> showUserEventStatus(@AuthenticationPrincipal PrincipalDetails principalDetails) {
+//        User user = principalDetails.getUser();
+//
+//        UserEventStatusDto userEventStatusDto = aggregationFacade.showUserEventStatus(user);
+//        return ResponseEntity.ok(userEventStatusDto);
+//    }
 
     @GetMapping("/refreshToken")
     public ResponseEntity<Void> reIssueRefreshToken() {

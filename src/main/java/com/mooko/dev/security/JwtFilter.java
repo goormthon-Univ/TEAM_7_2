@@ -29,9 +29,11 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private static final String NO_CHECK_URL_LOGIN = "/oauth2/authorization/kakao";
     private static final String NO_CHECK_URL_REDIRECT = "/login/oauth2/code/kakao";
-    private static final String NO_CHECK_URL_HANDSHAKING_FOR_CHECK = "/ws-check/**";
-    private static final String NO_CHECK_URL_HANDSHAKING_BUTTON = "/ws-button/**";
-    private static final String NO_CHECK_URL_HANDSHAKING_LEAVE = "/ws-leave-event/**";
+//    private static final String NO_CHECK_URL_HANDSHAKING_FOR_CHECK = "/ws-check/**";
+//    private static final String NO_CHECK_URL_HANDSHAKING_BUTTON = "/ws-button/**";
+//    private static final String NO_CHECK_URL_HANDSHAKING_LEAVE = "/ws-leave-event/**";
+    private static final String NO_CHECK_URL_EVENT_BLOCK = "/api/v1/event/{eventId}";
+    private static final String NO_CHECK_URL_EVENT_SAVE_PHOTO = "/api/v1/event/save-photo";
 
 
     private final JwtUtil jwtUtil;
@@ -54,10 +56,8 @@ public class JwtFilter extends OncePerRequestFilter {
     private boolean isPathExcluded(String path) {
         return antPathMatcher.match(NO_CHECK_URL_LOGIN, path)
                 || antPathMatcher.match(NO_CHECK_URL_REDIRECT, path)
-                || antPathMatcher.match(NO_CHECK_URL_HANDSHAKING_BUTTON, path)
-                || antPathMatcher.match(NO_CHECK_URL_HANDSHAKING_FOR_CHECK, path)
-                || antPathMatcher.match(NO_CHECK_URL_HANDSHAKING_LEAVE, path);
-
+                || antPathMatcher.match(NO_CHECK_URL_EVENT_BLOCK, path)
+                || antPathMatcher.match(NO_CHECK_URL_EVENT_SAVE_PHOTO, path);
     }
 
     private void processTokenAuthentication(HttpServletRequest request, HttpServletResponse response) {
