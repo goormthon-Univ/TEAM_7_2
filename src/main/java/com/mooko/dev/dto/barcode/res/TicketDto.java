@@ -19,6 +19,5 @@ public class TicketDto {
     private String startDate;
     private String endDate;
     private String createdAt;
-    private int memberCnt;
     private List<ImageInfoDto> imageInfoList;
 }
