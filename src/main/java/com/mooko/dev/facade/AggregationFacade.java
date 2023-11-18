@@ -66,12 +66,11 @@ public class AggregationFacade {
      * EventController
      */
 
-    //makeNewEvent
-    public Long makeNewEvent(User tempUser, NewEventDto newEventDto) {
+    //makeNewEvent 새로운 버전
+    public void makeNewEvent(User tempUser, NewEventDto newEventDto) {
         User user = userService.findUser(tempUser.getId());
-        if(checkUserAlreadyInEvent(user)){throw new CustomException(ErrorCode.USER_ALREADY_HAS_EVENT);}
         if(newEventDto.getTitle()==null|| newEventDto.getTitle().equals("")){throw new CustomException(ErrorCode.EVENT_TITLE_EMPTY);}
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate startDate = Instant.parse(newEventDto.getStartDate()).atZone(ZoneId.of("UTC")).toLocalDate();
         LocalDate endDate = Instant.parse(newEventDto.getEndDate()).atZone(ZoneId.of("UTC")).toLocalDate();
 
@@ -81,14 +80,9 @@ public class AggregationFacade {
         }
         Event event = eventService.makeNewEvent(user,newEventDto.getTitle(),startDate.toString(), endDate.toString());
         userService.addEvent(user, event);
-        return event.getId();
     }
 
-    private boolean checkUserAlreadyInEvent(User user) {
-        return Optional.ofNullable(user.getEvent())
-                .filter(Event::getActiveStatus)
-                .isPresent();
-    }
+
 
 
     //ShowEventPage

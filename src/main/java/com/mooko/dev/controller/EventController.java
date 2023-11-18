@@ -28,13 +28,13 @@ public class EventController {
 
     //3-A. 이벤트생성
     @PostMapping("/new-event")
-    public ResponseEntity<EventIdDto> makeNewEvent(
+    public ResponseEntity<Void> makeNewEvent(
             @AuthenticationPrincipal PrincipalDetails principalDetails,
             @RequestBody NewEventDto newEventDto
     ) {
         User user = principalDetails.getUser();
-        Long eventId = aggregationFacade.makeNewEvent(user, newEventDto);
-        return ResponseEntity.ok(EventIdDto.builder().eventId(eventId.toString()).build());
+        aggregationFacade.makeNewEvent(user, newEventDto);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     //3-C. 이벤트 바코드 생성
@@ -131,4 +131,8 @@ public class EventController {
         aggregationFacade.deleteUserEvent(user, eventId);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
+
+
+
+
 }
