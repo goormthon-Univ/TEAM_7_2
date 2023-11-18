@@ -72,4 +72,7 @@ public class EventPhotoService {
     }
 
 
+    public List<EventPhoto> findEventPhotoByEvent(Event event) {
+        return eventPhotoRepository.findByEvent(event);
+    }
 }
