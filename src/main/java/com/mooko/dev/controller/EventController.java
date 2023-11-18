@@ -26,7 +26,7 @@ public class EventController {
 
     private final AggregationFacade aggregationFacade;
 
-    //3-A. 이벤트생성
+    //5.4. 이벤트생성
     @PostMapping("/new-event")
     public ResponseEntity<Void> makeNewEvent(
             @AuthenticationPrincipal PrincipalDetails principalDetails,
@@ -37,15 +37,15 @@ public class EventController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    //3-C. 이벤트 바코드 생성
+    //5.3. 이벤트 바코드 생성
     @PostMapping("/{eventId}/result")
-    public ResponseEntity<BarcodeIdDto> makeNewEventBarcode(
+    public ResponseEntity<Void> makeNewEventBarcode(
             @AuthenticationPrincipal PrincipalDetails principalDetails,
             @PathVariable Long eventId
     ) throws IOException, InterruptedException {
         User user = principalDetails.getUser();
-        Long barcodeId = aggregationFacade.makeNewEventBarcode(user, eventId);
-        return ResponseEntity.ok(BarcodeIdDto.builder().barcodeId(barcodeId.toString()).build());
+        aggregationFacade.makeNewEventBarcode(user, eventId);
+        return ResponseEntity.status(HttpStatus.OK).build();
 
     }
 

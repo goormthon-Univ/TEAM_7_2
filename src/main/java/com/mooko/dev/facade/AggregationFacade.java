@@ -173,7 +173,6 @@ public class AggregationFacade {
     public Long makeNewEventBarcode(User tmpUser, Long eventId) throws IOException, InterruptedException {
         User user = userService.findUser(tmpUser.getId());
         Event event = eventService.findEvent(eventId);
-        checkUserRoomMaker(user, event);
         List<String> eventPhotoList = eventPhotoService.findAllEventPhotoList(event);
         checkEventPhotoCount(event, 0, true);
 
