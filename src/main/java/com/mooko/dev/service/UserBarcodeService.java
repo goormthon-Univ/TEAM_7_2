@@ -15,6 +15,7 @@ import java.util.List;
 public class UserBarcodeService {
 
     private final UserBarcodeRepository userBarcodeRepository;
+
     @Transactional
     public void makeUserBarcode(User user, Barcode barcode) {
         UserBarcode userBarcode = UserBarcode.builder()
