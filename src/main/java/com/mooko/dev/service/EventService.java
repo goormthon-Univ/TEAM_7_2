@@ -58,4 +58,5 @@ public class EventService {
         event.updateEventPhoto(eventPhotos);
     }
 
+
 }

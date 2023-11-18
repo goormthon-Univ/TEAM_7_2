@@ -74,4 +74,9 @@ public class EventPhotoService {
     public List<EventPhoto> findEventPhotoByEvent(Event event) {
         return eventPhotoRepository.findByEvent(event);
     }
+
+    @Transactional
+    public void deleteEventPhotoByEvent(Event event) {
+        eventPhotoRepository.deleteByEvent(event);
+    }
 }
