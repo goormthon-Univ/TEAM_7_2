@@ -6,7 +6,6 @@ import com.mooko.dev.dto.barcode.res.BarcodeInfoDto;
 import com.mooko.dev.dto.barcode.res.ImageInfoDto;
 import com.mooko.dev.dto.barcode.res.TicketDto;
 import com.mooko.dev.dto.day.req.BarcodeDateDto;
-import com.mooko.dev.dto.day.req.CalendarReqDto;
 import com.mooko.dev.dto.day.req.DayPhotoDto;
 import com.mooko.dev.dto.day.res.ButtonStatus;
 import com.mooko.dev.dto.day.res.CalendarResDto;
@@ -16,10 +15,7 @@ import com.mooko.dev.dto.event.req.EventPhotoDto;
 import com.mooko.dev.dto.event.req.NewEventDto;
 import com.mooko.dev.dto.event.req.UpdateEventDateDto;
 import com.mooko.dev.dto.event.req.UpdateEventNameDto;
-import com.mooko.dev.dto.event.res.EventInfoDto;
-import com.mooko.dev.dto.event.res.EventListDto;
-import com.mooko.dev.dto.event.res.EventPhotoResDto;
-import com.mooko.dev.dto.event.res.UserInfoDto;
+import com.mooko.dev.dto.event.res.*;
 import com.mooko.dev.dto.event.socket.UserEventCheckStatusDto;
 import com.mooko.dev.dto.user.req.UserNewInfoDto;
 import com.mooko.dev.dto.user.res.UserEventStatusDto;
@@ -774,17 +770,16 @@ public class AggregationFacade {
         return showTicketInfo(user, barcodeId);
     }
 
-    public List<EventListDto> showEventList(User tmpUser){
+    public EventList showEventList(User tmpUser){
         User user = userService.findUser(tmpUser.getId());
-        List<Event> eventList = eventService.findEventByRoomaker(user);
-        List<Long> eventIdList = eventList.stream().map(Event::getId).collect(Collectors.toList());
-
-        List<EventListDto> eventListDto = eventList.stream().map(event -> {
-            EventListDto.builder()
-                    .id(event.getId())
-                    .title(event.getTitle())
-                    .imageCount(eventPhotoService.get)
-        })
+        List<Event> eventList = user.getEvent();
+        eventList.stream().map(event ->
+                EventListDto.builder()
+                        .id(event.getId().toString())
+                        .title(event.getTitle())
+                        .imageCount(event.get)
+                        .build()
+        );
 
     }
 

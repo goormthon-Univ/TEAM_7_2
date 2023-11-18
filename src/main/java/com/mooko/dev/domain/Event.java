@@ -36,6 +36,10 @@ public class Event {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @Builder.Default
+    @OneToMany(mappedBy = "event", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    private List<EventPhoto> eventPhoto = new ArrayList<>();
+
     private LocalDateTime createdAt;
 
     public void updateEventName(String eventName) {
