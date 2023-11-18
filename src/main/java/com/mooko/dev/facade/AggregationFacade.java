@@ -16,8 +16,6 @@ import com.mooko.dev.dto.event.res.*;
 import com.mooko.dev.dto.event.socket.UserEventCheckStatusDto;
 import com.mooko.dev.dto.user.req.UserNewInfoDto;
 import com.mooko.dev.dto.user.res.UserPassportDto;
-import com.mooko.dev.event.ButtonEvent;
-import com.mooko.dev.event.LeaveEvent;
 import com.mooko.dev.exception.custom.CustomException;
 import com.mooko.dev.exception.custom.ErrorCode;
 import com.mooko.dev.service.*;
@@ -95,7 +93,6 @@ public class AggregationFacade {
                 .userId(eventUser.getId().toString())
                 .nickname(eventUser.getNickname())
                 .imageUrlList(eventPhotoUrlList)
-                .checkStatus(eventUser.getCheckStatus())
                 .imageCount(eventPhotoUrlList.size())
                 .build();
     }
@@ -179,25 +176,12 @@ public class AggregationFacade {
         User user = userService.findUser(Long.parseLong(userEventCheckStatusDto.getUserId()));
         userService.updateCheckStatus(user, userEventCheckStatusDto.isCheckStatus());
         Event event = eventService.findEvent(eventId);
-        checkEventButtonStatus(event);
         return UserEventCheckStatusDto.builder()
-                .checkStatus(user.getCheckStatus())
                 .userId(user.getId().toString())
                 .build();
     }
 
     //바코드 생성버튼 이벤트처리
-    private void checkEventButtonStatus(Event event) {
-        List<User> userByEvent = userService.findUserByEvent(event);
-        boolean allUsersChecked = userByEvent.stream()
-                .allMatch(User::getCheckStatus);
-        log.info("바코드 생성버튼 상태입니다 id = {}, status = {} ", event.getId(), allUsersChecked);
-        eventPublisher.publishEvent(
-                ButtonEvent.builder()
-                        .buttonStatus(allUsersChecked)
-                        .eventId(event.getId().toString())
-                        .build());
-    }
 
 
     /**
