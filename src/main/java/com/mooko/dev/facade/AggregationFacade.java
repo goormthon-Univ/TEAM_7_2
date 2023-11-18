@@ -74,51 +74,6 @@ public class AggregationFacade {
 //        userService.addEvent(user, event);
     }
 
-
-
-
-
-
-<<<<<<< HEAD
-//    private UserInfoDto createUserInfoDto(User eventUser, Event event) {
-//        List<EventPhoto> eventPhotoList = eventPhotoService.findUserEventPhotoList(eventUser, event);
-//        List<String> eventPhotoUrlList = eventPhotoList.stream()
-//                .map(EventPhoto::getUrl)
-//                .collect(Collectors.toList());
-//
-//        if (eventPhotoUrlList.isEmpty()) {
-//            return null;
-//        }
-//
-//        return UserInfoDto.builder()
-//                .userId(eventUser.getId().toString())
-//                .nickname(eventUser.getNickname())
-//                .imageUrlList(eventPhotoUrlList)
-//                .imageCount(eventPhotoUrlList.size())
-//                .build();
-//    }
-=======
-    private UserInfoDto createUserInfoDto(User eventUser, Event event) {
-        List<EventPhoto> eventPhotoList = eventPhotoService.findUserEventPhotoList(eventUser, event);
-        List<String> eventPhotoUrlList = eventPhotoList.stream()
-                .map(EventPhoto::getUrl)
-                .collect(Collectors.toList());
-
-        if (eventPhotoUrlList.isEmpty()) {
-            return null;
-        }
-
-        return UserInfoDto.builder()
-                .userId(eventUser.getId().toString())
-                .nickname(eventUser.getNickname())
-                .imageUrlList(eventPhotoUrlList)
-                .imageCount(eventPhotoUrlList.size())
-                .build();
-    }
->>>>>>> 1c15cf8e1a36d8ccc49b489dbbf964d1f013637f
-
-
-
     //makeNewEventBarcode
     public void makeNewEventBarcode(User tmpUser, Long eventId) throws IOException, InterruptedException {
         User user = userService.findUser(tmpUser.getId());
@@ -186,44 +141,6 @@ public class AggregationFacade {
      *
      * SocketController
      */
-
-    //updateUserEventCheckStatus
-<<<<<<< HEAD
-//    public UserEventCheckStatusDto updateUserEventCheckStatus(UserEventCheckStatusDto userEventCheckStatusDto, Long eventId) {
-//        User user = userService.findUser(Long.parseLong(userEventCheckStatusDto.getUserId()));
-//        userService.updateCheckStatus(user, userEventCheckStatusDto.isCheckStatus());
-//        Event event = eventService.findEvent(eventId);
-//        checkEventButtonStatus(event);
-//        return UserEventCheckStatusDto.builder()
-//                .checkStatus(user.getCheckStatus())
-//                .userId(user.getId().toString())
-//                .build();
-//    }
-
-    //바코드 생성버튼 이벤트처리
-//    private void checkEventButtonStatus(Event event) {
-//        List<User> userByEvent = userService.findUserByEvent(event);
-//        boolean allUsersChecked = userByEvent.stream()
-//                .allMatch(User::getCheckStatus);
-//        log.info("바코드 생성버튼 상태입니다 id = {}, status = {} ", event.getId(), allUsersChecked);
-//        eventPublisher.publishEvent(
-//                ButtonEvent.builder()
-//                        .buttonStatus(allUsersChecked)
-//                        .eventId(event.getId().toString())
-//                        .build());
-//    }
-=======
-    public UserEventCheckStatusDto updateUserEventCheckStatus(UserEventCheckStatusDto userEventCheckStatusDto, Long eventId) {
-        User user = userService.findUser(Long.parseLong(userEventCheckStatusDto.getUserId()));
-        userService.updateCheckStatus(user, userEventCheckStatusDto.isCheckStatus());
-        Event event = eventService.findEvent(eventId);
-        return UserEventCheckStatusDto.builder()
-                .userId(user.getId().toString())
-                .build();
-    }
-
-    //바코드 생성버튼 이벤트처리
->>>>>>> 1c15cf8e1a36d8ccc49b489dbbf964d1f013637f
 
 
     /**
