@@ -526,6 +526,9 @@ public class AggregationFacade {
     // showTicketInfo(quest-ticket)
     public TicketDto showTicketInfo(Long barcodeId){
         Barcode barcode = barcodeService.findBarcode(barcodeId);
+        if(barcode==null){
+            throw new CustomException(ErrorCode.BARCODE_NOT_FOUND);
+        }
         User user = userBarcodeService.findUserBarcodeByBarcode(barcode)
                 .stream()
                 .findFirst()

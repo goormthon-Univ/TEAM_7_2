@@ -40,7 +40,7 @@ public class SecurityConfig {
                         .requestMatchers("/oauth2/authorization/kakao", "/login/oauth2/code/kakao").permitAll()
                         .requestMatchers("/ws-check/**", "/ws-button/**", "/ws-leave-event/**").permitAll()
                         .requestMatchers("/api/v1/user/for-test").permitAll()
-                        .requestMatchers("/api/v1/barcode/{barcodeId}/guest-ticket").permitAll()
+                        .requestMatchers("/api/v1/barcode/{barcodeId}").permitAll()
                         .requestMatchers("/api/v1/event/{eventId}").permitAll()
                         .requestMatchers("/api/v1/event/{eventId}/save-photo").permitAll()
                         .anyRequest().authenticated()
