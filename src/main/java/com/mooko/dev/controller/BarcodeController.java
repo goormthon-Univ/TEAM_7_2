@@ -40,11 +40,11 @@ public class BarcodeController {
 //        return ResponseEntity.ok(ticketDto);
 //    }
 
-    //4-B 바코드티켓(GUEST)
+    //4-C 바코드티켓
     @GetMapping("/{barcodeId}")
-    public ResponseEntity<TicketDto> showGuestTicket(
+    public ResponseEntity<TicketDto> showTicketInfo(
             @PathVariable Long barcodeId){
-        TicketDto ticketDto = aggregationFacade.showTicketInfoGuest(barcodeId);
+        TicketDto ticketDto = aggregationFacade.showTicketInfo(barcodeId);
         return ResponseEntity.ok(ticketDto);
     }
 

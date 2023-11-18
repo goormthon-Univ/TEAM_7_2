@@ -27,11 +27,11 @@ public class UserService {
 //        userRepository.save(user);
 //    }
 
-    @Transactional
-    public void updateCheckStatus(User user, boolean checkStatus) {
-        user.updateCheckStatus(checkStatus);
-        userRepository.save(user);
-    }
+//    @Transactional
+//    public void updateCheckStatus(User user, boolean checkStatus) {
+//        user.updateCheckStatus(checkStatus);
+//        userRepository.save(user);
+//    }
 
     @Transactional
     public User save(User user){
