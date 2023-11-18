@@ -25,22 +25,16 @@ public class Event {
 
     private String title;
 
-    private Boolean activeStatus;
-
     private String startDate;
     private String endDate;
-
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "room_maker_id")
-    private User roomMaker;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "barcode_id")
     private Barcode barcode;
 
-    @Builder.Default
-    @OneToMany(mappedBy = "event", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    private List<User> users = new ArrayList<>();
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 
     private LocalDateTime createdAt;
 
@@ -51,10 +45,6 @@ public class Event {
     public void updateEventDate(String startDate, String endDate) {
         this.startDate = startDate;
         this.endDate = endDate;
-    }
-
-    public void updateEventStatus(Boolean activeStatus) {
-        this.activeStatus = activeStatus;
     }
 
     public void updateBarcode(Barcode barcode) {
