@@ -569,9 +569,9 @@ public class AggregationFacade {
         }
 
         Event event = eventService.findEvent(eventId);
-        List<EventPhoto> eventPhotoList = event.getEventPhoto();
-        if (!eventPhotoList.isEmpty()) {
-            eventPhotoList.forEach(eventPhoto -> s3Service.deleteFromS3(eventPhoto.getUrl()));
+        List<String> allEventPhotoList = eventPhotoService.findAllEventPhotoList(event);
+        if (!allEventPhotoList.isEmpty()) {
+            allEventPhotoList.forEach(s3Service::deleteFromS3);
         }
         List<String> newPhotoUrlList = newPhotoList.stream()
                 .map(this::uploadPhoto)
