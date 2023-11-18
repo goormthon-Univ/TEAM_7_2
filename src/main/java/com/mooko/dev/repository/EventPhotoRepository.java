@@ -15,4 +15,6 @@ public interface EventPhotoRepository extends JpaRepository<EventPhoto, Long> {
 //    List<EventPhoto> findByUserAndEvent(User user, Event event);
 
     List<EventPhoto> findByEvent(Event event);
+
+    void deleteByEvent(Event event);
 }

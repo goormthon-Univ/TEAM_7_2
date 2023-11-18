@@ -22,6 +22,7 @@ import com.mooko.dev.dto.user.res.UserPassportDto;
 import com.mooko.dev.exception.custom.CustomException;
 import com.mooko.dev.exception.custom.ErrorCode;
 import com.mooko.dev.service.*;
+import jakarta.persistence.GeneratedValue;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -569,10 +570,12 @@ public class AggregationFacade {
         }
 
         Event event = eventService.findEvent(eventId);
-        List<String> allEventPhotoList = eventPhotoService.findAllEventPhotoList(event);
-        if (!allEventPhotoList.isEmpty()) {
-            allEventPhotoList.forEach(s3Service::deleteFromS3);
-        }
+//        List<String> allEventPhotoList = eventPhotoService.findAllEventPhotoList(event);
+//        if (!allEventPhotoList.isEmpty()) {
+//            allEventPhotoList.forEach(s3Service::deleteFromS3);
+//            eventPhotoService.deleteEventPhotoByEvent(event);
+//            eventService.deleteEventPhoto(eventId);
+//        }
         List<String> newPhotoUrlList = newPhotoList.stream()
                 .map(this::uploadPhoto)
                 .collect(Collectors.toList());
