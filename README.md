@@ -2,7 +2,7 @@
 
 <h1 align="center"> ⭐️ 단풍톤 7팀의 백앤드 레포지터리 입니다. ⭐️ </h1>
 
-<h2 align="center"><strong><a href="https://moodbarcode.com">👉 ÚNETE A NUESTRO SLACK 👈</a></strong></h2>
+<h2 align="center"><strong><a href="https://moodbarcode.com">👉 무드바코드 👈</a></strong></h2>
 
 <br>
 
