@@ -542,7 +542,7 @@ public class AggregationFacade {
         List<Event> eventList = user.getEvent();
 
         List<EventListDto> eventListDtos = eventList.stream()
-                .filter(event -> event.getBarcode() != null)
+                .filter(event -> event.getBarcode() == null)
                 .map(event -> EventListDto.builder()
                         .id(event.getId().toString())
                         .title(event.getTitle())
