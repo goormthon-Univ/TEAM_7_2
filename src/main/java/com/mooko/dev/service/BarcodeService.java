@@ -44,6 +44,7 @@ public class BarcodeService {
     private final int MIN_PHOTO_COUNT_FOR_BARCODE = 30;
     private final int MAX_PHOTO_COUNT_FOR_BARCODE = 130;
 
+
     private final BarcodeRepository barcodeRepository;
 
     public BufferedImage combineImagesHorizontally(List<String> imageURLs, int totalWidth, int totalHeight) throws IOException {
