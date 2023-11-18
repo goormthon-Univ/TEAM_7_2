@@ -76,7 +76,7 @@ public class AggregationFacade {
         if (startDate.isAfter(endDate)) {
             throw new CustomException(ErrorCode.START_DATE_EXCEED_END_DATE);
         }
-        Event event = eventService.makeNewEvent(user,newEventDto.getTitle(),startDate.toString(), endDate.toString());
+        Event event = eventService.makeNewEvent(newEventDto.getTitle(),startDate.toString(), endDate.toString());
         userService.addEvent(user, event);
     }
 
