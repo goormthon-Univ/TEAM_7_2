@@ -551,7 +551,7 @@ public class AggregationFacade {
                 .collect(Collectors.toList()); // 리스트로 수집
 
         return EventList.builder()
-                .eventListDtoList(eventListDtos)
+                .eventList(eventListDtos)
                 .build();
     }
 
