@@ -16,14 +16,12 @@ public class UserBarcodeService {
 
     private final UserBarcodeRepository userBarcodeRepository;
     @Transactional
-    public void makeUserBarcode(List<User> users, Barcode barcode) {
-        users.forEach(user -> {
-            UserBarcode userBarcode = UserBarcode.builder()
-                    .user(user)
-                    .barcode(barcode)
-                    .build();
-            userBarcodeRepository.save(userBarcode);
-        });
+    public void makeUserBarcode(User user, Barcode barcode) {
+        UserBarcode userBarcode = UserBarcode.builder()
+                .user(user)
+                .barcode(barcode)
+                .build();
+        userBarcodeRepository.save(userBarcode);
     }
 
     @Transactional

@@ -50,10 +50,10 @@ public class EventService {
         eventRepository.save(event);
     }
 
-    @Transactional
-    public void updateEventStatus(Event event, boolean status) {
-        event.updateEventStatus(status);
-    }
+//    @Transactional
+//    public void updateEventStatus(Event event, boolean status) {
+//        event.updateEventStatus(status);
+//    }
 
     @Transactional
     public void addEventUser(User user, Event event) {

@@ -168,9 +168,12 @@ public class AggregationFacade {
     }
 
     //makeNewEventBarcode
-    public Long makeNewEventBarcode(User tmpUser, Long eventId) throws IOException, InterruptedException {
+    public void makeNewEventBarcode(User tmpUser, Long eventId) throws IOException, InterruptedException {
         User user = userService.findUser(tmpUser.getId());
         Event event = eventService.findEvent(eventId);
+        if(!event.getUser().equals(user)){
+            throw new CustomException(ErrorCode.NOT_OWNER_ACCESS);
+        }
         List<String> eventPhotoList = eventPhotoService.findAllEventPhotoList(event);
         checkEventPhotoCount(event, 0, true);
 
@@ -186,10 +189,8 @@ public class AggregationFacade {
                 event.getEndDate(),
                 BarcodeType.EVENT,
                 event);
-        userBarcodeService.makeUserBarcode(event.getUsers(), barcode);
+        userBarcodeService.makeUserBarcode(event.getUser(), barcode);
         eventService.addBarcode(event, barcode);
-        eventService.updateEventStatus(event, false);
-        return barcode.getId();
     }
 
     private void checkUserRoomMaker(User user, Event event) {
