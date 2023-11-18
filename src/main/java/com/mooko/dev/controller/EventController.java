@@ -62,7 +62,7 @@ public class EventController {
             @RequestBody EventIdDto eventIdDto
     ) throws IOException, InterruptedException {
         User user = principalDetails.getUser();
-        aggregationFacade.makeNewEventBarcode(user, eventId,eventIdDto);
+        aggregationFacade.makeNewEventBarcode(user, eventId, eventIdDto);
         return ResponseEntity.status(HttpStatus.OK).build();
 
     }
@@ -76,12 +76,4 @@ public class EventController {
         aggregationFacade.makeNewEvent(user, newEventDto);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
-
-
-
-
-
-
-
-
 }
