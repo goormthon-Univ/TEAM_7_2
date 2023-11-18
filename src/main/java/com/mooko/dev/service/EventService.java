@@ -2,6 +2,7 @@ package com.mooko.dev.service;
 
 import com.mooko.dev.domain.Barcode;
 import com.mooko.dev.domain.Event;
+import com.mooko.dev.domain.EventPhoto;
 import com.mooko.dev.domain.User;
 import com.mooko.dev.dto.event.req.NewEventDto;
 import com.mooko.dev.dto.event.req.UpdateEventDateDto;
@@ -87,4 +88,11 @@ public class EventService {
     public List<Event> findEventByRoomaker(User user){
         return eventRepository.findByRoomMaker(user);
     }
+
+    @Transactional
+    public void addEventPhoto(Event event, List<EventPhoto> eventPhotos){
+        event.updateEventPhoto(eventPhotos);
+
+    }
+
 }

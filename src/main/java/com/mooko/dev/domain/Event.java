@@ -55,4 +55,7 @@ public class Event {
         this.barcode = barcode;
     }
 
+    public void updateEventPhoto(List<EventPhoto> eventPhotos) {
+        this.eventPhoto = eventPhotos;
+    }
 }

@@ -281,15 +281,12 @@ public class AggregationFacade {
     public EventPhotoResDto showUserEventPhoto(User tmpUser, Long eventId){
         User user = userService.findUser(tmpUser.getId());
         Event event = eventService.findEvent(eventId);
-        List<EventPhoto> eventPhotoList = eventPhotoService.findUserEventPhotoList(user, event);
-        List<String> eventPhotoUrlList = eventPhotoList.stream()
-                .map(EventPhoto::getUrl)
-                .collect(Collectors.toList());
-
+        List<EventPhoto> eventPhotoByEvent = eventPhotoService.findEventPhotoByEvent(event);
+        List<String> imageUrlList = eventPhotoByEvent.stream().map(EventPhoto::getUrl).toList();
         return EventPhotoResDto
                 .builder()
                 .eventId(eventId.toString())
-                .imageUrlList(eventPhotoUrlList)
+                .imageUrlList(imageUrlList)
                 .build();
     }
 
@@ -773,18 +770,22 @@ public class AggregationFacade {
     public EventList showEventList(User tmpUser){
         User user = userService.findUser(tmpUser.getId());
         List<Event> eventList = user.getEvent();
-        eventList.stream().map(event ->
+        List<EventListDto> eventListDtos = eventList.stream().map(event ->
                 EventListDto.builder()
                         .id(event.getId().toString())
                         .title(event.getTitle())
-                        .imageCount(event.get)
+                        .imageCount(String.valueOf(event.getEventPhoto().size()))
                         .build()
-        );
+        ).toList();
+
+        return EventList.builder()
+                .eventListDtoList(eventListDtos)
+                .build();
 
     }
 
     public void updateEventPhoto(Long eventId, List<File> newPhotoList){
-        Event event = eventService.findEvent(eventId)
+        Event event = eventService.findEvent(eventId);
 
         List<String> newPhotoUrlList = new ArrayList<>();
         if (newPhotoList!=null){
@@ -795,6 +796,7 @@ public class AggregationFacade {
                     }).collect(Collectors.toList());
         }
 
-        if(newPhotoUrlList!=null){eventPhotoService.makeEventPhoto(event,newPhotoUrlList);}
+        List<EventPhoto> eventPhotos = eventPhotoService.makeEventPhoto(event, newPhotoUrlList);
+        eventService.addEventPhoto(event, eventPhotos);
     }
 }

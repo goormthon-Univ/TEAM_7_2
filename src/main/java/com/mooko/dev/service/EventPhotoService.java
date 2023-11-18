@@ -56,7 +56,7 @@ public class EventPhotoService {
     }
 
     @Transactional
-    public void makeEventPhoto(Event event, List<String> eventPhotoUrlList) {
+    public List<EventPhoto> makeEventPhoto(Event event, List<String> eventPhotoUrlList) {
         List<EventPhoto> eventPhotos = new ArrayList<>();
 
         for (String url : eventPhotoUrlList) {
@@ -68,8 +68,11 @@ public class EventPhotoService {
             eventPhotos.add(eventPhoto);
         }
 
-        eventPhotoRepository.saveAll(eventPhotos);
+        return eventPhotoRepository.saveAll(eventPhotos);
     }
 
 
+    public List<EventPhoto> findEventPhotoByEvent(Event event) {
+        return eventPhotoRepository.findByEvent(event);
+    }
 }

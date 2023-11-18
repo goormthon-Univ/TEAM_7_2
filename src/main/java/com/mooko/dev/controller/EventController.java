@@ -61,13 +61,12 @@ public class EventController {
     }
 
     //5-2. 이벤트 사진 등록/수정
-    @PostMapping("/{eventId}/save-photo}")
+    @PostMapping("/{eventId}/save-photo")
     public ResponseEntity<Void> updateUserEventPhoto(
             @AuthenticationPrincipal PrincipalDetails principalDetails,
             @PathVariable Long eventId,
             @ModelAttribute EventPhotoDto eventPhotoDto)
     {
-        User user = principalDetails.getUser();
         aggregationFacade.updateEventPhoto(eventId, eventPhotoDto.getImageList());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
@@ -82,6 +81,7 @@ public class EventController {
         EventPhotoResDto eventPhotoResDto = aggregationFacade.showUserEventPhoto(user, eventId);
         return ResponseEntity.ok(eventPhotoResDto);
     }
+
 
     //3-0. 이벤트 페이지
     @GetMapping("/{eventId}")
