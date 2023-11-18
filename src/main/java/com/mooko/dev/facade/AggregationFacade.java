@@ -11,14 +11,10 @@ import com.mooko.dev.dto.day.res.ButtonStatus;
 import com.mooko.dev.dto.day.res.CalendarResDto;
 import com.mooko.dev.dto.day.res.DayDto;
 import com.mooko.dev.dto.day.res.ThumbnailDto;
-import com.mooko.dev.dto.event.req.EventPhotoDto;
 import com.mooko.dev.dto.event.req.NewEventDto;
-import com.mooko.dev.dto.event.req.UpdateEventDateDto;
-import com.mooko.dev.dto.event.req.UpdateEventNameDto;
 import com.mooko.dev.dto.event.res.*;
 import com.mooko.dev.dto.event.socket.UserEventCheckStatusDto;
 import com.mooko.dev.dto.user.req.UserNewInfoDto;
-import com.mooko.dev.dto.user.res.UserEventStatusDto;
 import com.mooko.dev.dto.user.res.UserPassportDto;
 import com.mooko.dev.event.ButtonEvent;
 import com.mooko.dev.event.LeaveEvent;
@@ -151,18 +147,25 @@ public class AggregationFacade {
 
 
 
-    //showUserEventPhoto
-    public EventPhotoResDto showUserEventPhoto(User tmpUser, Long eventId){
-        User user = userService.findUser(tmpUser.getId());
+    //showEventBlock
+    public EventPhotoResDto showEventBlock(Long eventId) {
         Event event = eventService.findEvent(eventId);
         List<EventPhoto> eventPhotoByEvent = eventPhotoService.findEventPhotoByEvent(event);
-        List<String> imageUrlList = eventPhotoByEvent.stream().map(EventPhoto::getUrl).toList();
-        return EventPhotoResDto
-                .builder()
+        if (!eventPhotoByEvent.isEmpty()) {
+            List<String> imageUrlList = eventPhotoByEvent.stream().map(EventPhoto::getUrl).toList();
+            return EventPhotoResDto
+                    .builder()
+                    .eventId(eventId.toString())
+                    .imageUrlList(imageUrlList)
+                    .build();
+        }
+        return EventPhotoResDto.builder()
                 .eventId(eventId.toString())
-                .imageUrlList(imageUrlList)
+                .imageUrlList(null)
                 .build();
+
     }
+
 
 
 

@@ -30,8 +30,17 @@ public class EventController {
         User user = principalDetails.getUser();
         EventList eventList = aggregationFacade.showEventList(user);
         return ResponseEntity.ok(eventList);
-
     }
+
+    //5-1. 이벤트 블록 (accessToken x)
+    @GetMapping("/{eventId}")
+    public ResponseEntity<EventPhotoResDto> showEventBlock(
+            @PathVariable Long eventId
+    ){
+        EventPhotoResDto eventPhotoResDto = aggregationFacade.showEventBlock(eventId);
+        return ResponseEntity.ok(eventPhotoResDto);
+    }
+
 
     //5.4. 이벤트생성
     @PostMapping("/new-event")
@@ -67,16 +76,6 @@ public class EventController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    //5-1. 이벤트 블록
-    @GetMapping("{eventId}")
-    public ResponseEntity<EventPhotoResDto> showEventBlock(
-            @AuthenticationPrincipal PrincipalDetails principalDetails,
-            @PathVariable Long eventId
-    ){
-        User user = principalDetails.getUser();
-        EventPhotoResDto eventPhotoResDto = aggregationFacade.showUserEventPhoto(user, eventId);
-        return ResponseEntity.ok(eventPhotoResDto);
-    }
 
 
 
