@@ -50,4 +50,8 @@ public class User {
         this.gender = gender;
         this.modalActive = modalActive;
     }
+
+    public void updateEvent(Event event) {
+        this.event.add(event);
+    }
 }

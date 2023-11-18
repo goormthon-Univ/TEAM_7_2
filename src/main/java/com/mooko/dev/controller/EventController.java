@@ -4,6 +4,7 @@ import com.mooko.dev.domain.PrincipalDetails;
 import com.mooko.dev.domain.User;
 import com.mooko.dev.dto.event.req.EventPhotoDto;
 import com.mooko.dev.dto.event.req.NewEventDto;
+import com.mooko.dev.dto.event.res.EventIdDto;
 import com.mooko.dev.dto.event.res.EventList;
 import com.mooko.dev.dto.event.res.EventPhotoResDto;
 import com.mooko.dev.facade.AggregationFacade;
@@ -57,10 +58,11 @@ public class EventController {
     @PostMapping("/{eventId}/result")
     public ResponseEntity<Void> makeNewEventBarcode(
             @AuthenticationPrincipal PrincipalDetails principalDetails,
-            @PathVariable Long eventId
+            @PathVariable Long eventId,
+            @RequestBody EventIdDto eventIdDto
     ) throws IOException, InterruptedException {
         User user = principalDetails.getUser();
-        aggregationFacade.makeNewEventBarcode(user, eventId);
+        aggregationFacade.makeNewEventBarcode(user, eventId, eventIdDto);
         return ResponseEntity.status(HttpStatus.OK).build();
 
     }
@@ -74,7 +76,5 @@ public class EventController {
         aggregationFacade.makeNewEvent(user, newEventDto);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
-
-
 
 }

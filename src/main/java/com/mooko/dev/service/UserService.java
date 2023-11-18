@@ -21,28 +21,12 @@ public class UserService {
         return userRepository.findById(id).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
     }
 
-//    @Transactional
-//    public void addEvent(User user, Event event) {
-//        user.updateEvent(event);
-//        userRepository.save(user);
-//    }
-
-//    @Transactional
-//    public void updateCheckStatus(User user, boolean checkStatus) {
-//        user.updateCheckStatus(checkStatus);
-//        userRepository.save(user);
-//    }
 
     @Transactional
     public User save(User user){
         return userRepository.save(user);
     }
 
-//    @Transactional
-//    public void deleteEvent(User user) {
-//        user.updateEvent(null);
-//        userRepository.save(user);
-//    }
 
     @Transactional
     public void updateUserInfo(User user, String newProfileImgUrl, String nickname, String birth, String gender, boolean modalActive) {
@@ -53,5 +37,11 @@ public class UserService {
 
     public List<User> findUserByEvent(Event event) {
         return userRepository.findByEvent(event);
+    }
+
+    @Transactional
+    public void addEvent(User user, Event event) {
+        user.updateEvent(event);
+        userRepository.save(user);
     }
 }
