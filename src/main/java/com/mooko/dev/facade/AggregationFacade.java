@@ -12,8 +12,10 @@ import com.mooko.dev.dto.day.res.CalendarResDto;
 import com.mooko.dev.dto.day.res.DayDto;
 import com.mooko.dev.dto.day.res.ThumbnailDto;
 import com.mooko.dev.dto.event.req.NewEventDto;
-import com.mooko.dev.dto.event.res.*;
-import com.mooko.dev.dto.event.socket.UserEventCheckStatusDto;
+import com.mooko.dev.dto.event.res.EventIdDto;
+import com.mooko.dev.dto.event.res.EventList;
+import com.mooko.dev.dto.event.res.EventListDto;
+import com.mooko.dev.dto.event.res.EventPhotoResDto;
 import com.mooko.dev.dto.user.req.UserNewInfoDto;
 import com.mooko.dev.dto.user.res.UserPassportDto;
 import com.mooko.dev.exception.custom.CustomException;
@@ -32,7 +34,10 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -47,7 +52,6 @@ public class AggregationFacade {
     private final UserBarcodeService userBarcodeService;
     private final S3Service s3Service;
     private final S3Config s3Config;
-    private final ApplicationEventPublisher eventPublisher;
     private final DayService dayService;
     private final DayPhotoService dayPhotoService;
 
@@ -73,6 +77,7 @@ public class AggregationFacade {
         Event event = eventService.makeNewEvent(newEventDto.getTitle(),startDate.toString(), endDate.toString());
         userService.addEvent(user, event);
     }
+
 
     //makeNewEventBarcode
     public void makeNewEventBarcode(User tmpUser, Long eventId, EventIdDto eventIdDto) throws IOException, InterruptedException {
@@ -138,10 +143,6 @@ public class AggregationFacade {
 
 
 
-    /**
-     *
-     * SocketController
-     */
 
 
     /**
@@ -356,26 +357,7 @@ public class AggregationFacade {
         return barcode;
     }
 
-    /**
-     * UserController
-     */
 
-    //showUserEventStatus
-//    public UserEventStatusDto showUserEventStatus(User tmpUser) {
-//        User user = userService.findUser(tmpUser.getId());
-//        boolean isExistEvent = checkUserAlreadyInEvent(user);
-//
-//        if(isExistEvent){
-//           return UserEventStatusDto.builder()
-//                    .existEvent(isExistEvent)
-//                    .eventId(user.getEvent().getId().toString())
-//                    .build();
-//        }
-//        return UserEventStatusDto.builder()
-//                .existEvent(isExistEvent)
-//                .eventId(null)
-//                .build();
-//    }
 
     //test
     public User test(Long userId){
