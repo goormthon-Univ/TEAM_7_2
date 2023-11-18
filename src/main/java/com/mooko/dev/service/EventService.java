@@ -55,11 +55,11 @@ public class EventService {
 //        event.updateEventStatus(status);
 //    }
 
-    @Transactional
-    public void addEventUser(User user, Event event) {
-        event.getUsers().add(user);
-        eventRepository.save(event);
-    }
+//    @Transactional
+//    public void addEventUser(User user, Event event) {
+//        event.getUsers().add(user);
+//        eventRepository.save(event);
+//    }
 
     @Transactional
     public void addBarcode(Event event, Barcode barcode) {
@@ -67,14 +67,14 @@ public class EventService {
         eventRepository.save(event);
     }
 
-    @Transactional
-    public void deleteEventUser(User user, Event event) {
-        if (event.getUsers().removeIf(u -> u.equals(user))) {
-            eventRepository.save(event);
-        } else {
-            throw new CustomException(ErrorCode.USER_ALREADY_DELETED);
-        }
-    }
+//    @Transactional
+//    public void deleteEventUser(User user, Event event) {
+//        if (event.getUsers().removeIf(u -> u.equals(user))) {
+//            eventRepository.save(event);
+//        } else {
+//            throw new CustomException(ErrorCode.USER_ALREADY_DELETED);
+//        }
+//    }
 
     @Transactional
     public void deleteEvent(Event event) {

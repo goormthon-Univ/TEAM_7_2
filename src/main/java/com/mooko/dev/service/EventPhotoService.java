@@ -44,7 +44,6 @@ public class EventPhotoService {
 
         for (String url : eventPhotoUrlList) {
             EventPhoto eventPhoto = EventPhoto.builder()
-                    .user(user)
                     .event(event)
                     .createdAt(LocalDateTime.now())
                     .url(url)
