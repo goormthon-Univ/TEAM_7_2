@@ -53,17 +53,6 @@ public class EventController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    //5.4. 이벤트생성
-    @PostMapping("/new-event")
-    public ResponseEntity<Void> makeNewEvent(
-            @AuthenticationPrincipal PrincipalDetails principalDetails,
-            @RequestBody NewEventDto newEventDto
-    ) {
-        User user = principalDetails.getUser();
-        aggregationFacade.makeNewEvent(user, newEventDto);
-        return ResponseEntity.status(HttpStatus.OK).build();
-    }
-
     //5.3. 이벤트 바코드 생성
     @PostMapping("/{eventId}/result")
     public ResponseEntity<Void> makeNewEventBarcode(
@@ -75,5 +64,17 @@ public class EventController {
         return ResponseEntity.status(HttpStatus.OK).build();
 
     }
+    //5.4. 이벤트생성
+    @PostMapping("/new-event")
+    public ResponseEntity<Void> makeNewEvent(
+            @AuthenticationPrincipal PrincipalDetails principalDetails,
+            @RequestBody NewEventDto newEventDto
+    ) {
+        User user = principalDetails.getUser();
+        aggregationFacade.makeNewEvent(user, newEventDto);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+
 
 }

@@ -79,6 +79,7 @@ public class AggregationFacade {
 
 
 
+<<<<<<< HEAD
 //    private UserInfoDto createUserInfoDto(User eventUser, Event event) {
 //        List<EventPhoto> eventPhotoList = eventPhotoService.findUserEventPhotoList(eventUser, event);
 //        List<String> eventPhotoUrlList = eventPhotoList.stream()
@@ -96,6 +97,25 @@ public class AggregationFacade {
 //                .imageCount(eventPhotoUrlList.size())
 //                .build();
 //    }
+=======
+    private UserInfoDto createUserInfoDto(User eventUser, Event event) {
+        List<EventPhoto> eventPhotoList = eventPhotoService.findUserEventPhotoList(eventUser, event);
+        List<String> eventPhotoUrlList = eventPhotoList.stream()
+                .map(EventPhoto::getUrl)
+                .collect(Collectors.toList());
+
+        if (eventPhotoUrlList.isEmpty()) {
+            return null;
+        }
+
+        return UserInfoDto.builder()
+                .userId(eventUser.getId().toString())
+                .nickname(eventUser.getNickname())
+                .imageUrlList(eventPhotoUrlList)
+                .imageCount(eventPhotoUrlList.size())
+                .build();
+    }
+>>>>>>> 1c15cf8e1a36d8ccc49b489dbbf964d1f013637f
 
 
 
@@ -168,6 +188,7 @@ public class AggregationFacade {
      */
 
     //updateUserEventCheckStatus
+<<<<<<< HEAD
 //    public UserEventCheckStatusDto updateUserEventCheckStatus(UserEventCheckStatusDto userEventCheckStatusDto, Long eventId) {
 //        User user = userService.findUser(Long.parseLong(userEventCheckStatusDto.getUserId()));
 //        userService.updateCheckStatus(user, userEventCheckStatusDto.isCheckStatus());
@@ -191,6 +212,18 @@ public class AggregationFacade {
 //                        .eventId(event.getId().toString())
 //                        .build());
 //    }
+=======
+    public UserEventCheckStatusDto updateUserEventCheckStatus(UserEventCheckStatusDto userEventCheckStatusDto, Long eventId) {
+        User user = userService.findUser(Long.parseLong(userEventCheckStatusDto.getUserId()));
+        userService.updateCheckStatus(user, userEventCheckStatusDto.isCheckStatus());
+        Event event = eventService.findEvent(eventId);
+        return UserEventCheckStatusDto.builder()
+                .userId(user.getId().toString())
+                .build();
+    }
+
+    //바코드 생성버튼 이벤트처리
+>>>>>>> 1c15cf8e1a36d8ccc49b489dbbf964d1f013637f
 
 
     /**
