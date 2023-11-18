@@ -3,6 +3,7 @@ package com.mooko.dev.facade;
 import com.mooko.dev.configuration.S3Config;
 import com.mooko.dev.domain.*;
 import com.mooko.dev.dto.barcode.res.BarcodeInfoDto;
+import com.mooko.dev.dto.barcode.res.BarcodeListDto;
 import com.mooko.dev.dto.barcode.res.ImageInfoDto;
 import com.mooko.dev.dto.barcode.res.TicketDto;
 import com.mooko.dev.dto.day.req.BarcodeDateDto;
@@ -424,18 +425,24 @@ public class AggregationFacade {
      */
 
     //showBarcodeInfo(moodCloud)
-    public List<BarcodeInfoDto> showBarcodeInfo(User tmpUser){
+    public BarcodeListDto showBarcodeInfo(User tmpUser){
         User user = userService.findUser(tmpUser.getId());
 
         List<UserBarcode> userBarcodeList = userBarcodeService.findUserBarcodeList(user);
 
-        List<BarcodeInfoDto> recentBarcodeInfo = userBarcodeList.stream()
+        List<BarcodeInfoDto> barcodeInfoDtos = userBarcodeList.stream()
                 .map(UserBarcode::getBarcode)
                 .sorted(Comparator.comparing(Barcode::getCreatedAt).reversed())
-                .map(barcode -> new BarcodeInfoDto(barcode.getId().toString(), barcode.getBarcodeUrl(), barcode.getTitle()))
-                .collect(Collectors.toList());
+                .map(barcode -> BarcodeInfoDto.builder()
+                        .id(barcode.getId().toString())
+                        .imageUrl(barcode.getBarcodeUrl())
+                        .title(barcode.getTitle())
+                        .build())
+                .toList();
 
-        return recentBarcodeInfo;
+        return BarcodeListDto.builder()
+                .barcodeList(barcodeInfoDtos)
+                .build();
     }
 
     // showTicketInfo(my-ticket)

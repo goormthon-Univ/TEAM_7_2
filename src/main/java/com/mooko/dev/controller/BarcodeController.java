@@ -3,6 +3,7 @@ package com.mooko.dev.controller;
 import com.mooko.dev.domain.PrincipalDetails;
 import com.mooko.dev.domain.User;
 import com.mooko.dev.dto.barcode.res.BarcodeInfoDto;
+import com.mooko.dev.dto.barcode.res.BarcodeListDto;
 import com.mooko.dev.dto.barcode.res.TicketDto;
 import com.mooko.dev.facade.AggregationFacade;
 import java.util.List;
@@ -23,10 +24,10 @@ public class BarcodeController {
 
     //4.무드클라우드
     @GetMapping("/list")
-    public ResponseEntity<List<BarcodeInfoDto>> showBarcodeList(
+    public ResponseEntity<BarcodeListDto> showBarcodeList(
             @AuthenticationPrincipal PrincipalDetails principalDetails){
         User user = principalDetails.getUser();
-        List<BarcodeInfoDto> barcodeList = aggregationFacade.showBarcodeInfo(user);
+        BarcodeListDto barcodeList = aggregationFacade.showBarcodeInfo(user);
         return ResponseEntity.ok(barcodeList);
     }
 
