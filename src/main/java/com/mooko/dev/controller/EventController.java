@@ -76,4 +76,5 @@ public class EventController {
         aggregationFacade.makeNewEvent(user, newEventDto);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
+
 }
