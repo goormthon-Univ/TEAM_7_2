@@ -1,8 +1,8 @@
 # TEAM_7_2
 
-<h1 align="center"> ⭐️ 단풍톤 7팀의 백앤드 레포지터리 입니다. ⭐️ </h1>
+<h1 align="center"><strong><a href="https://moodbarcode.com"> ⭐️ MOOCO ⭐️ </h1>
 
-<h2 align="center"><strong><a href="https://moodbarcode.com">👉 무드바코드 👈</a></strong></h2>
+<h2 align="center">👉 단풍톤 TEAM_7의 백엔드 레포지토리입니다. 👈</a></strong></h2>
 
 <br>
 
