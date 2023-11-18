@@ -22,14 +22,11 @@ public class EventPhoto {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
-
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "event_id")
     private Event event;
 
     private String url;
+
     private LocalDateTime createdAt;
 
 }

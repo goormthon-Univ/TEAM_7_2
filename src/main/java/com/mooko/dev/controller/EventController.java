@@ -6,13 +6,11 @@ import com.mooko.dev.dto.event.req.EventPhotoDto;
 import com.mooko.dev.dto.event.req.NewEventDto;
 import com.mooko.dev.dto.event.req.UpdateEventDateDto;
 import com.mooko.dev.dto.event.req.UpdateEventNameDto;
-import com.mooko.dev.dto.event.res.BarcodeIdDto;
-import com.mooko.dev.dto.event.res.EventIdDto;
 import com.mooko.dev.dto.event.res.EventInfoDto;
+import com.mooko.dev.dto.event.res.EventList;
 import com.mooko.dev.dto.event.res.EventListDto;
 import com.mooko.dev.dto.event.res.EventPhotoResDto;
 import com.mooko.dev.facade.AggregationFacade;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,11 +29,11 @@ public class EventController {
 
     //5. 이벤트 목록
     @GetMapping("/event-list")
-    public ResponseEntity<EventListDto> showEventList(
+    public ResponseEntity<EventList> showEventList(
             @AuthenticationPrincipal PrincipalDetails principalDetails){
         User user = principalDetails.getUser();
-        EventListDto eventListDto = aggregationFacade.showEventList(user);
-        return ResponseEntity.ok(eventListDto);
+        EventList eventList = aggregationFacade.showEventList(user);
+        return ResponseEntity.ok(eventList);
 
     }
 
