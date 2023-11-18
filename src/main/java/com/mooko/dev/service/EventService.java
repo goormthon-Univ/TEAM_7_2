@@ -38,28 +38,7 @@ public class EventService {
         return eventRepository.save(event);
     }
 
-    @Transactional
-    public void updateEventName(String eventName, Event event) {
-        event.updateEventName(eventName);
-        eventRepository.save(event);
-    }
 
-    @Transactional
-    public void updateEventDate(Event event, String startDate, String endDate) {
-        event.updateEventDate(startDate, endDate);
-        eventRepository.save(event);
-    }
-
-//    @Transactional
-//    public void updateEventStatus(Event event, boolean status) {
-//        event.updateEventStatus(status);
-//    }
-
-//    @Transactional
-//    public void addEventUser(User user, Event event) {
-//        event.getUsers().add(user);
-//        eventRepository.save(event);
-//    }
 
     @Transactional
     public void addBarcode(Event event, Barcode barcode) {
@@ -67,19 +46,6 @@ public class EventService {
         eventRepository.save(event);
     }
 
-//    @Transactional
-//    public void deleteEventUser(User user, Event event) {
-//        if (event.getUsers().removeIf(u -> u.equals(user))) {
-//            eventRepository.save(event);
-//        } else {
-//            throw new CustomException(ErrorCode.USER_ALREADY_DELETED);
-//        }
-//    }
-
-    @Transactional
-    public void deleteEvent(Event event) {
-        eventRepository.delete(event);
-    }
 
     public Event findEventByBarcode(Barcode barcode){
         return eventRepository.findByBarcode(barcode);
