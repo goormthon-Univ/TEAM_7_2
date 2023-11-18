@@ -19,11 +19,3 @@
 
 제작한 큐알 코드 티켓이나 링크를 공유해 무코에 담긴 기록들을 보여줄 수 있습니다.
 
-<br>
-<br>
-  <strong><a href="https://twitter.com/NgColombiaConf">Twitter - </a></strong>
-  <strong><a href="https://join.slack.com/t/ng-colombia/shared_invite/enQtMjgwMjc3ODk1NjMyLTBjMmE4YmQzYTA0ZGNjNTVhMmNlMmQ1YWRjNGFlOWE4MDBjMWM3M2UwNmFjZWFhNmZkYzVmNDc3ZWQ5MmQwZmY">Slack - </a></strong>
-  <strong><a href="https://twitter.com/search?q=%23ngcolombia&src=typd">#NgColombia</a></strong>
-</div>
-
-
