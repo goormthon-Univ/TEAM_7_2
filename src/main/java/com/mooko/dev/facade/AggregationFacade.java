@@ -12,8 +12,10 @@ import com.mooko.dev.dto.day.res.CalendarResDto;
 import com.mooko.dev.dto.day.res.DayDto;
 import com.mooko.dev.dto.day.res.ThumbnailDto;
 import com.mooko.dev.dto.event.req.NewEventDto;
-import com.mooko.dev.dto.event.res.*;
-import com.mooko.dev.dto.event.socket.UserEventCheckStatusDto;
+import com.mooko.dev.dto.event.res.EventIdDto;
+import com.mooko.dev.dto.event.res.EventList;
+import com.mooko.dev.dto.event.res.EventListDto;
+import com.mooko.dev.dto.event.res.EventPhotoResDto;
 import com.mooko.dev.dto.user.req.UserNewInfoDto;
 import com.mooko.dev.dto.user.res.UserPassportDto;
 import com.mooko.dev.exception.custom.CustomException;
@@ -32,7 +34,10 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -47,7 +52,6 @@ public class AggregationFacade {
     private final UserBarcodeService userBarcodeService;
     private final S3Service s3Service;
     private final S3Config s3Config;
-    private final ApplicationEventPublisher eventPublisher;
     private final DayService dayService;
     private final DayPhotoService dayPhotoService;
 
@@ -73,49 +77,6 @@ public class AggregationFacade {
         Event event = eventService.makeNewEvent(newEventDto.getTitle(),startDate.toString(), endDate.toString());
         userService.addEvent(user, event);
     }
-
-
-
-
-
-
-<<<<<<< HEAD
-//    private UserInfoDto createUserInfoDto(User eventUser, Event event) {
-//        List<EventPhoto> eventPhotoList = eventPhotoService.findUserEventPhotoList(eventUser, event);
-//        List<String> eventPhotoUrlList = eventPhotoList.stream()
-//                .map(EventPhoto::getUrl)
-//                .collect(Collectors.toList());
-//
-//        if (eventPhotoUrlList.isEmpty()) {
-//            return null;
-//        }
-//
-//        return UserInfoDto.builder()
-//                .userId(eventUser.getId().toString())
-//                .nickname(eventUser.getNickname())
-//                .imageUrlList(eventPhotoUrlList)
-//                .imageCount(eventPhotoUrlList.size())
-//                .build();
-//    }
-=======
-    private UserInfoDto createUserInfoDto(User eventUser, Event event) {
-        List<EventPhoto> eventPhotoList = eventPhotoService.findUserEventPhotoList(eventUser, event);
-        List<String> eventPhotoUrlList = eventPhotoList.stream()
-                .map(EventPhoto::getUrl)
-                .collect(Collectors.toList());
-
-        if (eventPhotoUrlList.isEmpty()) {
-            return null;
-        }
-
-        return UserInfoDto.builder()
-                .userId(eventUser.getId().toString())
-                .nickname(eventUser.getNickname())
-                .imageUrlList(eventPhotoUrlList)
-                .imageCount(eventPhotoUrlList.size())
-                .build();
-    }
->>>>>>> 1c15cf8e1a36d8ccc49b489dbbf964d1f013637f
 
 
 
@@ -183,48 +144,7 @@ public class AggregationFacade {
 
 
 
-    /**
-     *
-     * SocketController
-     */
 
-    //updateUserEventCheckStatus
-<<<<<<< HEAD
-//    public UserEventCheckStatusDto updateUserEventCheckStatus(UserEventCheckStatusDto userEventCheckStatusDto, Long eventId) {
-//        User user = userService.findUser(Long.parseLong(userEventCheckStatusDto.getUserId()));
-//        userService.updateCheckStatus(user, userEventCheckStatusDto.isCheckStatus());
-//        Event event = eventService.findEvent(eventId);
-//        checkEventButtonStatus(event);
-//        return UserEventCheckStatusDto.builder()
-//                .checkStatus(user.getCheckStatus())
-//                .userId(user.getId().toString())
-//                .build();
-//    }
-
-    //바코드 생성버튼 이벤트처리
-//    private void checkEventButtonStatus(Event event) {
-//        List<User> userByEvent = userService.findUserByEvent(event);
-//        boolean allUsersChecked = userByEvent.stream()
-//                .allMatch(User::getCheckStatus);
-//        log.info("바코드 생성버튼 상태입니다 id = {}, status = {} ", event.getId(), allUsersChecked);
-//        eventPublisher.publishEvent(
-//                ButtonEvent.builder()
-//                        .buttonStatus(allUsersChecked)
-//                        .eventId(event.getId().toString())
-//                        .build());
-//    }
-=======
-    public UserEventCheckStatusDto updateUserEventCheckStatus(UserEventCheckStatusDto userEventCheckStatusDto, Long eventId) {
-        User user = userService.findUser(Long.parseLong(userEventCheckStatusDto.getUserId()));
-        userService.updateCheckStatus(user, userEventCheckStatusDto.isCheckStatus());
-        Event event = eventService.findEvent(eventId);
-        return UserEventCheckStatusDto.builder()
-                .userId(user.getId().toString())
-                .build();
-    }
-
-    //바코드 생성버튼 이벤트처리
->>>>>>> 1c15cf8e1a36d8ccc49b489dbbf964d1f013637f
 
 
     /**
