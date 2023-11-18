@@ -5,6 +5,8 @@ import java.io.File;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Setter
@@ -32,14 +34,9 @@ public class User {
     private String dateOfIssue;     //유저가 회원가입했을때의 시점으로
     private Boolean modalActive;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "event_id")
-    private Event event;
-
-
-    public void updateEvent(Event event) {
-        this.event = event;
-    }
+    @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    private List<Event> event = new ArrayList<>();
 
     public void updateCheckStatus(Boolean checkStatus) {
         this.checkStatus = checkStatus;

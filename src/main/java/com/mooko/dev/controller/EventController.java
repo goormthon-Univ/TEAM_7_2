@@ -28,6 +28,7 @@ public class EventController {
 
     private final AggregationFacade aggregationFacade;
 
+
     //5. 이벤트 목록
     @GetMapping("/event-list")
     public ResponseEntity<EventListDto> showEventList(
@@ -38,26 +39,26 @@ public class EventController {
 
     }
 
-    //3-A. 이벤트생성
+    //5.4. 이벤트생성
     @PostMapping("/new-event")
-    public ResponseEntity<EventIdDto> makeNewEvent(
+    public ResponseEntity<Void> makeNewEvent(
             @AuthenticationPrincipal PrincipalDetails principalDetails,
             @RequestBody NewEventDto newEventDto
     ) {
         User user = principalDetails.getUser();
-        Long eventId = aggregationFacade.makeNewEvent(user, newEventDto);
-        return ResponseEntity.ok(EventIdDto.builder().eventId(eventId.toString()).build());
+        aggregationFacade.makeNewEvent(user, newEventDto);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    //3-C. 이벤트 바코드 생성
+    //5.3. 이벤트 바코드 생성
     @PostMapping("/{eventId}/result")
-    public ResponseEntity<BarcodeIdDto> makeNewEventBarcode(
+    public ResponseEntity<Void> makeNewEventBarcode(
             @AuthenticationPrincipal PrincipalDetails principalDetails,
             @PathVariable Long eventId
     ) throws IOException, InterruptedException {
         User user = principalDetails.getUser();
-        Long barcodeId = aggregationFacade.makeNewEventBarcode(user, eventId);
-        return ResponseEntity.ok(BarcodeIdDto.builder().barcodeId(barcodeId.toString()).build());
+        aggregationFacade.makeNewEventBarcode(user, eventId);
+        return ResponseEntity.status(HttpStatus.OK).build();
 
     }
 
@@ -143,4 +144,8 @@ public class EventController {
         aggregationFacade.deleteUserEvent(user, eventId);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
+
+
+
+
 }
