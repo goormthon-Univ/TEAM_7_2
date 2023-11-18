@@ -62,6 +62,29 @@ public class EventController {
 
     }
 
+    //5-2. 이벤트 사진 등록/수정
+    @PostMapping("/{eventId}/save-photo}")
+    public ResponseEntity<Void> updateUserEventPhoto(
+            @AuthenticationPrincipal PrincipalDetails principalDetails,
+            @PathVariable Long eventId,
+            @ModelAttribute EventPhotoDto eventPhotoDto)
+    {
+        User user = principalDetails.getUser();
+        aggregationFacade.updateEventPhoto(eventId, eventPhotoDto.getImageList());
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    //5-1. 이벤트 블록
+    @GetMapping("{eventId}")
+    public ResponseEntity<EventPhotoResDto> showEventBlock(
+            @AuthenticationPrincipal PrincipalDetails principalDetails,
+            @PathVariable Long eventId
+    ){
+        User user = principalDetails.getUser();
+        EventPhotoResDto eventPhotoResDto = aggregationFacade.showUserEventPhoto(user, eventId);
+        return ResponseEntity.ok(eventPhotoResDto);
+    }
+
     //3-0. 이벤트 페이지
     @GetMapping("/{eventId}")
     public ResponseEntity<EventInfoDto> showEventPage(
@@ -105,18 +128,6 @@ public class EventController {
         User user = principalDetails.getUser();
         EventPhotoResDto eventPhotoResDto = aggregationFacade.showUserEventPhoto(user, eventId);
         return ResponseEntity.ok(eventPhotoResDto);
-    }
-
-    //3-5. 이벤트 사진 등록/수정
-    @PostMapping("/{eventId}")
-    public ResponseEntity<Void> updateUserEventPhoto(
-            @AuthenticationPrincipal PrincipalDetails principalDetails,
-            @PathVariable Long eventId,
-            @ModelAttribute EventPhotoDto eventPhotoDto)
-    {
-        User user = principalDetails.getUser();
-        aggregationFacade.updateUserEventPhoto(user, eventId, eventPhotoDto.getImageList());
-        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
 

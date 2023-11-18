@@ -12,6 +12,7 @@ import com.mooko.dev.dto.day.res.ButtonStatus;
 import com.mooko.dev.dto.day.res.CalendarResDto;
 import com.mooko.dev.dto.day.res.DayDto;
 import com.mooko.dev.dto.day.res.ThumbnailDto;
+import com.mooko.dev.dto.event.req.EventPhotoDto;
 import com.mooko.dev.dto.event.req.NewEventDto;
 import com.mooko.dev.dto.event.req.UpdateEventDateDto;
 import com.mooko.dev.dto.event.req.UpdateEventNameDto;
@@ -785,5 +786,18 @@ public class AggregationFacade {
                     .imageCount(eventPhotoService.get)
         })
 
+    }
+
+    public void updateEventPhoto(Long EventId, EventPhotoDto eventPhotoDto){
+        List<String> newDayPhotoUrlList = new ArrayList<>();
+        if (newDayPhotoList!=null){
+            newDayPhotoUrlList = newDayPhotoList.parallelStream()
+                    .map(newPhoto -> {
+                        String fileName = s3Service.makefileName();
+                        return s3Service.putFileToS3(newPhoto, fileName, s3Config.getDayImageDir());
+                    }).collect(Collectors.toList());
+        }
+
+        if(newDayPhotoList!=null){dayPhotoService.makeNewDayPhoto(day,newDayPhotoUrlList,false);}
     }
 }
