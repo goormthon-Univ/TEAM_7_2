@@ -136,7 +136,7 @@ public class AggregationFacade {
         }
         return EventPhotoResDto.builder()
                 .eventId(eventId.toString())
-                .imageUrlList(null)
+                .imageUrlList(new ArrayList<>())
                 .build();
 
     }
