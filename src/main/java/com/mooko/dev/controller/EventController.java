@@ -42,6 +42,17 @@ public class EventController {
     }
 
 
+
+    //5-2. 이벤트 사진 등록/수정
+    @PostMapping("/{eventId}/save-photo")
+    public ResponseEntity<Void> updateUserEventPhoto(
+            @PathVariable Long eventId,
+            @ModelAttribute EventPhotoDto eventPhotoDto)
+    {
+        aggregationFacade.updateEventPhoto(eventId, eventPhotoDto.getImageList());
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
     //5.4. 이벤트생성
     @PostMapping("/new-event")
     public ResponseEntity<Void> makeNewEvent(
@@ -65,16 +76,6 @@ public class EventController {
 
     }
 
-    //5-2. 이벤트 사진 등록/수정
-    @PostMapping("/{eventId}/save-photo")
-    public ResponseEntity<Void> updateUserEventPhoto(
-            @AuthenticationPrincipal PrincipalDetails principalDetails,
-            @PathVariable Long eventId,
-            @ModelAttribute EventPhotoDto eventPhotoDto)
-    {
-        aggregationFacade.updateEventPhoto(eventId, eventPhotoDto.getImageList());
-        return ResponseEntity.status(HttpStatus.OK).build();
-    }
 
 
 
