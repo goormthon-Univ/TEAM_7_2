@@ -55,5 +55,21 @@ public class EventPhotoService {
         eventPhotoRepository.saveAll(eventPhotos);
     }
 
+    @Transactional
+    public void makeEventPhoto(Event event, List<String> eventPhotoUrlList) {
+        List<EventPhoto> eventPhotos = new ArrayList<>();
+
+        for (String url : eventPhotoUrlList) {
+            EventPhoto eventPhoto = EventPhoto.builder()
+                    .event(event)
+                    .createdAt(LocalDateTime.now())
+                    .url(url)
+                    .build();
+            eventPhotos.add(eventPhoto);
+        }
+
+        eventPhotoRepository.saveAll(eventPhotos);
+    }
+
 
 }

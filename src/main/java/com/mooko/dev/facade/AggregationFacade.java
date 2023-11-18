@@ -783,16 +783,18 @@ public class AggregationFacade {
 
     }
 
-    public void updateEventPhoto(Long EventId, EventPhotoDto eventPhotoDto){
-        List<String> newDayPhotoUrlList = new ArrayList<>();
-        if (newDayPhotoList!=null){
-            newDayPhotoUrlList = newDayPhotoList.parallelStream()
+    public void updateEventPhoto(Long eventId, List<File> newPhotoList){
+        Event event = eventService.findEvent(eventId)
+
+        List<String> newPhotoUrlList = new ArrayList<>();
+        if (newPhotoList!=null){
+            newPhotoUrlList = newPhotoList.parallelStream()
                     .map(newPhoto -> {
                         String fileName = s3Service.makefileName();
                         return s3Service.putFileToS3(newPhoto, fileName, s3Config.getDayImageDir());
                     }).collect(Collectors.toList());
         }
 
-        if(newDayPhotoList!=null){dayPhotoService.makeNewDayPhoto(day,newDayPhotoUrlList,false);}
+        if(newPhotoUrlList!=null){eventPhotoService.makeEventPhoto(event,newPhotoUrlList);}
     }
 }
