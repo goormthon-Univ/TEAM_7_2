@@ -16,6 +16,7 @@ import com.mooko.dev.dto.event.req.NewEventDto;
 import com.mooko.dev.dto.event.req.UpdateEventDateDto;
 import com.mooko.dev.dto.event.req.UpdateEventNameDto;
 import com.mooko.dev.dto.event.res.EventInfoDto;
+import com.mooko.dev.dto.event.res.EventListDto;
 import com.mooko.dev.dto.event.res.EventPhotoResDto;
 import com.mooko.dev.dto.event.res.UserInfoDto;
 import com.mooko.dev.dto.event.socket.UserEventCheckStatusDto;
@@ -770,5 +771,19 @@ public class AggregationFacade {
                 .get()
                 .getUser();
         return showTicketInfo(user, barcodeId);
+    }
+
+    public List<EventListDto> showEventList(User tmpUser){
+        User user = userService.findUser(tmpUser.getId());
+        List<Event> eventList = eventService.findEventByRoomaker(user);
+        List<Long> eventIdList = eventList.stream().map(Event::getId).collect(Collectors.toList());
+
+        List<EventListDto> eventListDto = eventList.stream().map(event -> {
+            EventListDto.builder()
+                    .id(event.getId())
+                    .title(event.getTitle())
+                    .imageCount(eventPhotoService.get)
+        })
+
     }
 }
