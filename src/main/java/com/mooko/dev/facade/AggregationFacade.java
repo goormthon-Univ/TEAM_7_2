@@ -785,7 +785,7 @@ public class AggregationFacade {
     }
 
     public void updateEventPhoto(Long eventId, List<File> newPhotoList){
-        Event event = eventService.findEvent(eventId)
+        Event event = eventService.findEvent(eventId);
 
         List<String> newPhotoUrlList = new ArrayList<>();
         if (newPhotoList!=null){
@@ -796,6 +796,7 @@ public class AggregationFacade {
                     }).collect(Collectors.toList());
         }
 
-        if(newPhotoUrlList!=null){eventPhotoService.makeEventPhoto(event,newPhotoUrlList);}
+        List<EventPhoto> eventPhotos = eventPhotoService.makeEventPhoto(event, newPhotoUrlList);
+        eventService.addEventPhoto(event, eventPhotos);
     }
 }

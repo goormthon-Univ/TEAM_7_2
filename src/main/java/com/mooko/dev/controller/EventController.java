@@ -67,7 +67,6 @@ public class EventController {
             @PathVariable Long eventId,
             @ModelAttribute EventPhotoDto eventPhotoDto)
     {
-        User user = principalDetails.getUser();
         aggregationFacade.updateEventPhoto(eventId, eventPhotoDto.getImageList());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
