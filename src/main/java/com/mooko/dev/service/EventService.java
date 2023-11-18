@@ -27,7 +27,7 @@ public class EventService {
     }
 
     @Transactional
-    public Event makeNewEvent(User user,String title, String startDate, String endDate) {
+    public Event makeNewEvent(String title, String startDate, String endDate) {
         Event event = Event.builder()
                 .title(title)
                 .startDate(startDate)
@@ -50,10 +50,10 @@ public class EventService {
         eventRepository.save(event);
     }
 
-    @Transactional
-    public void updateEventStatus(Event event, boolean status) {
-        event.updateEventStatus(status);
-    }
+//    @Transactional
+//    public void updateEventStatus(Event event, boolean status) {
+//        event.updateEventStatus(status);
+//    }
 
     @Transactional
     public void addEventUser(User user, Event event) {

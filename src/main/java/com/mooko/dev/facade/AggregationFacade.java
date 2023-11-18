@@ -76,7 +76,7 @@ public class AggregationFacade {
         if (startDate.isAfter(endDate)) {
             throw new CustomException(ErrorCode.START_DATE_EXCEED_END_DATE);
         }
-        Event event = eventService.makeNewEvent(user,newEventDto.getTitle(),startDate.toString(), endDate.toString());
+        Event event = eventService.makeNewEvent(newEventDto.getTitle(),startDate.toString(), endDate.toString());
         userService.addEvent(user, event);
     }
 
@@ -84,40 +84,40 @@ public class AggregationFacade {
 
 
     //ShowEventPage
-    public EventInfoDto showEventPage(User tmpUser, Long eventId) {
-        User user = userService.findUser(tmpUser.getId());
-        Event event = eventService.findEvent(eventId);
-        if (!user.getEvent().getId().equals(event.getId())) {
-            throw new CustomException(ErrorCode.USER_ALREADY_HAS_EVENT);
-        }
-        // 이벤트에 사용자 등록 여부 확인 및 등록
-        if (event.getUsers().stream().noneMatch(existingUser -> existingUser.equals(user))) {
-            eventService.addEventUser(user, event);
-            userService.addEvent(user, event);
-        }
-
-        List<String> profileImageUrlList = event.getUsers().stream()
-                .map(User::getProfileUrl)
-                .collect(Collectors.toList());
-
-        boolean isRoomMaker = user.equals(event.getRoomMaker());
-
-        List<UserInfoDto> userInfoList = event.getUsers().stream()
-                .map(eventUser -> createUserInfoDto(eventUser, event))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-
-        return EventInfoDto.builder()
-                .profileImgUrlList(profileImageUrlList)
-                .roomMaker(isRoomMaker)
-                .eventName(event.getTitle())
-                .startDate(event.getStartDate())
-                .endDate(event.getEndDate())
-                .loginUserId(user.getId().toString())
-                .userCount(event.getUsers().size())
-                .userInfo(userInfoList)
-                .build();
-    }
+//    public EventInfoDto showEventPage(User tmpUser, Long eventId) {
+//        User user = userService.findUser(tmpUser.getId());
+//        Event event = eventService.findEvent(eventId);
+//        if (!user.getEvent().getId().equals(event.getId())) {
+//            throw new CustomException(ErrorCode.USER_ALREADY_HAS_EVENT);
+//        }
+//        // 이벤트에 사용자 등록 여부 확인 및 등록
+//        if (event.getUsers().stream().noneMatch(existingUser -> existingUser.equals(user))) {
+//            eventService.addEventUser(user, event);
+//            userService.addEvent(user, event);
+//        }
+//
+//        List<String> profileImageUrlList = event.getUsers().stream()
+//                .map(User::getProfileUrl)
+//                .collect(Collectors.toList());
+//
+//        boolean isRoomMaker = user.equals(event.getRoomMaker());
+//
+//        List<UserInfoDto> userInfoList = event.getUsers().stream()
+//                .map(eventUser -> createUserInfoDto(eventUser, event))
+//                .filter(Objects::nonNull)
+//                .collect(Collectors.toList());
+//
+//        return EventInfoDto.builder()
+//                .profileImgUrlList(profileImageUrlList)
+//                .roomMaker(isRoomMaker)
+//                .eventName(event.getTitle())
+//                .startDate(event.getStartDate())
+//                .endDate(event.getEndDate())
+//                .loginUserId(user.getId().toString())
+//                .userCount(event.getUsers().size())
+//                .userInfo(userInfoList)
+//                .build();
+//    }
 
     private UserInfoDto createUserInfoDto(User eventUser, Event event) {
         List<EventPhoto> eventPhotoList = eventPhotoService.findUserEventPhotoList(eventUser, event);
@@ -139,38 +139,41 @@ public class AggregationFacade {
     }
 
     //updateEventName
-    public void updateEventName(User tmpUser, UpdateEventNameDto updateEventNameDto, Long eventId) {
-        User user = userService.findUser(tmpUser.getId());
-        Event event = eventService.findEvent(eventId);
-
-        if(updateEventNameDto.getEventName()==null|| updateEventNameDto.getEventName().equals("")){throw new CustomException(ErrorCode.EVENT_TITLE_EMPTY);}
-
-        checkUserRoomMaker(user, event);
-        eventService.updateEventName(updateEventNameDto.getEventName(), event);
-    }
+//    public void updateEventName(User tmpUser, UpdateEventNameDto updateEventNameDto, Long eventId) {
+//        User user = userService.findUser(tmpUser.getId());
+//        Event event = eventService.findEvent(eventId);
+//
+//        if(updateEventNameDto.getEventName()==null|| updateEventNameDto.getEventName().equals("")){throw new CustomException(ErrorCode.EVENT_TITLE_EMPTY);}
+//
+//        checkUserRoomMaker(user, event);
+//        eventService.updateEventName(updateEventNameDto.getEventName(), event);
+//    }
 
 
 
     //updateEventDate
-    public void updateEventDate(User tmpUser, UpdateEventDateDto updateEventDateDto, Long eventId) {
-        User user = userService.findUser(tmpUser.getId());
-        Event event = eventService.findEvent(eventId);
-        checkUserRoomMaker(user, event);
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        LocalDate startDate = Instant.parse(updateEventDateDto.getStartDate()).atZone(ZoneId.of("UTC")).toLocalDate();
-        LocalDate endDate = Instant.parse(updateEventDateDto.getEndDate()).atZone(ZoneId.of("UTC")).toLocalDate();
-
-        if (startDate.isAfter(endDate)) {
-            throw new CustomException(ErrorCode.START_DATE_EXCEED_END_DATE);
-        }
-        eventService.updateEventDate(event, startDate.toString(), endDate.toString());
-    }
+//    public void updateEventDate(User tmpUser, UpdateEventDateDto updateEventDateDto, Long eventId) {
+//        User user = userService.findUser(tmpUser.getId());
+//        Event event = eventService.findEvent(eventId);
+//        checkUserRoomMaker(user, event);
+//
+//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+//        LocalDate startDate = Instant.parse(updateEventDateDto.getStartDate()).atZone(ZoneId.of("UTC")).toLocalDate();
+//        LocalDate endDate = Instant.parse(updateEventDateDto.getEndDate()).atZone(ZoneId.of("UTC")).toLocalDate();
+//
+//        if (startDate.isAfter(endDate)) {
+//            throw new CustomException(ErrorCode.START_DATE_EXCEED_END_DATE);
+//        }
+//        eventService.updateEventDate(event, startDate.toString(), endDate.toString());
+//    }
 
     //makeNewEventBarcode
-    public Long makeNewEventBarcode(User tmpUser, Long eventId) throws IOException, InterruptedException {
+    public void makeNewEventBarcode(User tmpUser, Long eventId) throws IOException, InterruptedException {
         User user = userService.findUser(tmpUser.getId());
         Event event = eventService.findEvent(eventId);
+        if(!event.getUser().equals(user)){
+            throw new CustomException(ErrorCode.NOT_OWNER_ACCESS);
+        }
         List<String> eventPhotoList = eventPhotoService.findAllEventPhotoList(event);
         checkEventPhotoCount(event, 0, true);
 
@@ -186,43 +189,41 @@ public class AggregationFacade {
                 event.getEndDate(),
                 BarcodeType.EVENT,
                 event);
-        userBarcodeService.makeUserBarcode(event.getUsers(), barcode);
+        userBarcodeService.makeUserBarcode(event.getUser(), barcode);
         eventService.addBarcode(event, barcode);
-        eventService.updateEventStatus(event, false);
-        return barcode.getId();
     }
 
-    private void checkUserRoomMaker(User user, Event event) {
-        if (!event.getRoomMaker().equals(user)) {
-            throw new CustomException(ErrorCode.NOT_ROOM_MAKER);
-        }
-    }
+//    private void checkUserRoomMaker(User user, Event event) {
+//        if (!event.getRoomMaker().equals(user)) {
+//            throw new CustomException(ErrorCode.NOT_ROOM_MAKER);
+//        }
+//    }
 
 
     //updateUserEventPhoto
-    public void updateUserEventPhoto(User tmpUser, Long eventId, List<File> newPhotoList) {
-        User user = userService.findUser(tmpUser.getId());
-        Event event = eventService.findEvent(eventId);
-        if (!event.getActiveStatus()) {
-            throw new CustomException(ErrorCode.INVALID_REQUEST);
-        }
-
-        List<EventPhoto> userEventPhotoList = eventPhotoService.findUserEventPhotoList(user, event);
-        userEventPhotoList.forEach(eventPhoto -> s3Service.deleteFromS3(eventPhoto.getUrl()));
-        eventPhotoService.deleteEventPhoto(userEventPhotoList);
-        deleteExistingPhotoOrEventUser(user, event, false, false);
-
-        if(newPhotoList != null){
-            checkEventPhotoCount(event, newPhotoList.size(), false);
-            List<String> newPhotoUrlList = newPhotoList.parallelStream()
-                    .map(newPhoto -> {
-                        String fileName = s3Service.makefileName();
-                        return s3Service.putFileToS3(newPhoto, fileName, s3Config.getEventImageDir());
-                    }).toList();
-            eventPhotoService.makeNewEventPhoto(user, event, newPhotoUrlList);
-        }
-
-    }
+//    public void updateUserEventPhoto(User tmpUser, Long eventId, List<File> newPhotoList) {
+//        User user = userService.findUser(tmpUser.getId());
+//        Event event = eventService.findEvent(eventId);
+//        if (!event.getActiveStatus()) {
+//            throw new CustomException(ErrorCode.INVALID_REQUEST);
+//        }
+//
+//        List<EventPhoto> userEventPhotoList = eventPhotoService.findUserEventPhotoList(user, event);
+//        userEventPhotoList.forEach(eventPhoto -> s3Service.deleteFromS3(eventPhoto.getUrl()));
+//        eventPhotoService.deleteEventPhoto(userEventPhotoList);
+//        deleteExistingPhotoOrEventUser(user, event, false, false);
+//
+//        if(newPhotoList != null){
+//            checkEventPhotoCount(event, newPhotoList.size(), false);
+//            List<String> newPhotoUrlList = newPhotoList.parallelStream()
+//                    .map(newPhoto -> {
+//                        String fileName = s3Service.makefileName();
+//                        return s3Service.putFileToS3(newPhoto, fileName, s3Config.getEventImageDir());
+//                    }).toList();
+//            eventPhotoService.makeNewEventPhoto(user, event, newPhotoUrlList);
+//        }
+//
+//    }
 
     public void checkEventPhotoCount(Event event, int additionalCount, boolean checkMinimum) {
         List<String> eventPhotoList = eventPhotoService.findAllEventPhotoList(event);
@@ -240,42 +241,42 @@ public class AggregationFacade {
 
 
     //deleteUserEventPhoto
-    public EventInfoDto deleteUserEventPhoto(User tmpUser, Long eventId, Long tmpUserId) {
-        User user = userService.findUser(tmpUser.getId());
-        Event event = eventService.findEvent(eventId);
-
-        if (!event.getActiveStatus()) {
-            throw new CustomException(ErrorCode.INVALID_REQUEST);
-        }
-        if (!Objects.equals(tmpUserId, user.getId())) {
-            throw new CustomException(ErrorCode.USER_NOT_MATCH);
-        }
-        deleteExistingPhotoOrEventUser(user, event, false, false);
-
-
-        List<String> profileImageUrlList = event.getUsers().stream()
-                .map(User::getProfileUrl)
-                .collect(Collectors.toList());
-
-        boolean isRoomMaker = user.equals(event.getRoomMaker());
-
-        List<UserInfoDto> userInfoList = event.getUsers().stream()
-                .map(eventUser -> createUserInfoDto(eventUser, event))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-
-        return EventInfoDto.builder()
-                .profileImgUrlList(profileImageUrlList)
-                .roomMaker(isRoomMaker)
-                .eventName(event.getTitle())
-                .startDate(event.getStartDate())
-                .endDate(event.getEndDate())
-                .loginUserId(user.getId().toString())
-                .userCount(event.getUsers().size())
-                .userInfo(userInfoList)
-                .build();
-
-    }
+//    public EventInfoDto deleteUserEventPhoto(User tmpUser, Long eventId, Long tmpUserId) {
+//        User user = userService.findUser(tmpUser.getId());
+//        Event event = eventService.findEvent(eventId);
+//
+//        if (!event.getActiveStatus()) {
+//            throw new CustomException(ErrorCode.INVALID_REQUEST);
+//        }
+//        if (!Objects.equals(tmpUserId, user.getId())) {
+//            throw new CustomException(ErrorCode.USER_NOT_MATCH);
+//        }
+//        deleteExistingPhotoOrEventUser(user, event, false, false);
+//
+//
+//        List<String> profileImageUrlList = event.getUsers().stream()
+//                .map(User::getProfileUrl)
+//                .collect(Collectors.toList());
+//
+//        boolean isRoomMaker = user.equals(event.getRoomMaker());
+//
+//        List<UserInfoDto> userInfoList = event.getUsers().stream()
+//                .map(eventUser -> createUserInfoDto(eventUser, event))
+//                .filter(Objects::nonNull)
+//                .collect(Collectors.toList());
+//
+//        return EventInfoDto.builder()
+//                .profileImgUrlList(profileImageUrlList)
+//                .roomMaker(isRoomMaker)
+//                .eventName(event.getTitle())
+//                .startDate(event.getStartDate())
+//                .endDate(event.getEndDate())
+//                .loginUserId(user.getId().toString())
+//                .userCount(event.getUsers().size())
+//                .userInfo(userInfoList)
+//                .build();
+//
+//    }
 
     //showUserEventPhoto
     public EventPhotoResDto showUserEventPhoto(User tmpUser, Long eventId){
@@ -291,38 +292,38 @@ public class AggregationFacade {
     }
 
     //deleteUserEvent
-    public void deleteUserEvent(User tmpUser, Long eventId) {
-        User user = userService.findUser(tmpUser.getId());
-        Event event = eventService.findEvent(eventId);
-        if (event.getRoomMaker().equals(user)) {
-            eventPublisher.publishEvent(
-                    LeaveEvent.builder()
-                            .eventStatus(true)
-                            .eventId(event.getId().toString())
-                            .build()
-            );
-            deleteExistingPhotoOrEventUser(user, event, true, true);
-            return;
-        }
-        deleteExistingPhotoOrEventUser(user, event, true, false);
-    }
-
-    private void deleteExistingPhotoOrEventUser(User user, Event event, boolean isLeaveEvent, boolean isDeleteEvent) {
-        List<EventPhoto> eventPhotoList = eventPhotoService.findUserEventPhotoList(user, event);
-        if (!eventPhotoList.isEmpty()) {
-            eventPhotoList.forEach(eventPhoto -> s3Service.deleteFromS3(eventPhoto.getUrl()));
-            eventPhotoService.deleteEventPhoto(eventPhotoList);
-
-        }
-        if (isLeaveEvent) {
-            eventService.deleteEventUser(user, event);
-            userService.deleteEvent(user);
-            if (isDeleteEvent) {
-                eventService.deleteEvent(event);
-            }
-        }
-
-    }
+//    public void deleteUserEvent(User tmpUser, Long eventId) {
+//        User user = userService.findUser(tmpUser.getId());
+//        Event event = eventService.findEvent(eventId);
+//        if (event.getRoomMaker().equals(user)) {
+//            eventPublisher.publishEvent(
+//                    LeaveEvent.builder()
+//                            .eventStatus(true)
+//                            .eventId(event.getId().toString())
+//                            .build()
+//            );
+//            deleteExistingPhotoOrEventUser(user, event, true, true);
+//            return;
+//        }
+//        deleteExistingPhotoOrEventUser(user, event, true, false);
+//    }
+//
+//    private void deleteExistingPhotoOrEventUser(User user, Event event, boolean isLeaveEvent, boolean isDeleteEvent) {
+//        List<EventPhoto> eventPhotoList = eventPhotoService.findUserEventPhotoList(user, event);
+//        if (!eventPhotoList.isEmpty()) {
+//            eventPhotoList.forEach(eventPhoto -> s3Service.deleteFromS3(eventPhoto.getUrl()));
+//            eventPhotoService.deleteEventPhoto(eventPhotoList);
+//
+//        }
+//        if (isLeaveEvent) {
+//            eventService.deleteEventUser(user, event);
+//            userService.deleteEvent(user);
+//            if (isDeleteEvent) {
+//                eventService.deleteEvent(event);
+//            }
+//        }
+//
+//    }
 
 
     /**
@@ -573,21 +574,21 @@ public class AggregationFacade {
      */
 
     //showUserEventStatus
-    public UserEventStatusDto showUserEventStatus(User tmpUser) {
-        User user = userService.findUser(tmpUser.getId());
-        boolean isExistEvent = checkUserAlreadyInEvent(user);
-
-        if(isExistEvent){
-           return UserEventStatusDto.builder()
-                    .existEvent(isExistEvent)
-                    .eventId(user.getEvent().getId().toString())
-                    .build();
-        }
-        return UserEventStatusDto.builder()
-                .existEvent(isExistEvent)
-                .eventId(null)
-                .build();
-    }
+//    public UserEventStatusDto showUserEventStatus(User tmpUser) {
+//        User user = userService.findUser(tmpUser.getId());
+//        boolean isExistEvent = checkUserAlreadyInEvent(user);
+//
+//        if(isExistEvent){
+//           return UserEventStatusDto.builder()
+//                    .existEvent(isExistEvent)
+//                    .eventId(user.getEvent().getId().toString())
+//                    .build();
+//        }
+//        return UserEventStatusDto.builder()
+//                .existEvent(isExistEvent)
+//                .eventId(null)
+//                .build();
+//    }
 
     //test
     public User test(Long userId){

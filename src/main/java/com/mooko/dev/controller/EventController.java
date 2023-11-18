@@ -4,11 +4,7 @@ import com.mooko.dev.domain.PrincipalDetails;
 import com.mooko.dev.domain.User;
 import com.mooko.dev.dto.event.req.EventPhotoDto;
 import com.mooko.dev.dto.event.req.NewEventDto;
-import com.mooko.dev.dto.event.req.UpdateEventDateDto;
-import com.mooko.dev.dto.event.req.UpdateEventNameDto;
-import com.mooko.dev.dto.event.res.EventInfoDto;
 import com.mooko.dev.dto.event.res.EventList;
-import com.mooko.dev.dto.event.res.EventListDto;
 import com.mooko.dev.dto.event.res.EventPhotoResDto;
 import com.mooko.dev.facade.AggregationFacade;
 import lombok.RequiredArgsConstructor;
@@ -83,78 +79,78 @@ public class EventController {
     }
 
 
-    //3-0. 이벤트 페이지
-    @GetMapping("/{eventId}")
-    public ResponseEntity<EventInfoDto> showEventPage(
-            @AuthenticationPrincipal PrincipalDetails principalDetails,
-            @PathVariable Long eventId) {
-        User user = principalDetails.getUser();
-        EventInfoDto eventInfoDto = aggregationFacade.showEventPage(user, eventId);
-        return ResponseEntity.ok(eventInfoDto);
-    }
-
-    //3-1. 이벤트 이름 수정
-    @PutMapping("/{eventId}/event-name")
-    public ResponseEntity<Void> updateEventName(
-            @AuthenticationPrincipal PrincipalDetails principalDetails,
-            @RequestBody UpdateEventNameDto updateEventNameDto,
-            @PathVariable Long eventId
-    ) {
-        User user = principalDetails.getUser();
-        aggregationFacade.updateEventName(user, updateEventNameDto, eventId);
-        return ResponseEntity.status(HttpStatus.OK).build();
-    }
-
-    //3-2. 이벤트 기간 수정
-    @PutMapping("/{eventId}/event-date")
-    public ResponseEntity<Void> updateEventDate(
-            @AuthenticationPrincipal PrincipalDetails principalDetails,
-            @RequestBody UpdateEventDateDto updateEventDateDto,
-            @PathVariable Long eventId
-    ) {
-        User user = principalDetails.getUser();
-        aggregationFacade.updateEventDate(user, updateEventDateDto, eventId);
-        return ResponseEntity.status(HttpStatus.OK).build();
-    }
-
-    //3-4. 이벤트 사진
-    @GetMapping("/{eventId}/image-list")
-    public ResponseEntity<EventPhotoResDto> showUserEventPhoto(
-            @AuthenticationPrincipal PrincipalDetails principalDetails,
-            @PathVariable Long eventId
-    ) {
-        User user = principalDetails.getUser();
-        EventPhotoResDto eventPhotoResDto = aggregationFacade.showUserEventPhoto(user, eventId);
-        return ResponseEntity.ok(eventPhotoResDto);
-    }
-
-
-    //3-6. 이벤트 사진 리스트 삭제
-    @DeleteMapping("/{eventId}/{userId}/image-list")
-    public ResponseEntity<EventInfoDto> deleteUserEventPhoto(
-            @AuthenticationPrincipal PrincipalDetails principalDetails,
-            @PathVariable Long userId,
-            @PathVariable Long eventId
-    )
-    {
-        User user = principalDetails.getUser();
-        EventInfoDto eventInfoDto = aggregationFacade.deleteUserEventPhoto(user, eventId, userId);
-
-        return ResponseEntity.ok(eventInfoDto);
-    }
-
-    //3-7. 이벤트 나가기
-    @DeleteMapping("/{eventId}")
-    public ResponseEntity<Void> deleteUserEvent(
-            @AuthenticationPrincipal PrincipalDetails principalDetails,
-            @PathVariable Long eventId
-    ) {
-        User user = principalDetails.getUser();
-        aggregationFacade.deleteUserEvent(user, eventId);
-        return ResponseEntity.status(HttpStatus.OK).build();
-    }
-
-
-
+//    //3-0. 이벤트 페이지
+//    @GetMapping("/{eventId}")
+//    public ResponseEntity<EventInfoDto> showEventPage(
+//            @AuthenticationPrincipal PrincipalDetails principalDetails,
+//            @PathVariable Long eventId) {
+//        User user = principalDetails.getUser();
+//        EventInfoDto eventInfoDto = aggregationFacade.showEventPage(user, eventId);
+//        return ResponseEntity.ok(eventInfoDto);
+//    }
+//
+//    //3-1. 이벤트 이름 수정
+//    @PutMapping("/{eventId}/event-name")
+//    public ResponseEntity<Void> updateEventName(
+//            @AuthenticationPrincipal PrincipalDetails principalDetails,
+//            @RequestBody UpdateEventNameDto updateEventNameDto,
+//            @PathVariable Long eventId
+//    ) {
+//        User user = principalDetails.getUser();
+//        aggregationFacade.updateEventName(user, updateEventNameDto, eventId);
+//        return ResponseEntity.status(HttpStatus.OK).build();
+//    }
+//
+//    //3-2. 이벤트 기간 수정
+//    @PutMapping("/{eventId}/event-date")
+//    public ResponseEntity<Void> updateEventDate(
+//            @AuthenticationPrincipal PrincipalDetails principalDetails,
+//            @RequestBody UpdateEventDateDto updateEventDateDto,
+//            @PathVariable Long eventId
+//    ) {
+//        User user = principalDetails.getUser();
+//        aggregationFacade.updateEventDate(user, updateEventDateDto, eventId);
+//        return ResponseEntity.status(HttpStatus.OK).build();
+//    }
+//
+//    //3-4. 이벤트 사진
+//    @GetMapping("/{eventId}/image-list")
+//    public ResponseEntity<EventPhotoResDto> showUserEventPhoto(
+//            @AuthenticationPrincipal PrincipalDetails principalDetails,
+//            @PathVariable Long eventId
+//    ) {
+//        User user = principalDetails.getUser();
+//        EventPhotoResDto eventPhotoResDto = aggregationFacade.showUserEventPhoto(user, eventId);
+//        return ResponseEntity.ok(eventPhotoResDto);
+//    }
+//
+//
+//    //3-6. 이벤트 사진 리스트 삭제
+//    @DeleteMapping("/{eventId}/{userId}/image-list")
+//    public ResponseEntity<EventInfoDto> deleteUserEventPhoto(
+//            @AuthenticationPrincipal PrincipalDetails principalDetails,
+//            @PathVariable Long userId,
+//            @PathVariable Long eventId
+//    )
+//    {
+//        User user = principalDetails.getUser();
+//        EventInfoDto eventInfoDto = aggregationFacade.deleteUserEventPhoto(user, eventId, userId);
+//
+//        return ResponseEntity.ok(eventInfoDto);
+//    }
+//
+//    //3-7. 이벤트 나가기
+//    @DeleteMapping("/{eventId}")
+//    public ResponseEntity<Void> deleteUserEvent(
+//            @AuthenticationPrincipal PrincipalDetails principalDetails,
+//            @PathVariable Long eventId
+//    ) {
+//        User user = principalDetails.getUser();
+//        aggregationFacade.deleteUserEvent(user, eventId);
+//        return ResponseEntity.status(HttpStatus.OK).build();
+//    }
+//
+//
+//
 
 }
