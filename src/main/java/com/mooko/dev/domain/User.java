@@ -28,7 +28,6 @@ public class User {
     private String refreshToken;
     private String socialId;
     private LocalDateTime createdAt;
-    private Boolean checkStatus;
     private String birth;
     private String gender;
     private String dateOfIssue;     //유저가 회원가입했을때의 시점으로
@@ -38,9 +37,6 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<Event> event = new ArrayList<>();
 
-    public void updateCheckStatus(Boolean checkStatus) {
-        this.checkStatus = checkStatus;
-    }
 
     public void updateRefreshToken(String refreshToken) {
         this.refreshToken = refreshToken;

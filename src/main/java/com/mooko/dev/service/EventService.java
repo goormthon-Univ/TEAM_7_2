@@ -85,14 +85,10 @@ public class EventService {
         return eventRepository.findByBarcode(barcode);
     }
 
-    public List<Event> findEventByRoomaker(User user){
-        return eventRepository.findByRoomMaker(user);
-    }
 
     @Transactional
     public void addEventPhoto(Event event, List<EventPhoto> eventPhotos){
         event.updateEventPhoto(eventPhotos);
-
     }
 
 }
