@@ -31,17 +31,17 @@ public class BarcodeController {
     }
 
     //4-A 바코드티켓(MY)
-    @GetMapping("/{barcodeId}/my-ticket")
-    public ResponseEntity<TicketDto> showMyTicket(
-            @AuthenticationPrincipal PrincipalDetails principalDetails,
-            @PathVariable Long barcodeId){
-        User user = principalDetails.getUser();
-        TicketDto ticketDto = aggregationFacade.showTicketInfo(user, barcodeId);
-        return ResponseEntity.ok(ticketDto);
-    }
+//    @GetMapping("/{barcodeId}/my-ticket")
+//    public ResponseEntity<TicketDto> showMyTicket(
+//            @AuthenticationPrincipal PrincipalDetails principalDetails,
+//            @PathVariable Long barcodeId){
+//        User user = principalDetails.getUser();
+//        TicketDto ticketDto = aggregationFacade.showTicketInfo(user, barcodeId);
+//        return ResponseEntity.ok(ticketDto);
+//    }
 
     //4-B 바코드티켓(GUEST)
-    @GetMapping("/{barcodeId}/guest-ticket")
+    @GetMapping("/{barcodeId}")
     public ResponseEntity<TicketDto> showGuestTicket(
             @PathVariable Long barcodeId){
         TicketDto ticketDto = aggregationFacade.showTicketInfoGuest(barcodeId);

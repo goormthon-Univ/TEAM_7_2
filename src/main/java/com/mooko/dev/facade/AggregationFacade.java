@@ -431,7 +431,9 @@ public class AggregationFacade {
 
         Day currentDay = dayService.findDayId(user,year,month,day);
 
-        if(currentDay==null){throw new CustomException(ErrorCode.DAY_NOT_FOUND);}
+        if (currentDay==null){
+            currentDay = dayService.makeDay(user,year,month,day);
+        }
 
         String memo = dayService.findMemo(currentDay);
         List<DayPhoto> dayImageList = dayPhotoService.findDayPhotoList(currentDay);
@@ -458,9 +460,7 @@ public class AggregationFacade {
         int day = currentDate.getDayOfMonth();
 
         Day currentDay = dayService.findDayId(user,year,month,day);
-        if (currentDay==null){
-            currentDay = dayService.makeDay(user,year,month,day);
-        }
+        if(currentDay==null){throw new CustomException(ErrorCode.DAY_NOT_FOUND);}
 
         dayService.updateMemo(currentDay, dayPhotoDto.getMemo());
 
@@ -734,7 +734,6 @@ public class AggregationFacade {
         String createdAt = barcode.getCreatedAt().format(formatter);
 
         Event event = eventService.findEventByBarcode(barcode);
-        int memberCnt = event.getUsers().size()-1;
 
         List<String> eventPhotoUrlList = eventPhotoService.findAllEventPhotoList(event);
         ImageInfoDto imageInfoDto = ImageInfoDto
@@ -752,7 +751,6 @@ public class AggregationFacade {
                 .startDate(barcode.getStartDate())
                 .endDate(barcode.getEndDate())
                 .createdAt(createdAt)
-                .memberCnt(memberCnt)
                 .imageInfoList(imageInfoList)
                 .build();
     }
