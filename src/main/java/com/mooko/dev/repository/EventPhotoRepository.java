@@ -12,7 +12,7 @@ import java.util.Optional;
 @Repository
 
 public interface EventPhotoRepository extends JpaRepository<EventPhoto, Long> {
-    List<EventPhoto> findByUserAndEvent(User user, Event event);
+//    List<EventPhoto> findByUserAndEvent(User user, Event event);
 
     List<EventPhoto> findByEvent(Event event);
 }

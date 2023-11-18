@@ -13,5 +13,5 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
     Event findByBarcode(Barcode barcode);
 
-    List<Event> findByRoomMaker(User user);
+    List<Event> findByUser(User user);
 }

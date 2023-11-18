@@ -19,8 +19,8 @@ import java.util.List;
 public class EventPhotoService {
     private final EventPhotoRepository eventPhotoRepository;
 
-    public List<EventPhoto> findUserEventPhotoList(User user, Event event) {
-        return eventPhotoRepository.findByUserAndEvent(user, event);
+    public List<EventPhoto> findUserEventPhotoList(Event event) {
+        return eventPhotoRepository.findByEvent(event);
     }
 
     public List<String> findAllEventPhotoList(Event event) {

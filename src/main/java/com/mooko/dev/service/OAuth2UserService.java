@@ -61,7 +61,6 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
                 .dateOfIssue(formattedDate)
                 .profileUrl(USER_DEFAULT_PROFILE_IMAGE)
                 .modalActive(true)
-                .checkStatus(false)
                 .build();
 
         /**
