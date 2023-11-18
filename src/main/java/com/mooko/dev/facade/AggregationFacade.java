@@ -772,13 +772,17 @@ public class AggregationFacade {
     public EventList showEventList(User tmpUser){
         User user = userService.findUser(tmpUser.getId());
         List<Event> eventList = user.getEvent();
-        eventList.stream().map(event ->
+        List<EventListDto> eventListDtos = eventList.stream().map(event ->
                 EventListDto.builder()
                         .id(event.getId().toString())
                         .title(event.getTitle())
-                        .imageCount(event.get)
+                        .imageCount(String.valueOf(event.getEventPhoto().size()))
                         .build()
-        );
+        ).toList();
+
+        return EventList.builder()
+                .eventListDtoList(eventListDtos)
+                .build();
 
     }
 }
