@@ -41,8 +41,8 @@ public class SecurityConfig {
                         .requestMatchers("/ws-check/**", "/ws-button/**", "/ws-leave-event/**").permitAll()
                         .requestMatchers("/api/v1/user/for-test").permitAll()
                         .requestMatchers("/api/v1/barcode/{barcodeId}").permitAll()
-//                        .requestMatchers("/api/v1/event/{eventId}").permitAll()
-//                        .requestMatchers("/api/v1/event/{eventId}/save-photo").permitAll()
+                        .requestMatchers("/api/v1/event/image-list/**").permitAll()
+                        .requestMatchers("/api/v1/event/save-photo/**").permitAll()
                         .anyRequest().authenticated()
                 );
 
