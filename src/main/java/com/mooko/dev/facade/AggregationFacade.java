@@ -557,15 +557,16 @@ public class AggregationFacade {
 
 
     public void updateEventPhoto(Long eventId, List<File> newPhotoList){
-        if (newPhotoList == null || newPhotoList.isEmpty()) {
-            return; // 빈 목록일 경우 조기 반환
-        }
-
         Event event = eventService.findEvent(eventId);
         List<EventPhoto> eventPhotoList = event.getEventPhoto();
         if (!eventPhotoList.isEmpty()) {
             eventPhotoList.forEach(eventPhoto -> s3Service.deleteFromS3(eventPhoto.getUrl()));
         }
+
+        if (newPhotoList == null || newPhotoList.isEmpty()) {
+            return; // 빈 목록일 경우 조기 반환
+        }
+
         List<String> newPhotoUrlList = newPhotoList.stream()
                 .map(this::uploadPhoto)
                 .collect(Collectors.toList());
