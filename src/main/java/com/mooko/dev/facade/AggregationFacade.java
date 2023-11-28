@@ -473,6 +473,7 @@ public class AggregationFacade {
         LocalDate startLocalDate = LocalDate.parse(barcode.getStartDate());
         LocalDate endLocalDate = LocalDate.parse(barcode.getEndDate());
 
+
         while (!startLocalDate.isAfter(endLocalDate)) {
             startLocalDate = startLocalDate.plusDays(1);
 
