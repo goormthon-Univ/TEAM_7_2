@@ -32,8 +32,8 @@ public class JwtFilter extends OncePerRequestFilter {
 //    private static final String NO_CHECK_URL_HANDSHAKING_FOR_CHECK = "/ws-check/**";
 //    private static final String NO_CHECK_URL_HANDSHAKING_BUTTON = "/ws-button/**";
 //    private static final String NO_CHECK_URL_HANDSHAKING_LEAVE = "/ws-leave-event/**";
-    private static final String NO_CHECK_URL_EVENT_BLOCK = "/api/v1/event/{eventId}";
-    private static final String NO_CHECK_URL_EVENT_SAVE_PHOTO = "/api/v1/event/save-photo";
+    private static final String NO_CHECK_URL_EVENT_BLOCK = "/api/v1/event/image-list/**";
+    private static final String NO_CHECK_URL_EVENT_SAVE_PHOTO = "/api/v1/event/save-photo/**";
 
 
     private final JwtUtil jwtUtil;

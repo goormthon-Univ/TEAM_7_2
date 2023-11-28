@@ -34,7 +34,7 @@ public class EventController {
     }
 
     //5-1. 이벤트 블록 (accessToken x)
-    @GetMapping("/{eventId}")
+    @GetMapping("/image-list/{eventId}")
     public ResponseEntity<EventPhotoResDto> showEventBlock(
             @PathVariable Long eventId
     ){
@@ -44,8 +44,8 @@ public class EventController {
 
 
 
-    //5-2. 이벤트 사진 등록/수정
-    @PostMapping("/{eventId}/save-photo")
+    //5-2. 이벤트 사진 등록/수정 (accessToken x )
+    @PostMapping("/save-photo/{eventId}")
     public ResponseEntity<Void> updateUserEventPhoto(
             @PathVariable Long eventId,
             @ModelAttribute EventPhotoDto eventPhotoDto)

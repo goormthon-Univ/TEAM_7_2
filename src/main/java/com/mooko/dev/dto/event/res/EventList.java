@@ -11,5 +11,5 @@ import java.util.List;
 @Setter
 @Getter
 public class EventList {
-    private List<EventListDto> eventListDtoList;
+    private List<EventListDto> eventList;
 }

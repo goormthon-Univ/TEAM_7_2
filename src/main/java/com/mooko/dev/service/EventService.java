@@ -27,11 +27,12 @@ public class EventService {
     }
 
     @Transactional
-    public Event makeNewEvent(String title, String startDate, String endDate) {
+    public Event makeNewEvent(User user, String title, String startDate, String endDate) {
         Event event = Event.builder()
                 .title(title)
                 .startDate(startDate)
                 .endDate(endDate)
+                .user(user)
                 .createdAt(LocalDateTime.now())
                 .build();
 
@@ -56,5 +57,6 @@ public class EventService {
     public void addEventPhoto(Event event, List<EventPhoto> eventPhotos){
         event.updateEventPhoto(eventPhotos);
     }
+
 
 }

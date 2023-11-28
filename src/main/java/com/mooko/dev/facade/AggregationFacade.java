@@ -3,6 +3,7 @@ package com.mooko.dev.facade;
 import com.mooko.dev.configuration.S3Config;
 import com.mooko.dev.domain.*;
 import com.mooko.dev.dto.barcode.res.BarcodeInfoDto;
+import com.mooko.dev.dto.barcode.res.BarcodeListDto;
 import com.mooko.dev.dto.barcode.res.ImageInfoDto;
 import com.mooko.dev.dto.barcode.res.TicketDto;
 import com.mooko.dev.dto.day.req.BarcodeDateDto;
@@ -21,6 +22,7 @@ import com.mooko.dev.dto.user.res.UserPassportDto;
 import com.mooko.dev.exception.custom.CustomException;
 import com.mooko.dev.exception.custom.ErrorCode;
 import com.mooko.dev.service.*;
+import jakarta.persistence.GeneratedValue;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -74,7 +76,7 @@ public class AggregationFacade {
         if (startDate.isAfter(endDate)) {
             throw new CustomException(ErrorCode.START_DATE_EXCEED_END_DATE);
         }
-        Event event = eventService.makeNewEvent(newEventDto.getTitle(),startDate.toString(), endDate.toString());
+        Event event = eventService.makeNewEvent(user, newEventDto.getTitle(),startDate.toString(), endDate.toString());
         userService.addEvent(user, event);
     }
 
@@ -135,7 +137,7 @@ public class AggregationFacade {
         }
         return EventPhotoResDto.builder()
                 .eventId(eventId.toString())
-                .imageUrlList(null)
+                .imageUrlList(new ArrayList<>())
                 .build();
 
     }
@@ -424,18 +426,24 @@ public class AggregationFacade {
      */
 
     //showBarcodeInfo(moodCloud)
-    public List<BarcodeInfoDto> showBarcodeInfo(User tmpUser){
+    public BarcodeListDto showBarcodeInfo(User tmpUser){
         User user = userService.findUser(tmpUser.getId());
 
         List<UserBarcode> userBarcodeList = userBarcodeService.findUserBarcodeList(user);
 
-        List<BarcodeInfoDto> recentBarcodeInfo = userBarcodeList.stream()
+        List<BarcodeInfoDto> barcodeInfoDtos = userBarcodeList.stream()
                 .map(UserBarcode::getBarcode)
                 .sorted(Comparator.comparing(Barcode::getCreatedAt).reversed())
-                .map(barcode -> new BarcodeInfoDto(barcode.getId().toString(), barcode.getBarcodeUrl(), barcode.getTitle()))
-                .collect(Collectors.toList());
+                .map(barcode -> BarcodeInfoDto.builder()
+                        .id(barcode.getId().toString())
+                        .imageUrl(barcode.getBarcodeUrl())
+                        .title(barcode.getTitle())
+                        .build())
+                .toList();
 
-        return recentBarcodeInfo;
+        return BarcodeListDto.builder()
+                .barcodeList(barcodeInfoDtos)
+                .build();
     }
 
     // showTicketInfo(my-ticket)
@@ -542,7 +550,7 @@ public class AggregationFacade {
         List<Event> eventList = user.getEvent();
 
         List<EventListDto> eventListDtos = eventList.stream()
-                .filter(event -> event.getBarcode() != null)
+                .filter(event -> event.getBarcode() == null)
                 .map(event -> EventListDto.builder()
                         .id(event.getId().toString())
                         .title(event.getTitle())
@@ -551,7 +559,7 @@ public class AggregationFacade {
                 .collect(Collectors.toList()); // 리스트로 수집
 
         return EventList.builder()
-                .eventListDtoList(eventListDtos)
+                .eventList(eventListDtos)
                 .build();
     }
 
