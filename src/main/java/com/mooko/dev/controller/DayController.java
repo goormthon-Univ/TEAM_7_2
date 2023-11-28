@@ -33,6 +33,7 @@ public class DayController {
             ){
 
         User user = principalDetails.getUser();
+
         CalendarResDto thumbnailInfoList = aggregationFacade.showCalendar(user,startDate, endDate, year, month);
         return ResponseEntity.ok(thumbnailInfoList);
     }
